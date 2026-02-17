@@ -1,0 +1,33 @@
+{
+  "to_address": {
+    "name": "Pramod Thomson",
+    "address1": "30 Clearview Dr",
+    "city": "Rock Springs",
+    "province_code": "WY",
+    "postal_code": "82901",
+    "country_code": "US",
+    "phone": "555-1234",
+    "email": "test@example.com",
+    "is_residential": true
+  },
+  "weight_unit": "lbs",
+  "weight": 0.6,
+  "length": 9,
+  "width": 12,
+  "height": 1,
+  "size_unit": "cm",
+  "items": [
+    {
+      "description": "Two pair of socks",
+      "sku": "SKU123",
+      "quantity": 2,
+      "value": 10,
+      "currency": "CAD",
+      "country_of_origin": "CN",
+      "hs_code": "7117.90.7500"
+    }
+  ],
+  "package_type": "Parcel",
+  "signature_confirmation": false,
+  "insured": false
+}

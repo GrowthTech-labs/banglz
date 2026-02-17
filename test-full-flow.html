@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Shipping Rates</title>
+    <meta name="csrf-token" content="test-token">
+</head>
+<body>
+    <h1>Test Shipping Rates API</h1>
+    <button onclick="testRates()">Test Rates</button>
+    <div id="result"></div>
+
+    <script>
+        async function testRates() {
+            const payload = {
+                to_address: {
+                    name: 'John Smith',
+                    address1: '123 Main Street',
+                    city: 'New York',
+                    province_code: 'NY',
+                    postal_code: '10001',
+                    country_code: 'US',
+                    phone: '+1-555-123-4567',
+                    email: 'john.smith@example.com',
+                    is_residential: true
+                },
+                weight_unit: 'lbs',
+                weight: 0.1,
+                length: 9,
+                width: 12,
+                height: 1,
+                size_unit: 'cm',
+                items: [{
+                    description: 'Gold Bangle Set',
+                    sku: 'BGL-001',
+                    quantity: 2,
+                    value: 89.99,
+                    currency: 'CAD',
+                    country_of_origin: 'CA',
+                    hs_code: '7117.90.7500'
+                }],
+                package_type: 'Parcel',
+                signature_confirmation: false,
+                insured: false
+            };
+
+            console.log('📤 Sending:', payload);
+            document.getElementById('result').innerHTML = 'Loading...';
+
+            try {
+                const res = await fetch('http://localhost:8000/admin/shipping/rates', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': 'test-token'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                console.log('📥 Response:', data);
+                
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (err) {
+                console.error('❌ Error:', err);
+                document.getElementById('result').innerHTML = 'Error: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>

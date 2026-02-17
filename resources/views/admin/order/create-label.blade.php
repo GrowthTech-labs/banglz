@@ -1053,7 +1053,7 @@
                         <p class="mb-1 text-muted">{{ $addr['city'] }}{{ !empty($addr['state_province']) ? ', '.$addr['state_province'] : '' }}</p>
                         @endif
 
-                        @if(!empty($addr['country'] || $addr['country_iso']))
+                        @if(!empty($addr['country']) || !empty($addr['country_iso']))
                         <p class="mb-0 text-muted">{{ $addr['country'] ?? '' }}{{ !empty($addr['country_iso']) ? ' ('.$addr['country_iso'].')' : '' }}</p>
                         @endif
 
@@ -2598,7 +2598,7 @@ console.log('Selected Adress:', comp['postal_code'] || '');
                 value: value,
                 currency: "{{ $order->currency ?? 'CAD' }}",
                 country_of_origin: 'CA',
-                hs_code: '7117907500' 
+                hs_code: '7117.90.7500' // Valid US HTS code for jewelry
             };
         });
         return items;
@@ -2708,6 +2708,8 @@ function collectPackage() {
     payload.insured = false;
     // payload.order_id= '{{ $order->id }}';
 
+    console.log('📤 Sending payload to API:', payload);
+
     try {
         const res = await fetch("{{ route('shipping.rates.post') }}", {
             method: 'POST',
@@ -2720,8 +2722,16 @@ function collectPackage() {
         });
 
         const data = await res.json();
+        console.log('📥 API Response:', data);
+        
         if (!data.success || !data.rates?.length) {
-            container.innerHTML = '<div class="error">No shipping options found.</div>';
+            if (data.errors) {
+                console.error('❌ Validation Errors:', data.errors);
+                const errorMsg = Object.values(data.errors).flat().join('<br>');
+                container.innerHTML = `<div class="error">Validation failed:<br>${errorMsg}</div>`;
+            } else {
+                container.innerHTML = '<div class="error">No shipping options found.</div>';
+            }
             return;
         }
 

@@ -11,51 +11,87 @@ class ShippingController extends Controller
 {
     public function postRates(Request $request)
     {
-        $validated = $request->validate([
-            'to_address.name' => 'required|string',
-            'to_address.address1' => 'required|string',
-            'to_address.city' => 'required|string',
-            'to_address.postal_code' => 'nullable|string',
-            'to_address.country_code' => 'required|string',
-            'to_address.province_code' => 'nullable|string',
-            'weight' => 'required|numeric',
-            'weight_unit' => 'required|string',
-            'length' => 'required|numeric|min:0.01',
-            'width' => 'required|numeric|min:0.01',
-            'height' => 'required|numeric|min:0.01',
-            'size_unit' => 'nullable|string|in:cm,in',
-            'items' => 'required|array|min:1',
-            'items.*.description' => 'required|string',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.value' => 'nullable|numeric|min:0',
-            'items.*.currency' => 'nullable|string|in:USD,CAD',
-            'items.*.country_of_origin' => 'nullable|string',
-            'items.*.hs_code' => 'nullable|string|size:10',
+        \Log::info('=== postRates called ===', [
+            'request_data' => $request->all(),
+            'headers' => $request->headers->all()
         ]);
-        // dd($to)
-
-        // ✅ Build payload for Stallion
-        $payload = [
-            'weight_unit' => 'lbs',
-            'weight' => (float) $validated['weight'],
-            'length' => (float) $validated['length'],
-            'width' => (float) $validated['width'],
-            'height' => (float) $validated['height'],
-            'size_unit' => $validated['size_unit'] ?? 'cm',
-
-            // ✅ use array for to_address (not curly braces)
-            'to_address' => [
-                'city' => $validated['to_address']['city'],
-                'province_code' => $validated['to_address']['province_code'] ?? null,
-                'postal_code' => $validated['to_address']['postal_code'] ?? null,
-                'country_code' => $validated['to_address']['country_code'],
-            ],
-            'items' => $validated['items'],
-        ];
-        // dd($payload);
-        $base = 'https://ship.stallionexpress.ca/api/v4';
-        $token = env('STALLION_API_TOKEN');
+        
         try {
+            $validated = $request->validate([
+                'to_address.name' => 'required|string',
+                'to_address.address1' => 'required|string',
+                'to_address.city' => 'required|string',
+                'to_address.postal_code' => 'nullable|string',
+                'to_address.country_code' => 'required|string',
+                'to_address.province_code' => 'nullable|string',
+                'to_address.phone' => 'nullable|string',
+                'to_address.email' => 'nullable|email',
+                'weight' => 'required|numeric',
+                'weight_unit' => 'required|string|in:lbs,kg,g,oz',
+                'length' => 'required|numeric|min:0.01',
+                'width' => 'required|numeric|min:0.01',
+                'height' => 'required|numeric|min:0.01',
+                'size_unit' => 'nullable|string|in:cm,in',
+                'items' => 'required|array|min:1',
+                'items.*.description' => 'required|string',
+                'items.*.sku' => 'nullable|string',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.value' => 'nullable|numeric|min:0',
+                'items.*.currency' => 'nullable|string|in:USD,CAD,EUR,AUD,GBP',
+                'items.*.country_of_origin' => 'nullable|string',
+                'items.*.hs_code' => 'nullable|string',
+            ]);
+            
+            // ✅ Build payload for Stallion Express v4 API
+            $payload = [
+                'to_address' => [
+                    'name' => $validated['to_address']['name'] ?? 'Customer',
+                    'company' => null,
+                    'address1' => $validated['to_address']['address1'],
+                    'address2' => null,
+                    'city' => $validated['to_address']['city'],
+                    'province_code' => $validated['to_address']['province_code'] ?? null,
+                    'postal_code' => $validated['to_address']['postal_code'] ?? null,
+                    'country_code' => $validated['to_address']['country_code'],
+                    'phone' => $validated['to_address']['phone'] ?? null,
+                    'email' => $validated['to_address']['email'] ?? null,
+                    'is_residential' => true,
+                ],
+                'weight_unit' => $validated['weight_unit'],
+                'weight' => (float) $validated['weight'],
+                'length' => (float) $validated['length'],
+                'width' => (float) $validated['width'],
+                'height' => (float) $validated['height'],
+                'size_unit' => $validated['size_unit'] ?? 'cm',
+                'items' => array_map(function($item) {
+                    return [
+                        'description' => $item['description'],
+                        'sku' => $item['sku'] ?? null,
+                        'quantity' => (int) $item['quantity'],
+                        'value' => (float) ($item['value'] ?? 0),
+                        'currency' => $item['currency'] ?? 'CAD',
+                        'country_of_origin' => $item['country_of_origin'] ?? 'CA',
+                        'hs_code' => $item['hs_code'] ?? '7117.90.7500', // Valid US HTS code for jewelry
+                    ];
+                }, $validated['items']),
+                'package_type' => 'Parcel',
+            ];
+            
+            $base = rtrim(config('services.stallion.base_url', 'https://ship.stallionexpress.ca/api/v4'), '/');
+            $token = config('services.stallion.api_token');
+            
+            if (empty($token)) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => ['Stallion Express API token is not configured. Please contact administrator.'],
+                ], 500);
+            }
+            
+            \Log::info('Calling Stallion API', [
+                'url' => $base . '/rates',
+                'payload' => $payload
+            ]);
+            
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $token,
                 'Accept' => 'application/json',
@@ -65,7 +101,19 @@ class ShippingController extends Controller
 
             $resp = $response;
             $data = $response->json();
+            
+            \Log::info('Stallion API Response', [
+                'status' => $resp->status(),
+                'body' => $data
+            ]);
+            
             if (!$resp->successful()) {
+                \Log::error('Stallion API Error', [
+                    'status' => $resp->status(),
+                    'response' => $data,
+                    'body' => $resp->body()
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'errors' => $data['errors'] ?? ['Failed to call Stallion API'],
@@ -76,7 +124,19 @@ class ShippingController extends Controller
                 'success' => true,
                 'rates' => $data['rates'] ?? [],
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors()
+            ]);
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Throwable $e) {
+            \Log::error('postRates exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'errors' => [$e->getMessage()],
@@ -120,7 +180,7 @@ class ShippingController extends Controller
         // ✅ Always use jewellery defaults
         foreach ($validated['items'] as &$item) {
             $item['country_of_origin'] = 'CA';
-            $item['hs_code'] = '7117907500';
+            $item['hs_code'] = '7117.90.7500'; // Valid US HTS code for jewelry
             $item['description'] = $item['description'] ?? 'Jewellery';
         }
 $provinceCode = $validated['to_address']['province_code'] ?? null;
@@ -177,9 +237,9 @@ if (strlen($provinceCode) > 2 && !empty($validated['to_address']['lat']) && !emp
             'postage_type' => $validated['postage_type'],
         ];
         // dd($payload);
-        // ✅ Stallion Mock URL
-        $base = 'https://stallionexpress.redocly.app/_mock/stallionexpress-v4';
-        $token = env('STALLION_API_TOKEN');
+        // ✅ Stallion Production URL
+        $base = rtrim(config('services.stallion.base_url', 'https://ship.stallionexpress.ca/api/v4'), '/');
+        $token = config('services.stallion.api_token');
 
         try {
             $response = Http::withHeaders([
