@@ -16,6 +16,41 @@
     </div>
     {{-- cards-section --}}
     <div class="dashbord-card-main row">
+      <div class="dashbord-cards col-md-3">
+        <div class="card-counter info">
+          <i class="fa fa-shopping-cart"></i>
+          <span class="count-name">Total Orders</span>
+          <span class="count-numbers">{{ $totalOrders ?? 0 }}</span>
+        </div>
+      </div>
+      
+      <div class="dashbord-cards col-md-3">
+        <div class="card-counter success">
+          <i class="fa fa-dollar"></i>
+          <span class="count-name">Total Revenue</span>
+          <span class="count-numbers">${{ number_format($totalRevenue ?? 0, 2) }}</span>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card-counter warning">
+          <i class="fa fa-calendar"></i>
+          <span class="count-name">Today's Orders</span>
+          <span class="count-numbers">{{ $todayOrders ?? 0 }}</span>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card-counter primary">
+          <i class="fa fa-calendar-check-o"></i>
+          <span class="count-name">This Month</span>
+          <span class="count-numbers">{{ $monthOrders ?? 0 }}</span>
+        </div>
+      </div>
+    </div>
+    
+    {{-- Secondary stats row --}}
+    <div class="dashbord-card-main row mt-3">
       <div class="dashbord-cards col-md-4">
         <div class="card-counter info">
           <i class="fa fa-ticket"></i>
@@ -38,8 +73,6 @@
           <span class="count-numbers">{{$collectionsCount ?? '-'}}</span>
         </div>
       </div>
-
-
     </div>
     {{-- cards-section-ends --}}
 
@@ -193,44 +226,17 @@
 
 
 <script>
-    function generateDailyData(days = 30){
-      const series = [];
-      const now = new Date();
-      for(let i = days - 1; i >= 0; i--){
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
-        const value = Math.round(60 + Math.sin(i/3.5)*40 + Math.random()*120);
-        series.push({ x: d.toISOString().slice(0,10), y: value });
-      }
-      return series;
-    }
-
-    function generateMonthlyData(months = 12){
-      const series = [];
-      const now = new Date();
-      for(let i = months - 1; i >= 0; i--){
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const value = Math.round(800 + Math.cos(i/2.1)*240 + Math.random()*400);
-        series.push({ x: d.toISOString().slice(0,7) + '-01', y: value });
-      }
-      return series;
-    }
-
-    function generateYearlyData(years = 5){
-      const series = [];
-      const now = new Date();
-      for(let i = years - 1; i >= 0; i--){
-        const d = new Date(now.getFullYear() - i, 0, 1);
-        const value = Math.round(9000 + Math.random()*4000 + (i*300));
-        series.push({ x: d.toISOString().slice(0,10), y: value });
-      }
-      return series;
-    }
-
+    // Real data from backend
     const DATA = {
-      daily: generateDailyData(30),
-      monthly: generateMonthlyData(12),
-      yearly: generateYearlyData(5)
+      daily: @json($dailyOrders->map(function($item) {
+          return ['x' => $item->date, 'y' => (int)$item->count];
+      })),
+      monthly: @json($monthlyOrders->map(function($item) {
+          return ['x' => $item->month . '-01', 'y' => (int)$item->count];
+      })),
+      yearly: @json($yearlyOrders->map(function($item) {
+          return ['x' => $item->year . '-01-01', 'y' => (int)$item->count];
+      }))
     };
 
     function computeStats(arr){
@@ -291,67 +297,47 @@
     document.getElementById('btn-monthly').addEventListener('click', ()=>{ setActiveButton('monthly'); updateChart('monthly'); });
     document.getElementById('btn-yearly').addEventListener('click', ()=>{ setActiveButton('yearly'); updateChart('yearly'); });
 
-    document.getElementById('toggleSpline').addEventListener('click', ()=>{
-      smooth = !smooth;
-      chart.updateOptions({ stroke: { curve: smooth ? 'smooth' : 'straight' } });
-      document.getElementById('toggleSpline').textContent = smooth ? 'Toggle Smooth Line' : 'Toggle Straight Line';
-    });
-
-    document.getElementById('downloadPng').addEventListener('click', ()=>{
-      chart.dataURI().then(({ imgURI })=>{
-        const link = document.createElement('a');
-        link.href = imgURI;
-        link.download = 'orders-chart.png';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+    // Optional buttons - only add listeners if they exist
+    const toggleSplineBtn = document.getElementById('toggleSpline');
+    if (toggleSplineBtn) {
+      toggleSplineBtn.addEventListener('click', ()=>{
+        smooth = !smooth;
+        chart.updateOptions({ stroke: { curve: smooth ? 'smooth' : 'straight' } });
+        toggleSplineBtn.textContent = smooth ? 'Toggle Smooth Line' : 'Toggle Straight Line';
       });
-    });
+    }
+
+    const downloadPngBtn = document.getElementById('downloadPng');
+    if (downloadPngBtn) {
+      downloadPngBtn.addEventListener('click', ()=>{
+        chart.dataURI().then(({ imgURI })=>{
+          const link = document.createElement('a');
+          link.href = imgURI;
+          link.download = 'orders-chart.png';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        });
+      });
+    }
 
     updateChart('daily');
   </script>
 
 <script>
-  // --------- Data Generators ----------
-  function generateDailyProfit(days = 30) {
-    const data = [];
-    const now = new Date();
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const val = Math.round(200 + Math.sin(i/3) * 100 + Math.random() * 300);
-      data.push({ x: d.toISOString().slice(0,10), y: val });
-    }
-    return data;
-  }
-
-  function generateWeeklyProfit(weeks = 12) {
-    const data = [];
-    const now = new Date();
-    for (let i = weeks - 1; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i * 7);
-      const val = Math.round(1800 + Math.cos(i/2) * 500 + Math.random() * 700);
-      data.push({ x: d.toISOString().slice(0,10), y: val });
-    }
-    return data;
-  }
-
-  function generateMonthlyProfit(months = 12) {
-    const data = [];
-    const now = new Date();
-    for (let i = months - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const val = Math.round(8000 + Math.sin(i/2) * 2000 + Math.random() * 2500);
-      data.push({ x: d.toISOString().slice(0,7) + "-01", y: val });
-    }
-    return data;
-  }
-
+  // --------- Real Revenue Data from Backend ----------
   const PROFIT_DATA = {
-    daily: generateDailyProfit(30),
-    weekly: generateWeeklyProfit(12),
-    monthly: generateMonthlyProfit(12),
+    daily: @json($dailyOrders->map(function($item) {
+        return ['x' => $item->date, 'y' => (float)($item->revenue ?? 0)];
+    })),
+    weekly: @json($dailyOrders->groupBy(function($item) {
+        return \Carbon\Carbon::parse($item->date)->startOfWeek()->format('Y-m-d');
+    })->map(function($week) {
+        return ['x' => $week->first()->date, 'y' => (float)$week->sum('revenue')];
+    })->values()),
+    monthly: @json($monthlyOrders->map(function($item) {
+        return ['x' => $item->month . '-01', 'y' => (float)($item->revenue ?? 0)];
+    }))
   };
 
   // --------- Stats ----------
@@ -403,7 +389,7 @@
   });
 
   function setActiveProfitBtn(range) {
-    document.querySelectorAll(".profit-btn-unique").forEach(btn => {
+    document.querySelectorAll("#profit-daily, #profit-weekly, #profit-monthly").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.range === range);
     });
   }

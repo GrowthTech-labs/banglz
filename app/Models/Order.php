@@ -29,7 +29,10 @@ class Order extends Model
         'rewards_discount',
         'sub_total',
         'applied_gift_card_meta_data',
-        'bangle_box_meta_data'
+        'bangle_box_meta_data',
+        'shipping_label_data',
+        'tracking_number',
+        'label_url',
     ];
 
     protected $casts = [

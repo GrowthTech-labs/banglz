@@ -1087,9 +1087,9 @@
     <input type="hidden" id="sub_area">
 
     <!-- New hidden fields for codes + formatted -->
-    <input type="hidden" id="country_iso">
-    <input type="hidden" id="state_code">
-    <input type="hidden" id="formatted_address">
+    <input type="hidden" id="country_iso" value="{{ $addr['country_iso'] ?? $addr['country'] ?? '' }}">
+    <input type="hidden" id="state_code" value="{{ $addr['province_code'] ?? '' }}">
+    <input type="hidden" id="formatted_address" value="{{ $addr['formatted_address'] ?? '' }}">
 
     <div class="row g-3">
         <div class="col-md-6">
@@ -1813,10 +1813,15 @@
                         </div>
 
                         <div class="mt-3">
-                            <!-- <button class="btn-buy" disabled title="Buy shipping label (disabled)">Buy shipping label</button> -->
-                                           <button type="button" class="btn-buy" onclick="buyShippingLabel()" disabled>
-    Buy Shipping Label
-</button>
+                            <button type="button" class="btn-buy" onclick="buyShippingLabel()" disabled>
+                                Buy Shipping Label
+                            </button>
+                            
+                            @if(!empty($order->shipping_label_data))
+                            <button type="button" class="btn btn-secondary mt-2 w-100" onclick="reprintExistingLabel()">
+                                🖨️ Reprint Existing Label
+                            </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -2591,9 +2596,11 @@ console.log('Selected Adress:', comp['postal_code'] || '');
             let weight = weightInput ? Number(weightInput.value || 0) : 0;
             // assume currency CAD and a default value per item — ideally you have price in DOM/data attributes
             let value = Number(row.dataset.price || (row.querySelector('.prod-price') && row.querySelector('.prod-price').textContent.replace(/[^0-9.]/g,'')) || 1);
+            let sku = row.dataset.sku || 'SKU-' + Date.now();
 
             return {
                 description: desc,
+                sku: sku,
                 quantity: qty,
                 value: value,
                 currency: "{{ $order->currency ?? 'CAD' }}",
@@ -2606,21 +2613,34 @@ console.log('Selected Adress:', comp['postal_code'] || '');
 
     function collectToAddress() {
        const name = (document.querySelector('#first_name')?.value || '{{ $firstName ?? '' }}') + ' ' + (document.querySelector('#last_name')?.value || '{{ $lastName ?? '' }}');
-      console.log('{{ $addr["address"] ?? "" }}');
-    //   console.log('lat:', place.geometry.location.lat());
-    //   console.log('lng:', place.geometry.location.lng());
+       
+       // Get province code and ensure it's 2 characters
+       let provinceCode = document.querySelector('#state_code')?.value || '{{ $addr["province_code"] ?? "" }}';
+       if (provinceCode && provinceCode.length > 2) {
+           // If it's a full state name, try to get the code from a mapping or just take first 2 chars
+           console.warn('Province code is longer than 2 characters:', provinceCode);
+           provinceCode = provinceCode.substring(0, 2).toUpperCase();
+       }
+       
+       // Get country code and ensure it's 2 characters
+       let countryCode = document.querySelector('#country_iso')?.value || '{{ $addr["country_iso"] ?? $addr["country"] ?? "" }}';
+       if (countryCode && countryCode.length > 2) {
+           console.warn('Country code is longer than 2 characters:', countryCode);
+           countryCode = countryCode.substring(0, 2).toUpperCase();
+       }
+       
        return {
             name: name.trim(),
-            address1: document.querySelector('#address')?.value || '{{ $addr["address"] ?? "" }}',
+            company: null,
+            address1: document.querySelector('#address')?.value || '{{ $addr["address"] ?? $addr["address1"] ?? "" }}',
+            address2: document.querySelector('#address2')?.value || '{{ $addr["address2"] ?? "" }}' || null,
             city: document.querySelector('#city')?.value || '{{ $addr["city"] ?? "" }}',
-            province_code: document.querySelector('#state_code')?.value || '{{ $addr["province_code"] ?? "" }}',
-            postal_code: document.querySelector('#zip')?.value || '{{ $addr["postcode"] ?? $addr["postal_code"] ?? "" }}' ,
-            country_code: document.querySelector('#country_iso')?.value || '{{ $addr["country_iso"] ?? $addr["country"] ?? "" }}',
+            province_code: provinceCode,
+            postal_code: document.querySelector('#zip')?.value || '{{ $addr["postcode"] ?? $addr["postal_code"] ?? "" }}',
+            country_code: countryCode,
             phone: document.querySelector('#phone')?.value || '{{ $phone ?? "" }}',
             email: '{{ $order->email ?? "" }}',
-            is_residential: true,
-            lat:document.querySelector('#latitude')?.value || '{{ $addr["latitude"] ?? "" }}',
-            lng:document.querySelector('#longitude')?.value || '{{ $addr["longitude"] ?? "" }}'
+            is_residential: true
         };
     }
 
@@ -2909,6 +2929,174 @@ function initShippingSelector() {
 }
 
 /**
+ * Reprint existing label
+ */
+function reprintExistingLabel() {
+    @if(!empty($order->shipping_label_data))
+    try {
+        const labelData = @json(json_decode($order->shipping_label_data, true));
+        
+        if (labelData && labelData.shipment) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Reprint Label',
+                html: `
+                    <div style="text-align: left;">
+                        <p><strong>Ship Code:</strong> ${labelData.shipment.ship_code || 'N/A'}</p>
+                        ${labelData.shipment.tracking_code ? `<p><strong>Tracking:</strong> ${labelData.shipment.tracking_code}</p>` : ''}
+                        <p><strong>Status:</strong> ${labelData.shipment.status || 'N/A'}</p>
+                    </div>
+                `,
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: '🖨️ Print',
+                denyButtonText: '📥 Download',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#3085d6',
+                denyButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    printShippingLabel(labelData.shipment);
+                } else if (result.isDenied) {
+                    downloadShippingLabel(labelData.shipment);
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Label Not Found',
+                text: 'No label data available for this order.',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (e) {
+        console.error('Error parsing label data:', e);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to load label data.',
+            confirmButtonText: 'OK'
+        });
+    }
+    @else
+    Swal.fire({
+        icon: 'info',
+        title: 'No Label',
+        text: 'No shipping label has been created for this order yet.',
+        confirmButtonText: 'OK'
+    });
+    @endif
+}
+
+/**
+ * Print shipping label
+ */
+function printShippingLabel(shipment) {
+    if (!shipment) {
+        console.error('No shipment data available');
+        return;
+    }
+    
+    // Try to get label URL from different possible fields
+    const labelUrl = shipment.label_url || shipment.label || shipment.pdf_url;
+    
+    if (labelUrl) {
+        // Method 1: Open in new window and trigger print
+        const printWindow = window.open(labelUrl, '_blank');
+        if (printWindow) {
+            printWindow.onload = function() {
+                printWindow.print();
+            };
+        }
+    } else if (shipment.label_base64) {
+        // Method 2: If label is base64 encoded
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Shipping Label - ${shipment.ship_code || 'Label'}</title>
+                    <style>
+                        body { margin: 0; padding: 0; }
+                        img { width: 100%; height: auto; }
+                        @media print {
+                            body { margin: 0; }
+                            img { page-break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body onload="window.print()">
+                    <img src="data:application/pdf;base64,${shipment.label_base64}" />
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    } else {
+        // Method 3: Create a printable view with shipment details
+        Swal.fire({
+            icon: 'info',
+            title: 'Label Not Available',
+            html: `
+                <p>The label PDF is not available yet.</p>
+                <p>Ship Code: <strong>${shipment.ship_code || 'N/A'}</strong></p>
+                <p>Status: <strong>${shipment.status || 'N/A'}</strong></p>
+                <p>Please check your Stallion Express dashboard for the label.</p>
+            `,
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+/**
+ * Download shipping label
+ */
+function downloadShippingLabel(shipment) {
+    if (!shipment) {
+        console.error('No shipment data available');
+        return;
+    }
+    
+    const labelUrl = shipment.label_url || shipment.label || shipment.pdf_url;
+    
+    if (labelUrl) {
+        // Create temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = labelUrl;
+        link.download = `shipping-label-${shipment.ship_code || Date.now()}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Download Started',
+            text: 'Your shipping label is being downloaded.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    } else if (shipment.label_base64) {
+        // Download base64 encoded label
+        const link = document.createElement('a');
+        link.href = `data:application/pdf;base64,${shipment.label_base64}`;
+        link.download = `shipping-label-${shipment.ship_code || Date.now()}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Label Not Available',
+            html: `
+                <p>The label PDF is not available for download yet.</p>
+                <p>Ship Code: <strong>${shipment.ship_code || 'N/A'}</strong></p>
+                <p>Please check your Stallion Express dashboard.</p>
+            `,
+            confirmButtonText: 'OK'
+        });
+    }
+}
+
+/**
  * Handle Buy Label button click
  */
 async function buyShippingLabel() {
@@ -2933,6 +3121,7 @@ async function buyShippingLabel() {
         const items = collectItems();
 
         const payload = {
+            order_id: '{{ $order->id }}',
             to_address: toAddr,
             weight: wt.weight,
             weight_unit: wt.weight_unit,
@@ -2941,10 +3130,12 @@ async function buyShippingLabel() {
             height: pkg.height,
             size_unit: pkg.size_unit,
             package_type: pkg.package_type,
-            package_contents: 'Jewellery',
             items: items,
-            postage_type: window.selectedRate.postage_type || window.selectedRate.postage_type_id || '',
-    order_id: '{{ $order->id }}'
+            postage_type: window.selectedRate.postage_type || '',
+            signature_confirmation: false,
+            insured: false,
+            label_format: 'pdf',
+            is_draft: true  // True = test mode without actual label creation
         };
 
         console.log('📤 Sending BuyLabel payload:', payload);
@@ -2963,26 +3154,89 @@ async function buyShippingLabel() {
         console.log('📦 BuyLabel response:', data);
 
         if (!data.success) {
-            const errMsg = Array.isArray(data.errors)
-                ? data.errors.join(', ')
-                : (typeof data.errors === 'string' ? data.errors : 'Label creation failed');
+            let errMsg = 'Label creation failed';
+            
+            if (data.errors) {
+                if (typeof data.errors === 'object' && !Array.isArray(data.errors)) {
+                    // Laravel validation errors format: {field: [messages]}
+                    const errorMessages = [];
+                    for (const [field, messages] of Object.entries(data.errors)) {
+                        if (Array.isArray(messages)) {
+                            errorMessages.push(`${field}: ${messages.join(', ')}`);
+                        } else {
+                            errorMessages.push(`${field}: ${messages}`);
+                        }
+                    }
+                    errMsg = errorMessages.join('\n');
+                } else if (Array.isArray(data.errors)) {
+                    errMsg = data.errors.join(', ');
+                } else if (typeof data.errors === 'string') {
+                    errMsg = data.errors;
+                }
+            }
+            
             throw new Error(errMsg);
         }
 
         btn.textContent = 'Label Purchased ✅';
-     Swal.fire({
-    icon: 'success',
-    title: 'Label Created!',
-    text: '✅ Shipping label created successfully!',
-    confirmButtonColor: '#3085d6',
-    confirmButtonText: 'OK'
-});
+        
+        // Store shipment data
+        window.lastShipment = data.shipment;
+        
+        // Build success message
+        let successMsg = '<div style="text-align: left;">';
+        successMsg += '<p><strong>✅ Shipping label created successfully!</strong></p>';
+        
+        if (data.shipment) {
+            if (data.shipment.ship_code) {
+                successMsg += `<p>Ship Code: <strong>${data.shipment.ship_code}</strong></p>`;
+            }
+            if (data.shipment.tracking_code || data.shipment.tracking_number) {
+                const tracking = data.shipment.tracking_code || data.shipment.tracking_number;
+                successMsg += `<p>Tracking: <strong>${tracking}</strong></p>`;
+            }
+            if (data.shipment.total_paid !== undefined) {
+                const cost = data.shipment.total_paid || 0;
+                const currency = data.shipment.currency || 'CAD';
+                successMsg += `<p>Cost: <strong>${cost} ${currency}</strong></p>`;
+            }
+            if (data.shipment.status) {
+                successMsg += `<p>Status: <strong>${data.shipment.status}</strong></p>`;
+            }
+        }
+        
+        successMsg += '</div>';
+        
+        // Show success dialog with print options
+        Swal.fire({
+            icon: 'success',
+            title: 'Label Created!',
+            html: successMsg,
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: '🖨️ Print Label',
+            denyButtonText: '📥 Download PDF',
+            cancelButtonText: 'Close',
+            confirmButtonColor: '#3085d6',
+            denyButtonColor: '#6c757d',
+            cancelButtonColor: '#aaa'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Print label
+                printShippingLabel(data.shipment);
+            } else if (result.isDenied) {
+                // Download label
+                downloadShippingLabel(data.shipment);
+            }
+            // Reload page to show updated order status
+            setTimeout(() => window.location.reload(), 500);
+        });
 } catch (err) {
     console.error('❌ BuyLabel Error:', err);
     Swal.fire({
         icon: 'error',
         title: 'Label Creation Failed',
-        text: err.message || 'Something went wrong while buying the label.',
+        html: (err.message || 'Something went wrong while buying the label.').replace(/\n/g, '<br>'),
         confirmButtonColor: '#d33',
         confirmButtonText: 'Try Again'
     });
