@@ -292,8 +292,9 @@ select{
             <div class="form-group">
                 <select id="country_select" name="country">
                     <option selected disabled>Select Country</option>
-                    <option value="AF">Afghanistan</option>
-                    <option value="AX">Åland Islands</option>
+                    @foreach($countries as $country)
+                        <option value="{{ $country->code }}">{{ $country->name }}</option>
+                    @endforeach
                 </select>
             </div>
         </div>

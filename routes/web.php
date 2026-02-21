@@ -264,6 +264,14 @@ Route::prefix('admin')->group(function () {
         Route::delete('/setting-delete/{id}', [PageSettingController::class, 'delete'])->name('admin.page-settings.delete');
         Route::get('/setting-edit/{id}', [PageSettingController::class, 'edit'])->name('admin.page-settings.edit');
 
+        // Countries routes
+        Route::get('countries', [\App\Http\Controllers\admin\CountryController::class, 'index'])->name('admin.countries.index');
+        Route::get('countries/create', [\App\Http\Controllers\admin\CountryController::class, 'create'])->name('admin.countries.create');
+        Route::post('countries/store', [\App\Http\Controllers\admin\CountryController::class, 'store'])->name('admin.countries.store');
+        Route::get('countries/{id}/edit', [\App\Http\Controllers\admin\CountryController::class, 'edit'])->name('admin.countries.edit');
+        Route::put('countries/{id}', [\App\Http\Controllers\admin\CountryController::class, 'update'])->name('admin.countries.update');
+        Route::delete('countries/{id}', [\App\Http\Controllers\admin\CountryController::class, 'destroy'])->name('admin.countries.destroy');
+
         Route::get('customers', function () {
             return view('admin.customer.customer');
         })->name('admin.customers.list');
@@ -344,7 +352,8 @@ Route::get('/bangle-color/{id}', [BanglzBox::class, 'getColors'])->name('bangle-
 // })->name('banglz-box');
 
 Route::get('/login', function () {
-    return view('pages.login');
+    $countries = \App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+    return view('pages.login', compact('countries'));
 })->name('user.login');
 Route::post('/signup', [ControllersAuthController::class, 'store'])->name('signup.store');
 Route::post('/signin', [ControllersAuthController::class, 'login'])->name('signin');

@@ -336,7 +336,8 @@ class BundleController extends Controller
         $products   = collect();
         $bundles    = collect();
         $giftCards  = collect();
-        return view('pages.cart', compact('products', 'bundles', 'giftCards', 'topListedProducts'));
+        $bangleBoxCartItems = collect();
+        return view('pages.cart', compact('products', 'bundles', 'giftCards', 'bangleBoxCartItems', 'topListedProducts'));
     }
 
     // Products

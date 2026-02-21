@@ -512,16 +512,11 @@ label[for="is_pre_order"] {
                     <label>Country of Origin <span class="text-danger">*</span></label>
                     <select name="country_of_origin" class="form-control" required>
                         <option value="">Select Country</option>
-                        <option value="CA" {{ old('country_of_origin', $product->country_of_origin ?? 'CA') == 'CA' ? 'selected' : '' }}>Canada</option>
-                        <option value="US" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'US' ? 'selected' : '' }}>United States</option>
-                        <option value="IN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'IN' ? 'selected' : '' }}>India</option>
-                        <option value="CN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'CN' ? 'selected' : '' }}>China</option>
-                        <option value="MX" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'MX' ? 'selected' : '' }}>Mexico</option>
-                        <option value="GB" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'GB' ? 'selected' : '' }}>United Kingdom</option>
-                        <option value="PK" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'PK' ? 'selected' : '' }}>Pakistan</option>
-                        <option value="BD" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'BD' ? 'selected' : '' }}>Bangladesh</option>
-                        <option value="TH" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'TH' ? 'selected' : '' }}>Thailand</option>
-                        <option value="VN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'VN' ? 'selected' : '' }}>Vietnam</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->code }}" {{ old('country_of_origin', $product->country_of_origin ?? 'CA') == $country->code ? 'selected' : '' }}>
+                                {{ $country->name }}
+                            </option>
+                        @endforeach
                     </select>
                     <small class="text-muted">Where the product is manufactured</small>
                 </div>

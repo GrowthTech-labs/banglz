@@ -30,7 +30,8 @@ class ProductController extends Controller
         $materials = Tag::where('type', 'material')->where('status', 1)->get();
         $styles = Tag::where('type', 'style')->where('status', 1)->get();
         $colors = ProductColor::all();
-        return view('admin.products.create', compact('parentCategories', 'collections', 'materials', 'styles', 'colors'));
+        $countries = \App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('admin.products.create', compact('parentCategories', 'collections', 'materials', 'styles', 'colors', 'countries'));
     }
     public function show($id)
     {
@@ -655,6 +656,7 @@ class ProductController extends Controller
         // dd($selectedStyleIds);
         $materials = Tag::where('type', 'material')->where('status', 1)->get();
         $styles = Tag::where('type', 'style')->where('status', 1)->get();
+        $countries = \App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
         $product->images_details = $product->images_details
             ? json_decode($product->images_details, true)
             : [];
@@ -668,7 +670,8 @@ class ProductController extends Controller
             'selectedStyleIds',
             'materials',
             'styles',
-            'colors'
+            'colors',
+            'countries'
         ));
     }
 

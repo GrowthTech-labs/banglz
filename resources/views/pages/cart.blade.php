@@ -732,18 +732,45 @@
       <div class="cart-main-wrapper ">
         <div class="cart-headig">
           <h1>Your Cart</h1>
-          @if ($products->isNotEmpty())
-          <h3>Cart Products</h3>
+          
+          @php
+            $isCartEmpty = $products->isEmpty() && 
+                          $bundles->isEmpty() && 
+                          $giftCards->isEmpty() && 
+                          $bangleBoxCartItems->isEmpty();
+          @endphp
+
+          @if($isCartEmpty)
+            {{-- Empty Cart State --}}
+            <div class="empty-cart-state" style="text-align: center; padding: 60px 20px; max-width: 600px; margin: 0 auto;">
+              <div style="font-size: 80px; color: #ddd; margin-bottom: 20px;">
+                <i class="fa fa-shopping-cart"></i>
+              </div>
+              <h2 style="font-size: 28px; color: #333; margin-bottom: 15px; font-weight: 600;">Your Cart is Empty</h2>
+              <p style="font-size: 16px; color: #666; margin-bottom: 30px; line-height: 1.6;">
+                Looks like you haven't added anything to your cart yet.<br>
+                Start shopping and discover our amazing products!
+              </p>
+              <a href="{{ route('home') }}" class="btn" style="display: inline-block; background: #9a6b55; color: #fff; padding: 14px 40px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 600; transition: background 0.3s;">
+                Continue Shopping
+              </a>
+            </div>
+          @else
+            {{-- Cart has items --}}
+            @if ($products->isNotEmpty())
+            <h3>Cart Products</h3>
+            @endif
           @endif
 
         </div>
 
+        @if(!$isCartEmpty)
         <div class="cart-main-body">
           <div class="shopping-cart">
 
             <section id="cart">
               @if($products->isEmpty())
-              <p></p>
+              {{-- Products section empty but other items exist --}}
               @else
               @foreach($products as $item)
               {{-- skip if product relation missing (safe-guard) --}}
@@ -772,14 +799,18 @@
               ? (($item->variation->quantity ?? 0) - ($item->variation->unavailable_quantity ?? 0))
               : (($item->product->quantity ?? 0) - ($item->product->unavailable_quantity ?? 0));
 
-              // $availableStock = $item->variation ? $item->variation->quantity : $item->product->quantity;
+              // Decode images if they're JSON strings
+              $productImages = is_string($item->product->images) 
+                  ? json_decode($item->product->images, true) 
+                  : ($item->product->images ?? []);
+              $firstImage = !empty($productImages) ? $productImages[0] : 'c-1.jpg';
               @endphp
 
               <article class="product" data-stock="{{ $availableStock }}">
                 <header style="background">
                   <a href="#" class="remove" data-id="{{ $item->id }}">
                     <div class="bundle-images">
-                      <img src="{{ asset('assets/images/products/' . ($item->product->images[0] ?? 'c-1.jpg')) }}"
+                      <img src="{{ asset('assets/images/products/' . $firstImage) }}"
                         alt="{{ $item->product->name }}">
                     </div>
                     <h3>Remove product</h3>
@@ -866,13 +897,20 @@
               });
               $bundleTotalPrice = $bundleUnitPrice * $qty;
 
+              // Decode images if they're JSON strings
+              $firstItemImages = is_string($firstItem->product->images) 
+                  ? json_decode($firstItem->product->images, true) 
+                  : ($firstItem->product->images ?? []);
+
               $bundleData = $bundleProducts->map(fn($bp) => [
               'id' => $bp->id,
               'product' => [
               'id' => $bp->product->id,
               'name' => $bp->product->name,
               'description' => $bp->product->description,
-              'images' => $bp->product->images,
+              'images' => is_string($bp->product->images) 
+                  ? json_decode($bp->product->images, true) 
+                  : ($bp->product->images ?? []),
               ],
               'variation' => $bp->variation ? [
               'id' => $bp->variation->id,
@@ -886,7 +924,7 @@
                 <header>
                   <a href="#" class="remove" data-id="{{ $cartBundle->id }}">
                     <div class="bundle-images">
-                      @foreach(array_slice($firstItem->product->images ?? [], 0, 3) as $img)
+                      @foreach(array_slice($firstItemImages, 0, 3) as $img)
                       <img src="{{ asset('assets/images/products/' . $img) }}" alt="product-image">
                       @endforeach
                     </div>
@@ -1386,6 +1424,7 @@
             </div>
           </footer>
         </div>
+        @endif {{-- End of !$isCartEmpty --}}
       </div>
     </div>
 
@@ -1644,9 +1683,9 @@
                   setTimeout(function() {
                     $article.slideUp('fast', function() {
                       $article.remove();
-                      // If cart is empty, show fallback text (same as your original logic)
-                      if ($(".product").length === 0) {
-                        $("#cart").html("<h1>No products!</h1>");
+                      // If cart is empty, reload page to show empty state
+                      if ($(".product").length === 0 && $(".product.bangle-box").length === 0) {
+                        window.location.reload();
                       }
 
                       // Update totals

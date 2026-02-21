@@ -65,6 +65,14 @@
                     Colors</a>
             </li>
             <li class="nav-item ">
+                <a class="nav-link sidenav-item" href="{{ route('admin.countries.index') }}"><img
+                        src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
+                        height="30">
+                    <img src="{{asset('assets/images/admin/blue-plots.png')}}" class="icon-blue pr-2" width="30"
+                        height="30">
+                    Countries</a>
+            </li>
+            <li class="nav-item ">
                 <a class="nav-link sidenav-item" href="{{ route('admin.blog.index') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
