@@ -195,19 +195,29 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
+                                <th>Color</th>
+                                @if($product->variations->whereNotNull('size')->where('size', '!=', '')->count() > 0)
                                 <th>Size</th>
+                                @endif
                                 <th>Quantity</th>
                                 <th>Price</th>
+                                @if($product->variations->whereNotNull('compare_price')->where('compare_price', '>', 0)->count() > 0)
                                 <th>Compare Price</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($product->variations as $variation)
                             <tr>
+                                <td>{{ $variation->color->name ?? '-' }}</td>
+                                @if($product->variations->whereNotNull('size')->where('size', '!=', '')->count() > 0)
                                 <td>{{ $variation['size'] ?? '-' }}</td>
-                                <td>{{ $variation['quantity'] ?? '-' }}</td>
-                                <td>{{ $variation['price'] ?? '-' }}</td>
-                                <td>{{ $variation['compare_price'] ?? '-' }}</td>
+                                @endif
+                                <td>{{ $variation['quantity'] ?? '0' }}</td>
+                                <td>${{ number_format($variation['price'] ?? 0, 2) }}</td>
+                                @if($product->variations->whereNotNull('compare_price')->where('compare_price', '>', 0)->count() > 0)
+                                <td>${{ number_format($variation['compare_price'] ?? 0, 2) }}</td>
+                                @endif
                             </tr>
                             @endforeach
                         </tbody>

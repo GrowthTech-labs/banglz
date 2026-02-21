@@ -221,8 +221,16 @@ class ProductController extends Controller
             // Decide final category: child selected (category) else parent_category
             $finalCategoryId = $request->input('category') ?: $request->input('parent_category');
 
-            // Check if bangles exist
-            $hasBangles = $request->has('bangles') && is_array($request->input('bangles')) && count($request->input('bangles')) > 0;
+            // Check if bangles exist and filter out empty entries
+            $banglesInput = $request->input('bangles', []);
+            if (is_array($banglesInput)) {
+                // Filter out empty bangle entries
+                $banglesInput = array_filter($banglesInput, function($bangle) {
+                    return !empty($bangle['color_id']) || !empty($bangle['size']) || !empty($bangle['quantity']);
+                });
+                $banglesInput = array_values($banglesInput); // Re-index array
+            }
+            $hasBangles = is_array($banglesInput) && count($banglesInput) > 0;
 
             // Validation rules
             $rules = [
@@ -234,31 +242,38 @@ class ProductController extends Controller
                 'images.*'      => 'image',
                 'existing_images' => 'nullable|array',
                 'removed_existing_images' => 'nullable|string',
-                'bangles'       => 'nullable|array',
-                'bangles.*.size' => 'nullable:bangles|string',
-                'bangles.*.color_id' => 'required_with:bangles|exists:product_colors,id',
-                'bangles.*.quantity' => 'required_with:bangles|integer',
-                'bangles.*.unavailable_quantity' => 'nullable|integer',
-                'bangles.*.price' => 'required_with:bangles|numeric',
-                'bangles.*.compare_price' => 'nullable|numeric',
-                'bangles.*.member_price' => 'nullable|numeric',
                 'care' => 'required|string',
                 'sustainability' => 'required|string',
                 'shipping' => 'required|string',
                 'returns' => 'required|string',
                 // Shipping fields
-                'weight' => 'required|numeric|min:0.01',
-                'weight_unit' => 'required|in:g,kg,oz,lbs',
+                'weight' => 'nullable|numeric|min:0.01',
+                'weight_unit' => 'nullable|in:g,kg,oz,lbs',
                 'country_of_origin' => 'required|string|size:2',
                 'hs_code' => 'required|string|min:6|max:10|regex:/^[0-9]+$/',
             ];
 
-            if (!$hasBangles) {
+            // Only add bangle validation rules if bangles actually exist
+            if ($hasBangles) {
+                $rules['bangles'] = 'array';
+                $rules['bangles.*.size'] = 'nullable|string';
+                $rules['bangles.*.color_id'] = 'required|exists:product_colors,id';
+                $rules['bangles.*.quantity'] = 'required|integer';
+                $rules['bangles.*.unavailable_quantity'] = 'nullable|integer';
+                $rules['bangles.*.price'] = 'required|numeric';
+                $rules['bangles.*.compare_price'] = 'nullable|numeric';
+                $rules['bangles.*.member_price'] = 'nullable|numeric';
+                $rules['bangles.*.weight'] = 'nullable|numeric|min:0.01';
+                $rules['bangles.*.weight_unit'] = 'nullable|in:g,kg,oz,lbs';
+            } else {
+                // Simple product without variations
                 $rules['price'] = 'required|numeric';
                 $rules['quantity'] = 'required|integer';
                 $rules['unavailable_quantity'] = 'nullable|integer';
                 $rules['compare_price'] = 'nullable|numeric';
                 $rules['member_price'] = 'nullable|numeric';
+                $rules['weight'] = 'required|numeric|min:0.01';
+                $rules['weight_unit'] = 'required|in:g,kg,oz,lbs';
             }
 
             $validator = Validator::make(array_merge($request->all(), ['category' => $finalCategoryId]), $rules);
@@ -409,12 +424,14 @@ class ProductController extends Controller
                 'meta_title' => $request->input('meta_title', ''),
                 'meta_description' => $request->input('meta_description', ''),
             ];
-            $banglesRaw = $request->input('bangles', []);
+            $banglesRaw = $banglesInput; // Use filtered bangles
             $bangles = is_array($banglesRaw) ? array_values($banglesRaw) : [];
             $banglesCount = is_array($bangles) ? count($bangles) : 0;
+            
             if ($banglesCount > 1) {
-                $productData['color_id'] = $single['color_id'] ?? null;
-                $productData['size'] = $single['size'] ?? null;
+                // Multiple variations - store at variation level
+                $productData['color_id'] = null;
+                $productData['size'] = null;
                 $productData['quantity'] = null;
                 $productData['price'] = null;
                 $productData['compare_price'] = null;
@@ -423,6 +440,7 @@ class ProductController extends Controller
                 $productData['weight'] = null;
                 $productData['weight_unit'] = null;
             } elseif ($banglesCount == 1) {
+                // Single variation - store at product level
                 $single = $bangles[0];
                 $productData['color_id'] = $single['color_id'] ?? null;
                 $productData['size'] = $single['size'] ?? null;
@@ -433,7 +451,22 @@ class ProductController extends Controller
                 $productData['unavailable_quantity'] = $single['unavailable_quantity'] ?? 0;
                 $productData['weight'] = $single['weight'] ?? null;
                 $productData['weight_unit'] = $single['weight_unit'] ?? null;
+            } else {
+                // No variations - simple product, store at product level
+                $productData['color_id'] = null;
+                $productData['size'] = null;
+                $productData['quantity'] = $request->input('quantity', 0);
+                $productData['price'] = $request->input('price');
+                $productData['compare_price'] = $request->input('compare_price');
+                $productData['member_price'] = $request->input('member_price');
+                $productData['unavailable_quantity'] = $request->input('unavailable_quantity', 0);
+                $productData['weight'] = $request->input('weight');
+                $productData['weight_unit'] = $request->input('weight_unit');
             }
+            
+            // Shipping fields for customs (always at product level)
+            $productData['country_of_origin'] = $request->input('country_of_origin');
+            $productData['hs_code'] = $request->input('hs_code');
 
             if (!$request->input('id')) {
                 $productData['slug'] = Str::slug($request->input('name') . '-' . uniqid());
@@ -476,7 +509,7 @@ class ProductController extends Controller
             // Handle bangles (variations)
             if ($banglesCount > 1) {
                 $submittedIds = [];
-                foreach ($request->input('bangles') as $bangle) {
+                foreach ($bangles as $bangle) {
                     // dd($bangle);
                     if (!empty($bangle['id'])) {
                         // dd($bangle);
