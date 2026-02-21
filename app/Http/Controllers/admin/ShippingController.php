@@ -279,38 +279,74 @@ class ShippingController extends Controller
         $productsMetaData = json_decode($order->products_meta_data, true);
         $items = [];
 
-        foreach ($productsMetaData as $item) {
-            $productId = $item['product_id'] ?? null;
-            $variationId = $item['variation_id'] ?? null;
-            $quantity = $item['quantity'] ?? 1;
+        // Handle both old and new format
+        $productsList = $productsMetaData['Products'] ?? $productsMetaData ?? [];
 
-            if ($variationId) {
-                $variation = \App\Models\ProductVariation::find($variationId);
-                if (!$variation) continue;
-                
-                $product = $variation->product;
-                $items[] = [
-                    'description' => $product->name . ' - ' . $variation->size,
-                    'sku' => $product->sku ?? '',
-                    'quantity' => $quantity,
-                    'value' => $variation->price ?? $product->price,
-                    'currency' => 'CAD',
-                    'country_of_origin' => $variation->country_of_origin ?? $product->country_of_origin,
-                    'hs_code' => $variation->hs_code ?? $product->hs_code,
-                ];
-            } else if ($productId) {
-                $product = \App\Models\Product::find($productId);
+        foreach ($productsList as $item) {
+            // New format: item has 'product' key
+            if (isset($item['product'])) {
+                $product = \App\Models\Product::find($item['product']['id'] ?? $item['product_id']);
                 if (!$product) continue;
                 
-                $items[] = [
-                    'description' => $product->name,
-                    'sku' => $product->sku ?? '',
-                    'quantity' => $quantity,
-                    'value' => $product->price,
-                    'currency' => 'CAD',
-                    'country_of_origin' => $product->country_of_origin,
-                    'hs_code' => $product->hs_code,
-                ];
+                $quantity = $item['qty'] ?? $item['quantity'] ?? 1;
+                $variation = $item['variation'] ?? null;
+                
+                if ($variation) {
+                    $items[] = [
+                        'description' => $product->name . ' - ' . ($variation['size'] ?? ''),
+                        'sku' => $product->sku ?? '',
+                        'quantity' => $quantity,
+                        'value' => $variation['price'] ?? $product->price,
+                        'currency' => 'CAD',
+                        'country_of_origin' => $product->country_of_origin,
+                        'hs_code' => $product->hs_code,
+                    ];
+                } else {
+                    $items[] = [
+                        'description' => $product->name,
+                        'sku' => $product->sku ?? '',
+                        'quantity' => $quantity,
+                        'value' => $product->price,
+                        'currency' => 'CAD',
+                        'country_of_origin' => $product->country_of_origin,
+                        'hs_code' => $product->hs_code,
+                    ];
+                }
+            }
+            // Old format: direct product_id
+            else {
+                $productId = $item['product_id'] ?? null;
+                $variationId = $item['variation_id'] ?? null;
+                $quantity = $item['quantity'] ?? 1;
+
+                if ($variationId) {
+                    $variation = \App\Models\ProductVariation::find($variationId);
+                    if (!$variation) continue;
+                    
+                    $product = $variation->product;
+                    $items[] = [
+                        'description' => $product->name . ' - ' . $variation->size,
+                        'sku' => $product->sku ?? '',
+                        'quantity' => $quantity,
+                        'value' => $variation->price ?? $product->price,
+                        'currency' => 'CAD',
+                        'country_of_origin' => $variation->country_of_origin ?? $product->country_of_origin,
+                        'hs_code' => $variation->hs_code ?? $product->hs_code,
+                    ];
+                } else if ($productId) {
+                    $product = \App\Models\Product::find($productId);
+                    if (!$product) continue;
+                    
+                    $items[] = [
+                        'description' => $product->name,
+                        'sku' => $product->sku ?? '',
+                        'quantity' => $quantity,
+                        'value' => $product->price,
+                        'currency' => 'CAD',
+                        'country_of_origin' => $product->country_of_origin,
+                        'hs_code' => $product->hs_code,
+                    ];
+                }
             }
         }
 
@@ -318,6 +354,14 @@ class ShippingController extends Controller
         $validated['items'] = $items;
 
         // ✅ Build payload for Stallion API
+        $totalValue = array_sum(array_map(function($item) {
+            return $item['value'] * $item['quantity'];
+        }, $validated['items']));
+        
+        $packageContents = implode(', ', array_map(function($item) {
+            return $item['description'] . ' (x' . $item['quantity'] . ')';
+        }, $validated['items']));
+        
         $payload = [
             'to_address' => [
                 'name' => $validated['to_address']['name'],
@@ -339,6 +383,9 @@ class ShippingController extends Controller
             'height' => (float) $validated['height'],
             'size_unit' => $validated['size_unit'],
             'items' => $validated['items'],
+            'package_contents' => $packageContents,
+            'value' => $totalValue,
+            'currency' => 'CAD',
             'package_type' => $validated['package_type'],
             'postage_type' => $validated['postage_type'],
             'signature_confirmation' => $validated['signature_confirmation'] ?? false,

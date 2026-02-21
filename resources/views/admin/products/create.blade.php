@@ -646,13 +646,13 @@ label[for="is_pre_order"] {
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <input type="text" name="bangles[{{ $i }}][size]" class="form-control" placeholder="Size" value="{{ $var->size }}">
+                        <input type="text" name="bangles[{{ $i }}][size]" class="form-control" placeholder="Size" value="{{ $var->size ?: '' }}">
                     </div>
                     <div class="col-md-2">
-                        <input type="number" name="bangles[{{ $i }}][quantity]" class="form-control" placeholder="Quantity" value="{{ $var->quantity ?: 0  }}">
+                        <input type="number" name="bangles[{{ $i }}][quantity]" class="form-control" placeholder="Quantity" value="{{ $var->quantity ?: ''  }}">
                     </div>
                     <div class="col-md-2">
-                        <input type="number" name="bangles[{{ $i }}][unavailable_quantity]" class="form-control" placeholder="Unavailable Quantity" value="{{ $var->unavailable_quantity ?: 0 }}">
+                        <input type="number" name="bangles[{{ $i }}][unavailable_quantity]" class="form-control" placeholder="Unavailable Quantity" value="{{ $var->unavailable_quantity ?: '' }}">
                     </div>
                     <div class="col-md-2">
                         <input type="number" step="0.01" name="bangles[{{ $i }}][price]" class="form-control" placeholder="Price" value="{{ $var->price }}">
@@ -851,6 +851,13 @@ function genFileId(){ return 'f' + (fileIdCounter++) + '_' + Date.now(); }
 if (parentSelectEl) {
     $(parentSelectEl).on('change', function() {
         const parentId = this.value;
+        
+        // Load boxes for the selected category
+        if (typeof loadBoxes === 'function') {
+            console.log("Calling loadBoxes from parent category change:", parentId);
+            loadBoxes(parentId);
+        }
+        
         if (!childSelectEl || !childWrapEl) return;
         if (!parentId) {
             childSelectEl.innerHTML = '<option value="">Select Child (Optional)</option>';
@@ -1118,18 +1125,18 @@ function addBangleRow(size = '', qty = 0, price = '', compare = '', member_price
         </div>
        ${allowSize == 1 ? `
     <div class="col-md-2 bangle-size-col">
-        <input type="text" name="bangles[${banglesIndex}][size]" class="form-control" placeholder="Size" value="${size}">
+        <input type="text" name="bangles[${banglesIndex}][size]" class="form-control" placeholder="Size" value="${size || ''}">
     </div>
 ` : `
     <div class="col-md-2 bangle-size-col" style="display:none;">
-        <input type="text" name="bangles[${banglesIndex}][size]" class="form-control" placeholder="Size" value="${size}" disabled>
+        <input type="text" name="bangles[${banglesIndex}][size]" class="form-control" placeholder="Size" value="${size || ''}" disabled>
     </div>
 `}
-
-        <input type="number" name="bangles[${banglesIndex}][quantity]" class="form-control" placeholder="Quantity" value="${qty && qty !== '' ? qty : 0}">
+        <div class="col-md-2">
+        <input type="number" name="bangles[${banglesIndex}][quantity]" class="form-control" placeholder="Quantity" value="${qty || ''}">
         </div>
         <div class="col-md-2">
-        <input type="number" name="bangles[${banglesIndex}][unavailable_quantity]" class="form-control" placeholder="Unavailable Quantity" value="${unavailable_quantity && unavailable_quantity !== '' ? unavailable_quantity : 0}">
+        <input type="number" name="bangles[${banglesIndex}][unavailable_quantity]" class="form-control" placeholder="Unavailable Quantity" value="${unavailable_quantity || ''}">
         </div>
         <div class="col-md-2"><input type="number" step="0.01" name="bangles[${banglesIndex}][price]" class="form-control" placeholder="Price" value="${price}"></div>
         <div class="col-md-2"><input type="number" step="0.01" name="bangles[${banglesIndex}][compare_price]" class="form-control" placeholder="Discount Price" value="${compare}"></div>
@@ -1565,64 +1572,80 @@ formData.append('images_details', JSON.stringify(imagesDetails));
 
 </script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    function loadBoxes(categoryId, selectedBoxId = null) {
-        const boxDiv = document.getElementById("category_box_div");
-        const boxDropdown = document.getElementById("category_box");
+console.log("=== TYPE BOX SCRIPT STARTING ===");
 
-        if (!categoryId) {
-            boxDiv.style.display = "none";
-            boxDropdown.innerHTML = '<option value="">Select Box</option>';
-            return;
-        }
+// Load boxes function - defined globally
+function loadBoxes(categoryId, selectedBoxId = null) {
+    console.log("loadBoxes called with categoryId:", categoryId, "selectedBoxId:", selectedBoxId);
+    const boxDiv = document.getElementById("category_box_div");
+    const boxDropdown = document.getElementById("category_box");
 
-        // Use Laravel route with placeholder
-        let url = "{{ route('categories.getBoxes', ':id') }}".replace(':id', categoryId);
-
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                boxDropdown.innerHTML = '<option value="">Select Box</option>';
-
-                if (data.length > 0) {
-                    data.forEach(box => {
-                        let option = document.createElement("option");
-                        option.value = box.id;
-                        option.textContent = box.name;
-                        if (selectedBoxId && selectedBoxId == box.id) {
-                            option.selected = true;
-                        }
-                        boxDropdown.appendChild(option);
-                    });
-
-                    boxDiv.style.display = "block";
-                } else {
-                    // Only hide if no preselected box
-                    if (!selectedBoxId) {
-                        boxDiv.style.display = "none";
-                    }
-                }
-            })
-            .catch(error => console.error("Error loading boxes:", error));
+    if (!categoryId) {
+        console.log("No category ID, hiding box dropdown");
+        if (boxDiv) boxDiv.style.display = "none";
+        if (boxDropdown) boxDropdown.innerHTML = '<option value="">Select Box</option>';
+        return;
     }
 
+    // Use Laravel route with placeholder
+    let url = "{{ route('categories.getBoxes', ':id') }}".replace(':id', categoryId);
+    console.log("Fetching boxes from URL:", url);
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Received boxes data:", data);
+            boxDropdown.innerHTML = '<option value="">Select Box</option>';
+
+            if (data.length > 0) {
+                data.forEach(box => {
+                    let option = document.createElement("option");
+                    option.value = box.id;
+                    option.textContent = box.name;
+                    if (selectedBoxId && selectedBoxId == box.id) {
+                        option.selected = true;
+                    }
+                    boxDropdown.appendChild(option);
+                });
+
+                boxDiv.style.display = "block";
+                console.log("Box dropdown populated with", data.length, "boxes");
+            } else {
+                console.log("No boxes found for this category");
+                // Only hide if no preselected box
+                if (!selectedBoxId) {
+                    boxDiv.style.display = "none";
+                }
+            }
+        })
+        .catch(error => console.error("Error loading boxes:", error));
+}
+
+// Initialize when DOM is ready - using jQuery since it's already loaded
+$(document).ready(function() {
+    console.log("Box dropdown script loaded - DOM ready");
+    
     const parentCategory = document.getElementById("parent_category");
-    const childCategory = document.getElementById("child_category");
 
-    parentCategory.addEventListener("change", function () {
-        loadBoxes(this.value);
-    });
+    if (!parentCategory) {
+        console.error("Parent category element not found!");
+        return;
+    }
 
-    childCategory.addEventListener("change", function () {
-        loadBoxes(this.value || parentCategory.value);
-    });
+    console.log("Parent category element found");
 
-    // Edit case (preload selected box)
+    // Load boxes on page load if a category is already selected
+    if (parentCategory.value) {
+        console.log("Loading boxes for initial category:", parentCategory.value);
+        loadBoxes(parentCategory.value);
+    }
+
     @if(isset($product) && $product->category)
-        loadBoxes(
-            {{ $product->category->id }},
-            {!! json_encode($product->category_box_id) !!}
-        );
+    // Edit case (preload selected box)
+    loadBoxes(
+        {{ $product->category->id }},
+        {!! json_encode($product->category_box_id) !!}
+    );
     @endif
 });
 </script>
@@ -1755,6 +1778,14 @@ function toggleSizeForExistingRows(allow) {
 // When child changes: child always wins — fetch child details
 $(document).on('change', '#child_category', function () {
     const childId = this.value || null;
+    
+    // Load boxes for the selected child category (or parent if no child)
+    if (typeof loadBoxes === 'function') {
+        const parentId = $('#parent_category').val();
+        console.log("Calling loadBoxes from child category change:", childId || parentId);
+        loadBoxes(childId || parentId);
+    }
+    
     fetchAndApplyCategoryDetails(childId , 'child');
 });
 </script>

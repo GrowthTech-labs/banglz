@@ -433,7 +433,7 @@
                         if (!empty($productsMetaData['Bundle'])) {
                         $productsCount += count($productsMetaData['Bundle']);
                         }
-                        $shippingTitle = $order->shipping_title ?? $order->shipping_method ?? $order->shipping_service ?? ($order->shipping_name ?? 'Banglez Online Shipping');
+                        $shippingTitle = $order->shipping_title ?? $order->shipping_method ?? $order->shipping_service ?? ($order->shipping_name ?? ($order->tracking_number ? 'Label Created' : 'Label Not Created'));
                         @endphp
 
                         <div class="fulfillment-header">
@@ -453,7 +453,7 @@
                         {{-- Shipping method (one-line) --}}
                         <div class="mb-3">
                             <i class="bi bi-truck" aria-hidden="true"></i>
-                            <span class="ms-2 text-muted">{{ $order->shipping_description ?? ($order->shipping_title ?? 'Free Standard Shipping') }}</span>
+                            <span class="ms-2 text-muted">{{ $order->shipping_description ?? ($order->shipping_title ?? ($order->tracking_number ? 'Shipping label created' : 'Shipping label not created')) }}</span>
                         </div>
 
                        {{-- Product list: single products --}}
@@ -719,7 +719,7 @@
                 is_string($order->payment_status ?? null) && strtolower($order->payment_status) === 'paid'
                 ) || ($order->is_paid ?? false));
                 $paidAmount = $order->paid_amount ?? $order->paid_total ?? ($isPaid ? ($order->total_amount ?? 0) : 0);
-                $shippingLabel = $order->shipping_title ?? $order->shipping_method ?? 'Free Standard Shipping';
+                $shippingLabel = $order->shipping_title ?? $order->shipping_method ?? ($order->tracking_number ? 'Label Created' : 'Label Not Created');
                 $shippingWeightInfo = $order->shipping_weight_info ?? $order->shipping_weight_text ?? null;
                 $taxName = $order->tax_name ?? $order->tax_label ?? 'Taxes';
                 $taxRate = isset($order->tax_rate) ? (float)$order->tax_rate : (isset($order->tax_percent) ? (float)$order->tax_percent : null);

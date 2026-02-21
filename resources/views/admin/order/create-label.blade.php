@@ -988,7 +988,7 @@
             </div>
 
             <div>
-                <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary">← Back</a>
+                <a href="{{ route('admin.orders') }}" class="btn btn-sm btn-outline-secondary">← Back to Orders</a>
             </div>
         </div>
 
@@ -1199,7 +1199,7 @@
                                 $variantText = !empty($variantParts) ? implode(' / ', $variantParts) : ($item['variant_name'] ?? $item['variant'] ?? '');
                                 @endphp
 
-                                <div class="item-row">
+                                <div class="item-row" data-price="{{ $product['price'] ?? 0 }}" data-sku="{{ $product['sku'] ?? '' }}">
                                     <div class="item-left">
                                         <img src="{{ $img }}" alt="thumb" class="thumb">
                                         <div class="prod-info">
