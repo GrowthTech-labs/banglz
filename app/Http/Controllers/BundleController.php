@@ -26,6 +26,36 @@ class BundleController extends Controller
         $variationId = $request->input('variation_id');
         $userId      = Auth::check() ? Auth::id() : null;
 
+        // Stock validation BEFORE adding to bundle
+        $availableStock = 0;
+        $productName = '';
+        
+        if ($variationId) {
+            $variation = ProductVariation::with('product')->find($variationId);
+            if (!$variation) {
+                return response()->json([
+                    'message' => 'Product variation not found.',
+                ], 404);
+            }
+            $availableStock = $variation->quantity - ($variation->unavailable_quantity ?? 0);
+            $productName = $variation->product->name . ' (' . $variation->size . ')';
+        } else {
+            $product = Product::find($productId);
+            if (!$product) {
+                return response()->json([
+                    'message' => 'Product not found.',
+                ], 404);
+            }
+            $availableStock = $product->quantity - ($product->unavailable_quantity ?? 0);
+            $productName = $product->name;
+        }
+
+        if ($availableStock <= 0) {
+            return response()->json([
+                'message' => "'{$productName}' is out of stock and cannot be added to bundle.",
+            ], 422);
+        }
+
         // Always ensure we have a session_id
         $sessionId = session()->get('bundle_session_id');
         if (!$sessionId) {
@@ -150,26 +180,134 @@ class BundleController extends Controller
                 ], 404);
             }
 
-            $cartItem->qty = (int) $request->input('qty', 1);
-            $cartItem->save();
+            $newQty = (int) $request->input('qty', 1);
 
-            // Stock check
-            $stock = 0;
+            // Stock validation for update
             if ($cartItem->type === 'product') {
-                $stock = $cartItem->variation_id
-                    ? ProductVariation::find($cartItem->variation_id)->quantity ?? 0
-                    : Product::find($cartItem->type_id)->quantity ?? 0;
+                $availableStock = 0;
+                if ($cartItem->variation_id) {
+                    $variation = ProductVariation::find($cartItem->variation_id);
+                    $availableStock = $variation ? ($variation->quantity - ($variation->unavailable_quantity ?? 0)) : 0;
+                } else {
+                    $product = Product::find($cartItem->type_id);
+                    $availableStock = $product ? ($product->quantity - ($product->unavailable_quantity ?? 0)) : 0;
+                }
+
+                if ($availableStock <= 0) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'This product is out of stock.',
+                    ], 422);
+                }
+
+                if ($newQty > $availableStock) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Only {$availableStock} items available in stock.",
+                    ], 422);
+                }
             }
+
+            $cartItem->qty = $newQty;
+            $cartItem->save();
 
             return response()->json([
                 'status'    => 'ok',
                 'message'   => 'Cart updated',
                 'cartItem'  => $cartItem,
-                'available' => $stock,
             ]);
         }
 
-        // 🔹 Case 2: Add new item
+        // 🔹 Case 2: Add new item - Stock validation BEFORE adding
+        $qtyFromRequest = (int) $request->input('qty', 1);
+        
+        // Validate stock for products
+        if ($request->type === 'product') {
+            $availableStock = 0;
+            
+            if ($request->filled('variation_id')) {
+                $variation = ProductVariation::find($request->variation_id);
+                if (!$variation) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Product variation not found.',
+                    ], 404);
+                }
+                $availableStock = $variation->quantity - ($variation->unavailable_quantity ?? 0);
+            } else {
+                $product = Product::find($request->type_id);
+                if (!$product) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => 'Product not found.',
+                    ], 404);
+                }
+                $availableStock = $product->quantity - ($product->unavailable_quantity ?? 0);
+            }
+
+            if ($availableStock <= 0) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'This product is out of stock.',
+                ], 422);
+            }
+
+            if ($qtyFromRequest > $availableStock) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => "Only {$availableStock} items available in stock.",
+                ], 422);
+            }
+        }
+        
+        // Validate stock for bundles
+        if ($request->type === 'bundle') {
+            $bundle = Bundle::with('bundleProducts.product', 'bundleProducts.variation')->find($request->type_id);
+            
+            if (!$bundle) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Bundle not found.',
+                ], 404);
+            }
+            
+            if ($bundle->bundleProducts->count() < 3) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Bundle must have 3 products before adding to cart.',
+                ], 422);
+            }
+            
+            // Check stock for each product in bundle
+            foreach ($bundle->bundleProducts as $bundleProduct) {
+                $availableStock = 0;
+                
+                if ($bundleProduct->variation_id && $bundleProduct->variation) {
+                    $availableStock = $bundleProduct->variation->quantity - ($bundleProduct->variation->unavailable_quantity ?? 0);
+                    $productName = $bundleProduct->product->name . ' (' . $bundleProduct->variation->size . ')';
+                } else if ($bundleProduct->product) {
+                    $availableStock = $bundleProduct->product->quantity - ($bundleProduct->product->unavailable_quantity ?? 0);
+                    $productName = $bundleProduct->product->name;
+                } else {
+                    continue;
+                }
+                
+                if ($availableStock <= 0) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Product '{$productName}' in this bundle is out of stock.",
+                    ], 422);
+                }
+                
+                if ($qtyFromRequest > $availableStock) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Only {$availableStock} units of '{$productName}' available.",
+                    ], 422);
+                }
+            }
+        }
+
         $userId    = Auth::check() ? Auth::id() : null;
         $sessionId = session()->get('cart_session_id');
         if ($userId) {
@@ -199,12 +337,6 @@ class BundleController extends Controller
         // Ensure bundle is complete before adding
         if ($request->type == 'bundle') {
             $bundle = Bundle::with('bundleProducts')->findOrFail($request->type_id);
-            if ($bundle->bundleProducts->count() < 3) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Bundle must have 3 products before adding to cart.',
-                ], 422);
-            }
             // Mark bundle as complete
             Bundle::where('user_id', $bundle->user_id)
                 ->orWhere('session_id', $bundle->session_id)
@@ -229,7 +361,6 @@ class BundleController extends Controller
             })
             ->first();
 
-        $qtyFromRequest = (int) $request->input('qty', 1);
          if ($request->type === 'gift-card') {
         $giftCardOptions = config('services.gift_cards'); // comes from services.php
         $priceId = $request->type_id;
@@ -240,8 +371,6 @@ class BundleController extends Controller
                 'message' => 'Invalid gift card option selected.',
             ], 422);
         }
-
-        $qtyFromRequest = (int) $request->input('qty', 1);
 
         // Check if already exists in cart
         $existingCart = Cart::where('type', 'gift-card')
@@ -281,7 +410,28 @@ class BundleController extends Controller
     }
 
         if ($existingCart) {
-            $existingCart->qty += $qtyFromRequest;
+            // Check if adding more would exceed stock
+            $newTotalQty = $existingCart->qty + $qtyFromRequest;
+            
+            if ($request->type === 'product') {
+                $availableStock = 0;
+                if ($existingCart->variation_id) {
+                    $variation = ProductVariation::find($existingCart->variation_id);
+                    $availableStock = $variation ? ($variation->quantity - ($variation->unavailable_quantity ?? 0)) : 0;
+                } else {
+                    $product = Product::find($existingCart->type_id);
+                    $availableStock = $product ? ($product->quantity - ($product->unavailable_quantity ?? 0)) : 0;
+                }
+                
+                if ($newTotalQty > $availableStock) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Cannot add more. Only {$availableStock} items available (you already have {$existingCart->qty} in cart).",
+                    ], 422);
+                }
+            }
+            
+            $existingCart->qty = $newTotalQty;
             if ($userId && !$existingCart->user_id) {
                 $existingCart->user_id = $userId; // Merge guest → user
             }
@@ -298,19 +448,10 @@ class BundleController extends Controller
             ]);
         }
 
-        // Stock check
-        $available = 0;
-        if ($cartItem->type === 'product') {
-            $available = $cartItem->variation_id
-                ? ProductVariation::find($cartItem->variation_id)->quantity ?? 0
-                : Product::find($cartItem->type_id)->quantity ?? 0;
-        }
-
         return response()->json([
             'status'    => 'ok',
             'message'   => ucfirst($request->type) . ' added to cart',
             'cartItem'  => $cartItem,
-            'available' => $available,
         ]);
     }
 
@@ -428,4 +569,35 @@ class BundleController extends Controller
             'message' => 'Item removed from cart.',
         ]);
     }
+    public function removeProductFromBundle(Request $request)
+        {
+            $bundleProductId = $request->input('bundle_product_id');
+
+            $bundleProduct = BundleProduct::find($bundleProductId);
+
+            if (!$bundleProduct) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Bundle product not found.',
+                ], 404);
+            }
+
+            $bundle = $bundleProduct->bundle;
+
+            // Delete the bundle product
+            $bundleProduct->delete();
+
+            // Check if bundle is now empty
+            $remainingProducts = BundleProduct::where('bundle_id', $bundle->id)->count();
+
+            if ($remainingProducts === 0) {
+                // Delete the bundle if no products left
+                $bundle->delete();
+            }
+
+            return response()->json([
+                'status'  => 'ok',
+                'message' => 'Product removed from bundle.',
+            ]);
+        }
 }

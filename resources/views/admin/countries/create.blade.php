@@ -11,6 +11,20 @@
 
         <div class="card">
             <div class="card-body">
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+                
                 <form action="{{ route('admin.countries.store') }}" method="POST">
                     @csrf
                     
@@ -34,13 +48,10 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="sort_order" class="form-label">Sort Order</label>
-                        <input type="number" class="form-control @error('sort_order') is-invalid @enderror" 
-                               id="sort_order" name="sort_order" value="{{ old('sort_order', 0) }}" min="0">
-                        @error('sort_order')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="text-muted">Lower numbers appear first in dropdown</small>
+                        <label for="sort_order_display" class="form-label">Sort Order (Auto-generated)</label>
+                        <input type="text" class="form-control" id="sort_order_display" value="Loading..." readonly>
+                        <input type="hidden" name="sort_order" id="sort_order" value="">
+                        <small class="text-muted">Automatically assigned. Lower numbers appear first in dropdown</small>
                     </div>
 
                     <div class="mb-3 form-check">
@@ -61,5 +72,20 @@
 <script>
     $('.sidenav li').removeClass('active');
     $('.sidenav li:has(a[href="{{ route('admin.countries.index') }}"])').addClass('active');
+    
+    // Auto-fill sort order on page load
+    $(document).ready(function() {
+        fetch('{{ route('admin.countries.nextSortOrder') }}')
+            .then(response => response.json())
+            .then(data => {
+                $('#sort_order').val(data.next_sort_order);
+                $('#sort_order_display').val(data.next_sort_order);
+            })
+            .catch(error => {
+                console.error('Error fetching next sort order:', error);
+                $('#sort_order').val(1);
+                $('#sort_order_display').val(1);
+            });
+    });
 </script>
 @endsection

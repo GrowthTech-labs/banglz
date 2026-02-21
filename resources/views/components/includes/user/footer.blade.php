@@ -544,7 +544,9 @@ const addToCartBtn = document.querySelector('#add-to-cart');
           lookBoxes.forEach((box, i) => {
             box.style.display = "flex";
             box.innerHTML = `<span class="plus">+</span> Add Item ${i + 1}`;
-            box.onclick = () => window.location.href = "{{ route('home') }}";
+            box.onclick = () => {
+              window.location.href = "{{ route('home') }}#products";
+            };
           });
 
           updateBundleBadge(0);
@@ -591,7 +593,7 @@ const addToCartBtn = document.querySelector('#add-to-cart');
           subtotal += parseFloat(effectivePrice || 0);
 
           container.innerHTML += `
-          <div class="cart-item-card right-side-cart">
+          <div class="cart-item-card right-side-cart" data-bundle-product-id="${item.id}">
               <div class="cart-item-image">
                   <img src="${firstImage}" alt="${item.product.name}">
               </div>
@@ -604,6 +606,9 @@ const addToCartBtn = document.querySelector('#add-to-cart');
                       : ""}
                   </p>
               </div>
+              <button class="remove-bundle-product-btn" data-bundle-product-id="${item.id}" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; margin-left: 8px; transition: background 0.3s; flex-shrink: 0;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                  <i class="fas fa-trash"></i>
+              </button>
           </div>
         `;
         });
@@ -646,7 +651,9 @@ const addToCartBtn = document.querySelector('#add-to-cart');
           if (i < remaining) {
             box.style.display = "flex";
             box.innerHTML = `<span class="plus">+</span> Add Item ${count + i + 1}`;
-            box.onclick = () => window.location.href = "{{ route('home') }}";
+            box.onclick = () => {
+              window.location.href = "{{ route('home') }}#products";
+            };
           } else {
             box.style.display = "none";
           }
@@ -654,6 +661,40 @@ const addToCartBtn = document.querySelector('#add-to-cart');
       })
       .catch(err => console.error("Fetch error:", err));
   }
+  
+  // Handle bundle product removal
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-bundle-product-btn')) {
+      const btn = e.target.closest('.remove-bundle-product-btn');
+      const bundleProductId = btn.dataset.bundleProductId;
+      
+      if (!confirm('Remove this item from your bundle?')) {
+        return;
+      }
+      
+      fetch('{{ route("bundle.removeProduct") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ bundle_product_id: bundleProductId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          // Refresh the bundle sidebar
+          fetchPendingBundle();
+        } else {
+          alert(data.message || 'Failed to remove item');
+        }
+      })
+      .catch(err => {
+        console.error('Error removing bundle product:', err);
+        alert('Failed to remove item from bundle');
+      });
+    }
+  });
 </script>
 <script>
   $(document).ready(function() {

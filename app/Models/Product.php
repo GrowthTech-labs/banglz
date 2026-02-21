@@ -83,4 +83,61 @@ class Product extends Model
         return $this->belongsTo(ProductColor::class);
     }
 
+    /**
+     * Get the first image with fallback to default
+     */
+    public function getFirstImageAttribute()
+    {
+        $images = $this->images;
+        
+        // Handle if images is null or empty
+        if (empty($images) || !is_array($images)) {
+            return 'default.jpg';
+        }
+        
+        $firstImage = $images[0];
+        
+        // Check if file exists
+        $imagePath = public_path('assets/images/products/' . $firstImage);
+        if (file_exists($imagePath)) {
+            return $firstImage;
+        }
+        
+        // Fallback to default
+        return 'default.jpg';
+    }
+
+    /**
+     * Get all valid images with fallback
+     */
+    public function getValidImagesAttribute()
+    {
+        $images = $this->images;
+        
+        if (empty($images) || !is_array($images)) {
+            return ['default.jpg'];
+        }
+        
+        $validImages = [];
+        foreach ($images as $image) {
+            $imagePath = public_path('assets/images/products/' . $image);
+            if (file_exists($imagePath)) {
+                $validImages[] = $image;
+            }
+        }
+        
+        // If no valid images found, return default
+        return empty($validImages) ? ['default.jpg'] : $validImages;
+    }
+
+    /**
+     * Get image URL with fallback
+     */
+    public function getImageUrl($index = 0)
+    {
+        $images = $this->valid_images;
+        $image = $images[$index] ?? $images[0] ?? 'default.jpg';
+        return asset('assets/images/products/' . $image);
+    }
+
 }

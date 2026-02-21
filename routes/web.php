@@ -109,6 +109,7 @@ Route::get('/search', [ProductsController::class, 'search'])->name('search');
 
 Route::get('/product-detail/{slug}', [ProductsController::class, 'show'])->name('product.detail');
 Route::post('/bundle/add', [BundleController::class, 'addProductToBundle'])->name('bundle.add');
+Route::post('/bundle/remove-product', [BundleController::class, 'removeProductFromBundle'])->name('bundle.removeProduct');
 Route::get('/bundle/pending', [BundleController::class, 'getPendingBundle'])
     ->name('bundle.pending');
 Route::post('/cart/add', [BundleController::class, 'addToCart'])->name('cart.add');
@@ -267,6 +268,7 @@ Route::prefix('admin')->group(function () {
         // Countries routes
         Route::get('countries', [\App\Http\Controllers\admin\CountryController::class, 'index'])->name('admin.countries.index');
         Route::get('countries/create', [\App\Http\Controllers\admin\CountryController::class, 'create'])->name('admin.countries.create');
+        Route::get('countries/next-sort-order', [\App\Http\Controllers\admin\CountryController::class, 'getNextSortOrder'])->name('admin.countries.nextSortOrder');
         Route::post('countries/store', [\App\Http\Controllers\admin\CountryController::class, 'store'])->name('admin.countries.store');
         Route::get('countries/{id}/edit', [\App\Http\Controllers\admin\CountryController::class, 'edit'])->name('admin.countries.edit');
         Route::put('countries/{id}', [\App\Http\Controllers\admin\CountryController::class, 'update'])->name('admin.countries.update');

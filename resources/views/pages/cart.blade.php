@@ -134,25 +134,35 @@
       }
 
       .product img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        background: #fff !important;
       }
 
       .bundle-images {
         display: flex;
         width: 100%;
         height: 100%;
+        background: #fff;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
 
       .bundle-images img {
         flex: 1 1 0;
         /* All images grow/shrink equally */
-        width: 0;
-        /* Forces equal share */
-        height: 100%;
-        object-fit: cover;
-        /* Prevents distortion */
+        max-width: 33.33%;
+        /* Max 3 images side by side */
+        max-height: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        /* Shows full image without cropping */
+        background: #fff !important;
       }
 
       .product header,
@@ -164,13 +174,67 @@
       }
 
       .product header {
-        background: #000;
+        background: #fff;
         margin: 0 1% 20px 0;
         overflow: hidden;
-        padding: 0;
+        padding: 10px;
         position: relative;
         width: 30%;
         height: 195px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .product header .product-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      
+      .product header .product-link:hover {
+        transform: scale(1.05);
+      }
+      
+      .product header .product-link:hover img {
+        opacity: 0.8;
+      }
+      
+      .product .content .product-name-link {
+        text-decoration: none;
+        color: inherit;
+        display: inline-block;
+        transition: color 0.3s ease;
+        cursor: pointer;
+      }
+      
+      .product .content .product-name-link:hover {
+        color: #9a6b55;
+      }
+      
+      .product .content .product-name-link h1 {
+        margin: 10px 0 0px 0;
+      }
+      
+      .product header .bundle-images {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .product header img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        background: #fff !important;
       }
 
       .product header:hover img {
@@ -233,6 +297,34 @@
         border: none;
         padding-left: 20px;
       }
+      
+      .product footer .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      
+      .remove-btn {
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s ease;
+        width: fit-content;
+        height: fit-content;
+      }
+      
+      .remove-btn:hover {
+        background: #c82333;
+      }
+      
+      .remove-btn i {
+        margin-right: 5px;
+      }
 
       .product footer.content p {
         font-size: 12px !important;
@@ -245,7 +337,16 @@
         font-size: 15px;
         font-weight: 300;
         margin: 0;
-        padding: 5px 20px;
+        padding: 8px 20px;
+        min-width: 120px;
+        text-align: center;
+      }
+      
+      .product footer .price small {
+        color: #666 !important;
+        font-size: 11px !important;
+        display: block !important;
+        margin-bottom: 3px;
       }
 
       .product footer .full-price {
@@ -255,14 +356,23 @@
         font-size: 18px;
         font-weight: 300;
         margin: 0;
-        padding: 5px 20px;
-
+        padding: 8px 20px;
+        min-width: 120px;
+        text-align: center;
 
         -webkit-transition: margin .15s linear;
         -moz-transition: margin .15s linear;
         -ms-transition: margin .15s linear;
         -o-transition: margin .15s linear;
         transition: margin .15s linear;
+      }
+      
+      .product footer .full-price small {
+        color: #fff !important;
+        font-size: 11px !important;
+        display: block !important;
+        margin-bottom: 3px;
+        opacity: 0.9;
       }
 
       .plus-minus-button {
@@ -273,7 +383,16 @@
       .product-price {
         margin: 0px;
         padding-top: 10px;
-        padding-bottom: 10px
+        padding-bottom: 10px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      
+      .product-price .full-price,
+      .product-price .price {
+        margin: 0 !important;
+        float: none !important;
       }
 
       .qt,
@@ -475,9 +594,64 @@
         /* show 3 cards */
         scroll-snap-align: start;
         margin-right: 10px;
-        background: transparent;
-
+        background: #fff;
         overflow: hidden;
+        border-radius: 8px;
+        border: 2px solid #eee;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      
+      .carousel .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #9a6b55;
+      }
+      
+      .carousel .card img {
+        transition: transform 0.3s ease;
+      }
+      
+      .carousel .card:hover img {
+        transform: scale(1.05);
+      }
+      
+      .carousel .card .card-content h4 {
+        color: #333;
+        font-size: 14px;
+        font-weight: 600;
+        margin: 10px 0;
+        transition: color 0.3s ease;
+      }
+      
+      .carousel .card:hover .card-content h4 {
+        color: #9a6b55;
+      }
+      
+      .view-product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(154, 107, 85, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .carousel .card:hover .view-product-overlay {
+        opacity: 1;
+      }
+      
+      .view-product-overlay span {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
 
       /* ✅ Nav buttons fixed over carousel */
@@ -799,26 +973,25 @@
               ? (($item->variation->quantity ?? 0) - ($item->variation->unavailable_quantity ?? 0))
               : (($item->product->quantity ?? 0) - ($item->product->unavailable_quantity ?? 0));
 
-              // Decode images if they're JSON strings
-              $productImages = is_string($item->product->images) 
-                  ? json_decode($item->product->images, true) 
-                  : ($item->product->images ?? []);
-              $firstImage = !empty($productImages) ? $productImages[0] : 'c-1.jpg';
+              // Get valid image with fallback
+              $firstImage = $item->product->first_image ?? 'default.jpg';
               @endphp
 
               <article class="product" data-stock="{{ $availableStock }}">
                 <header style="background">
-                  <a href="#" class="remove" data-id="{{ $item->id }}">
+                  <a href="{{ route('product.detail', $item->product->slug) }}" class="product-link">
                     <div class="bundle-images">
                       <img src="{{ asset('assets/images/products/' . $firstImage) }}"
-                        alt="{{ $item->product->name }}">
+                        alt="{{ $item->product->name }}"
+                        onerror="this.onerror=null; this.src='{{ asset('assets/images/products/default.jpg') }}';">
                     </div>
-                    <h3>Remove product</h3>
                   </a>
                 </header>
 
                 <div class="content">
-                  <h1>{{ $item->product->name }}</h1>
+                  <a href="{{ route('product.detail', $item->product->slug) }}" class="product-name-link">
+                    <h1>{{ $item->product->name }}</h1>
+                  </a>
 
                   @if($item->variation)
                   <p>
@@ -841,25 +1014,34 @@
                 </div>
 
                 <footer class="content">
-                  <div class="plus-minus-button">
-                    {{-- Disable minus if qty = 1 --}}
-                    <button type="button" class="qt-minus" data-type="product" data-id="{{ $item->id }}"
-                      @if($qty <=1) disabled @endif>-</button>
+                  <div class="quantity-controls">
+                    <div class="plus-minus-button">
+                      {{-- Disable minus if qty = 1 --}}
+                      <button type="button" class="qt-minus" data-type="product" data-id="{{ $item->id }}"
+                        @if($qty <=1) disabled @endif>-</button>
 
-                    <span class="qt">{{ $qty }}</span>
+                      <span class="qt">{{ $qty }}</span>
 
-                    {{-- Disable plus if stock exhausted --}}
-                    <button type="button" class="qt-plus" data-type="product" data-id="{{ $item->id }}"
-                      @if($availableStock <=$qty) disabled @endif>+</button>
+                      {{-- Disable plus if stock exhausted --}}
+                      <button type="button" class="qt-plus" data-type="product" data-id="{{ $item->id }}"
+                        @if($availableStock <=$qty) disabled @endif>+</button>
+                    </div>
+                    
+                    {{-- Remove button next to quantity --}}
+                    <button type="button" class="remove-btn remove" data-id="{{ $item->id }}" title="Remove item">
+                      <i class="fa fa-trash"></i>
+                    </button>
                   </div>
 
                   <div class="product-price">
                     <h2 class="full-price">
-                      $ {{ number_format($totalPrice, 2) }}
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Total:</small>
+                      ${{ number_format($totalPrice, 2) }}
                     </h2>
 
                     <h2 class="price">
-                      $ {{ number_format((float) $unitPrice, 2) }}
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Each:</small>
+                      ${{ number_format((float) $unitPrice, 2) }}
                     </h2>
                   </div>
                 </footer>
@@ -897,10 +1079,8 @@
               });
               $bundleTotalPrice = $bundleUnitPrice * $qty;
 
-              // Decode images if they're JSON strings
-              $firstItemImages = is_string($firstItem->product->images) 
-                  ? json_decode($firstItem->product->images, true) 
-                  : ($firstItem->product->images ?? []);
+              // Get valid images for first item
+              $firstItemImages = $firstItem->product->valid_images ?? ['default.jpg'];
 
               $bundleData = $bundleProducts->map(fn($bp) => [
               'id' => $bp->id,
@@ -908,9 +1088,7 @@
               'id' => $bp->product->id,
               'name' => $bp->product->name,
               'description' => $bp->product->description,
-              'images' => is_string($bp->product->images) 
-                  ? json_decode($bp->product->images, true) 
-                  : ($bp->product->images ?? []),
+              'images' => $bp->product->valid_images ?? ['default.jpg'],
               ],
               'variation' => $bp->variation ? [
               'id' => $bp->variation->id,
@@ -925,7 +1103,9 @@
                   <a href="#" class="remove" data-id="{{ $cartBundle->id }}">
                     <div class="bundle-images">
                       @foreach(array_slice($firstItemImages, 0, 3) as $img)
-                      <img src="{{ asset('assets/images/products/' . $img) }}" alt="product-image">
+                      <img src="{{ asset('assets/images/products/' . $img) }}" 
+                        alt="product-image"
+                        onerror="this.onerror=null; this.src='{{ asset('assets/images/products/default.jpg') }}';">
                       @endforeach
                     </div>
                     <h3>Remove bundle</h3>
@@ -965,8 +1145,14 @@
                   </div>
 
                   <div class="product-price">
-                    <h2 class="full-price">$ {{ number_format($bundleTotalPrice, 2) }} </h2>
-                    <h2 class="price">$ {{ number_format($bundleUnitPrice, 2) }} </h2>
+                    <h2 class="full-price">
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Total:</small>
+                      ${{ number_format($bundleTotalPrice, 2) }}
+                    </h2>
+                    <h2 class="price">
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Each:</small>
+                      ${{ number_format($bundleUnitPrice, 2) }}
+                    </h2>
                   </div>
                 </footer>
               </article>
@@ -1007,8 +1193,14 @@
                   </div>
 
                   <div class="product-price">
-                    <h2 class="full-price">$ {{ number_format($giftCard->gift_card_price * $giftCard->qty, 2) }}</h2>
-                    <h2 class="price">$ {{ number_format($giftCard->gift_card_price, 2) }}</h2>
+                    <h2 class="full-price">
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Total:</small>
+                      ${{ number_format($giftCard->gift_card_price * $giftCard->qty, 2) }}
+                    </h2>
+                    <h2 class="price">
+                      <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Each:</small>
+                      ${{ number_format($giftCard->gift_card_price, 2) }}
+                    </h2>
                   </div>
                 </footer>
               </article>
@@ -1148,9 +1340,10 @@
         <img src="{{ asset('assets/images/bangle-box/' . $firstColor->image) }}"
              alt="bangle-color"
              class="active-image"
-             style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease, opacity 0.3s ease;">
+             style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease, opacity 0.3s ease;"
+             onerror="this.onerror=null; this.src='{{ asset('assets/images/products/default.jpg') }}';">
       @else
-        <img src="{{ asset('assets/images/no-image.png') }}"
+        <img src="{{ asset('assets/images/products/default.jpg') }}"
              alt="no-image"
              class="active-image"
              style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease, opacity 0.3s ease;">
@@ -1181,10 +1374,6 @@
     });
   });
 </script>
-
-
-
-
 
       <div class="content">
 
@@ -1222,8 +1411,14 @@
         </div>
 
         <div class="product-price">
-          <h2 class="full-price">$ {{ number_format($totalPrice, 2) }}</h2>
-          <h2 class="price">$ {{ number_format($unitPrice, 2) }}</h2>
+          <h2 class="full-price">
+            <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Total:</small>
+            ${{ number_format($totalPrice, 2) }}
+          </h2>
+          <h2 class="price">
+            <small style="font-size: 12px; font-weight: normal; display: block; color: #666;">Each:</small>
+            ${{ number_format($unitPrice, 2) }}
+          </h2>
         </div>
       </footer>
     </article>
@@ -1343,19 +1538,25 @@
                 <p>No top Seller products available.</p>
                 @else
                 @foreach($topListedProducts as $topProduct)
-                <div class="card cursor-pointer"
+                <div class="card cursor-pointer top-seller-card"
                   onclick="window.location='{{ route('product.detail', $topProduct->slug) }}'">
 
                   {{-- First Image --}}
                   @php
-                  if (is_array($topProduct->images) && !empty($topProduct->images)) {
-                  $firstImage = 'assets/images/products/' . $topProduct->images[0];
-                  } else {
-                  $firstImage = 'assets/images/no-image.png';
-                  }
+                  $firstImage = $topProduct->first_image ?? 'default.jpg';
                   @endphp
 
-                  <img src="{{ asset($firstImage) }}" alt="{{ $topProduct->name }}" class="w-full h-48 object-cover">
+                  <div style="position: relative; overflow: hidden;">
+                    <img src="{{ asset('assets/images/products/' . $firstImage) }}" 
+                      alt="{{ $topProduct->name }}" 
+                      class="w-full h-48 object-contain"
+                      style="background: #fff;"
+                      onerror="this.onerror=null; this.src='{{ asset('assets/images/products/default.jpg') }}';">
+                    
+                    <div class="view-product-overlay">
+                      <span>View Product</span>
+                    </div>
+                  </div>
 
                   <div class="card-content p-3 pt-0">
                     <h4>{{ $topProduct->name }}</h4>
@@ -1529,7 +1730,15 @@
             var newFull = Math.round(unitVal * newQty * 100) / 100;
 
             $qtyEl.text(newQty);
-            $article.find('.full-price').first().text(' $' + newFull.toFixed(2));
+            
+            // Update price while preserving the label
+            var $fullPrice = $article.find('.full-price').first();
+            var $label = $fullPrice.find('small');
+            if ($label.length) {
+              $fullPrice.html($label[0].outerHTML + '$' + newFull.toFixed(2));
+            } else {
+              $fullPrice.text('$' + newFull.toFixed(2));
+            }
 
             // animation
             $article.find('.full-price').addClass('added');
@@ -1584,7 +1793,15 @@
             var newFull = Math.round(unitVal * newQty * 100) / 100;
 
             $qtyEl.text(newQty);
-            $article.find('.full-price').first().text(' $' + newFull.toFixed(2));
+            
+            // Update price while preserving the label
+            var $fullPrice = $article.find('.full-price').first();
+            var $label = $fullPrice.find('small');
+            if ($label.length) {
+              $fullPrice.html($label[0].outerHTML + '$' + newFull.toFixed(2));
+            } else {
+              $fullPrice.text('$' + newFull.toFixed(2));
+            }
 
             // animation
             $article.find('.full-price').addClass('minused');
@@ -1772,13 +1989,14 @@
             selected.product.images.slice(0, 3).forEach(function(img) {
               var $img = $('<img>', {
                 src: "{{ asset('assets/images/products') }}/" + img,
-                alt: 'product-image'
+                alt: 'product-image',
+                onerror: "this.onerror=null; this.src='{{ asset('assets/images/products/default.jpg') }}';"
               });
               $imgContainer.append($img);
             });
           } else {
             // fallback image
-            $imgContainer.append('<img src="{{ asset("assets/images/products/c-1.jpg") }}" alt="product-image">');
+            $imgContainer.append('<img src="{{ asset("assets/images/products/default.jpg") }}" alt="product-image">');
           }
 
         });
@@ -1888,6 +2106,7 @@
 </script> -->
 <script>
   const bangleImageBase = "{{ asset('assets/images/bangle-box') }}"; // ✅ Laravel base URL
+  const defaultImage = "{{ asset('assets/images/products/default.jpg') }}"; // ✅ Fallback image
 
   $(document).on('change', '.bangle-switcher', function() {
     const $select = $(this);
@@ -1899,13 +2118,18 @@
 
     const selected = bangleData[selectedIndex];
 
-    // === Update image (fix path) ===
+    // === Update image with error handling ===
     const $img = $article.find('.bundle-images img.active-image');
-    const encodedImg = encodeURIComponent(selected.image);
-    $img.attr('src', `${bangleImageBase}/${encodedImg}`);
+    if (selected.image) {
+      const encodedImg = encodeURIComponent(selected.image);
+      $img.attr('src', `${bangleImageBase}/${encodedImg}`);
+      $img.attr('onerror', `this.onerror=null; this.src='${defaultImage}';`);
+    } else {
+      $img.attr('src', defaultImage);
+    }
 
     // === Update color name ===
-    $article.find('.bangle-current-color span').text(selected.name);
+    $article.find('.bangle-current-color span').text(selected.name || 'Color');
   });
 </script>
 

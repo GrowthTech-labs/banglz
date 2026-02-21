@@ -39,15 +39,14 @@
     </x-slot>
     <x-slot name="content">
         <div class="product-detail-main-wrapper">
-          <div class="product-detail-main-wrapper">
     @php
         $meta = $pageData && $pageData->meta_data ? (is_array($pageData->meta_data) ? $pageData->meta_data : json_decode($pageData->meta_data, true)) : [];
         $hero = $meta['sections']['hero'] ?? [];
         $images = isset($hero['images']) ? (is_array($hero['images']) ? $hero['images'] : [])
                  : ($pageData && $pageData->images ? (is_array($pageData->images) ? $pageData->images : (is_string($pageData->images) ? json_decode($pageData->images, true) : [])) : []);
-        $heroImage = $images[0]['src'] ?? ($pageData->image ?? 'about-head.jpg');
+        $heroImage = $images[0]['src'] ?? ($pageData->image ?? 'default-banner.jpg');
         $heroTransform = $images[0]['transform'] ?? '';
-        $heroHeading = $hero['heading'] ?? ($pageData->heading ?? 'Welcome To Contact Us');
+        $heroHeading = $hero['heading'] ?? ($pageData->heading ?? 'Resources');
     @endphp
 
     <div class="contact-hero-section editable-bg position-relative" style="height: 400px; overflow:hidden;">
@@ -66,7 +65,6 @@
             {{ $heroHeading }}
         </h1>
     </div>
-</div>
 
 
             {{-- detail about us --}}

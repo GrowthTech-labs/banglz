@@ -586,9 +586,9 @@
     $hero = $meta['sections']['hero'] ?? [];
     $images = isset($hero['images']) ? (is_array($hero['images']) ? $hero['images'] : [])
              : ($pageData && $pageData->images ? (is_array($pageData->images) ? $pageData->images : (is_string($pageData->images) ? json_decode($pageData->images, true) : [])) : []);
-    $heroImage = $images[0]['src'] ?? ($pageData->image ?? 'about-head.jpg');
+    $heroImage = $images[0]['src'] ?? ($pageData->image ?? 'default-banner.jpg');
     $heroTransform = $images[0]['transform'] ?? '';
-    $heroHeading = $hero['heading'] ?? ($pageData->heading ?? 'Welcome To Contact Us');
+    $heroHeading = $hero['heading'] ?? ($pageData->heading ?? 'Contact Us');
 @endphp
 
 <div class="contact-hero-section editable-bg position-relative" style="height: 400px; overflow:hidden;">
