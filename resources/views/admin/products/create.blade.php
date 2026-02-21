@@ -477,6 +477,81 @@ label[for="is_pre_order"] {
                 </div>
             </div>
 
+            <!-- Shipping Information Section -->
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <h5 class="mb-3" style="color: #6cc2b6; border-bottom: 2px solid #6cc2b6; padding-bottom: 10px;">
+                        <i class="fa fa-shipping-fast"></i> Shipping Information
+                    </h5>
+                    <p class="text-muted small">Required for international shipments and customs compliance</p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Shipping Weight <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" 
+                               step="0.01" 
+                               name="weight" 
+                               value="{{ old('weight', $product->weight ?? '') }}" 
+                               class="form-control" 
+                               placeholder="0.00"
+                               required>
+                        <select name="weight_unit" class="form-select" style="max-width: 100px;" required>
+                            <option value="g" {{ old('weight_unit', $product->weight_unit ?? 'g') == 'g' ? 'selected' : '' }}>grams</option>
+                            <option value="kg" {{ old('weight_unit', $product->weight_unit ?? '') == 'kg' ? 'selected' : '' }}>kg</option>
+                            <option value="oz" {{ old('weight_unit', $product->weight_unit ?? '') == 'oz' ? 'selected' : '' }}>oz</option>
+                            <option value="lbs" {{ old('weight_unit', $product->weight_unit ?? '') == 'lbs' ? 'selected' : '' }}>lbs</option>
+                        </select>
+                    </div>
+                    <small class="text-muted">Product weight for shipping calculations</small>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Country of Origin <span class="text-danger">*</span></label>
+                    <select name="country_of_origin" class="form-control" required>
+                        <option value="">Select Country</option>
+                        <option value="CA" {{ old('country_of_origin', $product->country_of_origin ?? 'CA') == 'CA' ? 'selected' : '' }}>Canada</option>
+                        <option value="US" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'US' ? 'selected' : '' }}>United States</option>
+                        <option value="IN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'IN' ? 'selected' : '' }}>India</option>
+                        <option value="CN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'CN' ? 'selected' : '' }}>China</option>
+                        <option value="MX" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'MX' ? 'selected' : '' }}>Mexico</option>
+                        <option value="GB" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'GB' ? 'selected' : '' }}>United Kingdom</option>
+                        <option value="PK" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'PK' ? 'selected' : '' }}>Pakistan</option>
+                        <option value="BD" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'BD' ? 'selected' : '' }}>Bangladesh</option>
+                        <option value="TH" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'TH' ? 'selected' : '' }}>Thailand</option>
+                        <option value="VN" {{ old('country_of_origin', $product->country_of_origin ?? '') == 'VN' ? 'selected' : '' }}>Vietnam</option>
+                    </select>
+                    <small class="text-muted">Where the product is manufactured</small>
+                </div>
+
+                <div class="col-md-4">
+                    <label>HS Code <span class="text-danger">*</span></label>
+                    <input type="text" 
+                           name="hs_code" 
+                           value="{{ old('hs_code', $product->hs_code ?? '7117907500') }}" 
+                           class="form-control" 
+                           placeholder="7117907500"
+                           pattern="[0-9]{6,10}"
+                           maxlength="10"
+                           required>
+                    <small class="text-muted">
+                        <a href="https://hts.usitc.gov/" target="_blank" style="color: #6cc2b6;">Find HS Code</a> 
+                        (Default: 7117907500 for jewelry)
+                    </small>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="alert alert-info" style="background-color: #e8f5f4; border-color: #6cc2b6;">
+                        <strong><i class="fa fa-info-circle"></i> Note:</strong> These fields are required for international shipping and customs compliance. 
+                        Default HS code 7117907500 is for imitation jewelry/bangles. For real gold/silver jewelry, use appropriate codes.
+                    </div>
+                </div>
+            </div>
+
             <!-- Is Feature checkbox -->
             <div class="row mb-3">
                 <div class="col-md-4">

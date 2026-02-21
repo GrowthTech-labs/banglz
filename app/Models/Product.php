@@ -39,7 +39,9 @@ class Product extends Model
         'images_details',
         'is_pre_order',
         'weight',
-        'weight_unit'
+        'weight_unit',
+        'country_of_origin',
+        'hs_code'
     ];
 
     protected $casts = [

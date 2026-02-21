@@ -246,6 +246,11 @@ class ProductController extends Controller
                 'sustainability' => 'required|string',
                 'shipping' => 'required|string',
                 'returns' => 'required|string',
+                // Shipping fields
+                'weight' => 'required|numeric|min:0.01',
+                'weight_unit' => 'required|in:g,kg,oz,lbs',
+                'country_of_origin' => 'required|string|size:2',
+                'hs_code' => 'required|string|min:6|max:10|regex:/^[0-9]+$/',
             ];
 
             if (!$hasBangles) {

@@ -9,6 +9,68 @@ use Illuminate\Support\Facades\Http;
 
 class ShippingController extends Controller
 {
+    /**
+     * Validate that all products in order have required shipping data
+     */
+    private function validateOrderShippingData($orderId)
+    {
+        $order = Order::find($orderId);
+        if (!$order) {
+            return ['error' => 'Order not found'];
+        }
+
+        $productsMetaData = json_decode($order->products_meta_data, true);
+        if (!$productsMetaData || !is_array($productsMetaData)) {
+            return ['error' => 'No products found in order'];
+        }
+
+        $missingData = [];
+
+        foreach ($productsMetaData as $item) {
+            $productId = $item['product_id'] ?? null;
+            $variationId = $item['variation_id'] ?? null;
+
+            if ($variationId) {
+                $variation = \App\Models\ProductVariation::find($variationId);
+                if (!$variation) continue;
+
+                $product = $variation->product;
+                $weight = $variation->weight ?? $product->weight ?? null;
+                $countryOfOrigin = $variation->country_of_origin ?? $product->country_of_origin ?? null;
+                $hsCode = $variation->hs_code ?? $product->hs_code ?? null;
+
+                if (!$weight || !$countryOfOrigin || !$hsCode) {
+                    $missingData[] = [
+                        'name' => $product->name . ' (' . $variation->size . ')',
+                        'sku' => $product->sku,
+                        'missing' => array_filter([
+                            !$weight ? 'weight' : null,
+                            !$countryOfOrigin ? 'country_of_origin' : null,
+                            !$hsCode ? 'hs_code' : null,
+                        ]),
+                    ];
+                }
+            } else if ($productId) {
+                $product = \App\Models\Product::find($productId);
+                if (!$product) continue;
+
+                if (!$product->weight || !$product->country_of_origin || !$product->hs_code) {
+                    $missingData[] = [
+                        'name' => $product->name,
+                        'sku' => $product->sku,
+                        'missing' => array_filter([
+                            !$product->weight ? 'weight' : null,
+                            !$product->country_of_origin ? 'country_of_origin' : null,
+                            !$product->hs_code ? 'hs_code' : null,
+                        ]),
+                    ];
+                }
+            }
+        }
+
+        return $missingData;
+    }
+
     public function postRates(Request $request)
     {
         \Log::info('=== postRates called ===', [
@@ -150,6 +212,35 @@ class ShippingController extends Controller
             'request_data' => $request->all()
         ]);
 
+        // Validate order has required shipping data
+        $orderId = $request->input('order_id');
+        $missingData = $this->validateOrderShippingData($orderId);
+        
+        if (isset($missingData['error'])) {
+            return response()->json([
+                'success' => false,
+                'errors' => [$missingData['error']],
+            ], 404);
+        }
+        
+        if (!empty($missingData)) {
+            $errorMessage = '<strong>Cannot create shipping label.</strong><br><br>The following products are missing required shipping data:<br><br>';
+            foreach ($missingData as $item) {
+                $errorMessage .= '<strong>' . htmlspecialchars($item['name']) . '</strong>';
+                if ($item['sku']) {
+                    $errorMessage .= ' (SKU: ' . htmlspecialchars($item['sku']) . ')';
+                }
+                $errorMessage .= '<br>Missing: ' . implode(', ', $item['missing']) . '<br><br>';
+            }
+            $errorMessage .= 'Please update the product information in the admin panel before creating a shipping label.';
+            
+            return response()->json([
+                'success' => false,
+                'errors' => [$errorMessage],
+                'missing_data' => $missingData,
+            ], 422);
+        }
+
         $validated = $request->validate([
             'order_id' => 'required|integer',
             'to_address.name' => 'required|string|max:40',
@@ -183,11 +274,48 @@ class ShippingController extends Controller
             'items.*.currency' => 'required|string|in:USD,CAD,EUR,AUD,GBP',
         ]);
 
-        // ✅ Add required fields to items
-        foreach ($validated['items'] as &$item) {
-            $item['country_of_origin'] = $item['country_of_origin'] ?? 'CA';
-            $item['hs_code'] = $item['hs_code'] ?? '7117.90.7500';
+        // ✅ Build items from actual product data
+        $order = Order::find($validated['order_id']);
+        $productsMetaData = json_decode($order->products_meta_data, true);
+        $items = [];
+
+        foreach ($productsMetaData as $item) {
+            $productId = $item['product_id'] ?? null;
+            $variationId = $item['variation_id'] ?? null;
+            $quantity = $item['quantity'] ?? 1;
+
+            if ($variationId) {
+                $variation = \App\Models\ProductVariation::find($variationId);
+                if (!$variation) continue;
+                
+                $product = $variation->product;
+                $items[] = [
+                    'description' => $product->name . ' - ' . $variation->size,
+                    'sku' => $product->sku ?? '',
+                    'quantity' => $quantity,
+                    'value' => $variation->price ?? $product->price,
+                    'currency' => 'CAD',
+                    'country_of_origin' => $variation->country_of_origin ?? $product->country_of_origin,
+                    'hs_code' => $variation->hs_code ?? $product->hs_code,
+                ];
+            } else if ($productId) {
+                $product = \App\Models\Product::find($productId);
+                if (!$product) continue;
+                
+                $items[] = [
+                    'description' => $product->name,
+                    'sku' => $product->sku ?? '',
+                    'quantity' => $quantity,
+                    'value' => $product->price,
+                    'currency' => 'CAD',
+                    'country_of_origin' => $product->country_of_origin,
+                    'hs_code' => $product->hs_code,
+                ];
+            }
         }
+
+        // Override validated items with actual product data
+        $validated['items'] = $items;
 
         // ✅ Build payload for Stallion API
         $payload = [

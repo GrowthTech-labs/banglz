@@ -18,8 +18,9 @@ class ProductVariation extends Model
         'member_price',
         'color_id',
         'weight',
-        'weight_unit'
-        
+        'weight_unit',
+        'country_of_origin',
+        'hs_code'
     ];
 
 
