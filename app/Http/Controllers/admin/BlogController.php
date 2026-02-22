@@ -236,27 +236,36 @@ class BlogController extends Controller
 
     public function StoreBlog(Request $request)
     {
+        // Normalize category key (accept category or category_id)
+        $categoryId = $request->input('category') ?? $request->input('category_id');
+        // Convert empty string to null
+        $categoryId = $categoryId === '' ? null : $categoryId;
+        
         // Validation rules: image required only when creating (no id)
         $rules = [
             'title'             => 'required|string|max:255',
-            // 'category'          => 'required|exists:categories,id',
             'short_description' => 'required|string|max:500',
             'author'            => 'required|string|max:100',
             'content'           => 'required|string',
         ];
 
         if (!$request->filled('id')) {
-            // creating
-            $rules['image'] = 'required|image';
+            // creating - image required
+            $rules['image'] = 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120';
         } else {
-            // updating
-            $rules['image'] = 'nullable|image';
+            // updating - image optional
+            $rules['image'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120';
         }
 
-        $validated = $request->validate($rules);
-
-        // Normalize category key (accept category or category_id)
-        $categoryId = $request->input('category') ?? $request->input('category_id');
+        try {
+            $validated = $request->validate($rules);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         DB::beginTransaction();
         try {
@@ -279,36 +288,51 @@ class BlogController extends Controller
                 $blog->url = $request->input('url');
             }
             $blog->author = $request->input('author');
-            $blog->category_id = $categoryId;
+            $blog->category_id = $categoryId; // Already converted to null if empty
             $blog->short_description = $request->input('short_description');
             $blog->content = $request->input('content');
             if ($request->hasFile('image') && $request->file('image')->isValid()) {
                 $file = $request->file('image');
+                
+                // Validate file size and type
+                if ($file->getSize() > 5120 * 1024) { // 5MB
+                    throw new Exception('Image file size must not exceed 5MB');
+                }
+                
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+                if (!in_array($file->getMimeType(), $allowedMimes)) {
+                    throw new Exception('Image must be a file of type: jpeg, png, jpg, gif, webp');
+                }
+                
                 $filename = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $destinationPath = public_path('assets/images/blogs');
+                
                 if (!File::exists($destinationPath)) {
                     File::makeDirectory($destinationPath, 0777, true, true);
                 }
+                
                 if ($blog->getAttribute('image')) {
-                    $existing = public_path($blog->getAttribute('image'));
+                    $existing = public_path('assets/images/blogs/' . $blog->getAttribute('image'));
                     if (File::exists($existing)) {
                         try {
                             File::delete($existing);
                         } catch (Exception $ex) {
+                            \Log::warning('Failed to delete old image: ' . $ex->getMessage());
                         }
                     }
                 }
 
                 $file->move($destinationPath, $filename);
-
-                $blog->image =  $filename;
+                $blog->image = $filename;
+                
             } else {
                 if ($request->input('remove_image') == '1' && $blog->getAttribute('image')) {
-                    $existing = public_path($blog->getAttribute('image'));
+                    $existing = public_path('assets/images/blogs/' . $blog->getAttribute('image'));
                     if (File::exists($existing)) {
                         try {
                             File::delete($existing);
                         } catch (Exception $ex) {
+                            \Log::warning('Failed to delete image: ' . $ex->getMessage());
                         }
                     }
                     $blog->image = null;
@@ -357,11 +381,12 @@ class BlogController extends Controller
             $blog = Blog::findOrFail($id);
             // Delete associated image file if exists
             if ($blog->getAttribute('image')) {
-                $existing = public_path($blog->getAttribute('image'));
+                $existing = public_path('assets/images/blogs/' . $blog->getAttribute('image'));
                 if (File::exists($existing)) {
                     try {
                         File::delete($existing);
                     } catch (Exception $ex) {
+                        \Log::warning('Failed to delete blog image: ' . $ex->getMessage());
                     }
                 }
             }
