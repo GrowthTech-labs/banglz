@@ -127,13 +127,15 @@
   const signInButton = document.getElementById('signIn');
   const container = document.getElementById('container');
 
-  signUpButton.addEventListener('click', () => {
-    container.classList.add("right-panel-active");
-  });
+  if (signUpButton && signInButton && container) {
+    signUpButton.addEventListener('click', () => {
+      container.classList.add("right-panel-active");
+    });
 
-  signInButton.addEventListener('click', () => {
-    container.classList.remove("right-panel-active");
-  });
+    signInButton.addEventListener('click', () => {
+      container.classList.remove("right-panel-active");
+    });
+  }
 </script>
 
 
@@ -1123,86 +1125,91 @@ function updateWishlistBadge(count) {
 
   loadCartBadge();
 
+// Wrap all jQuery-dependent code
+if (typeof jQuery !== 'undefined') {
+  jQuery(document).ready(function($) {
+    
+    function toggleWishlist(productId, $btn, variationId = null) {
+        // Prevent double clicks
+        if ($btn.data('loading')) return;
+        $btn.data('loading', true);
 
+        $.ajax({
+        url: "{{ route('wishlist.toggle') }}",
+        type: "POST",
+        data: {
+            product_id: productId,
+            variation_id: variationId, // send variation id (or null)
+            _token: "{{ csrf_token() }}",
+        },
+        success: function (res) {
+            loadWishlistBadge();
 
-function toggleWishlist(productId, $btn, variationId = null) {
-    // Prevent double clicks
-    if ($btn.data('loading')) return;
-    $btn.data('loading', true);
+            // ✅ Find the heart button
+            const $btn = $(`.api-wishlist-button[data-product-id="${productId}"]`);
 
-    $.ajax({
-    url: "{{ route('wishlist.toggle') }}",
-    type: "POST",
-    data: {
-        product_id: productId,
-        variation_id: variationId, // send variation id (or null)
-        _token: "{{ csrf_token() }}",
-    },
-    success: function (res) {
-        loadWishlistBadge();
-
-        // ✅ Find the heart button
-        const $btn = $(`.api-wishlist-button[data-product-id="${productId}"]`);
-
-        // ✅ Update icon based on status
-        if (res.status === "added") {
-            $btn.attr("src", "{{ asset('assets/images/heart-filled.png') }}");
+            // ✅ Update icon based on status
+            if (res.status === "added") {
+                $btn.attr("src", "{{ asset('assets/images/heart-filled.png') }}");
+                Toast.fire({
+                    icon: 'success',
+                    title: res.message || "Added to wishlist."
+                });
+            } else if (res.status === "removed") {
+                $btn.attr("src", "{{ asset('assets/images/heart.png') }}");
+                Toast.fire({
+                    icon: 'info',
+                    title: res.message || "Removed from wishlist."
+                });
+            }
+        },
+        error: function () {
             Toast.fire({
-                icon: 'success',
-                title: res.message || "Added to wishlist."
+                icon: 'error',
+                title: "Something went wrong."
             });
-        } else if (res.status === "removed") {
-            $btn.attr("src", "{{ asset('assets/images/heart.png') }}");
-            Toast.fire({
-                icon: 'info',
-                title: res.message || "Removed from wishlist."
-            });
+        },
+        complete: function () {
+            $btn.data('loading', false);
         }
-    },
-    error: function () {
-        Toast.fire({
-            icon: 'error',
-            title: "Something went wrong."
-        });
-    },
-    complete: function () {
-        $btn.data('loading', false);
-    }
-});
+    });
 
+    }
+
+    // Bind click event once
+    $(document).on("click", ".api-wishlist-button", function (e) {
+        e.preventDefault();
+        if (!isLoggedIn) {
+
+              // 🔒 Not logged in → open modal
+              const modal = new bootstrap.Modal(document.getElementById('staticBackdropWhishlist'));
+              modal.show();
+              return;
+            }
+        const $btn = $(this);
+        const productId = $btn.data("product-id");
+
+        // Try to get variation id from nearest product-options selected size
+        let variationId = null;
+        const $root = $btn.closest('.product-options');
+        if ($root && $root.length) {
+            const $sel = $root.find('.size-option.selected');
+            if ($sel && $sel.length) {
+                variationId = $sel.data('variation-id') || $sel.data('variationId') || $sel.data('variationid') || null;
+            }
+        }
+
+        // Fallback: read from global addToCart button (you already update this on size select)
+        if (!variationId) {
+            variationId = $('#addToCartBtn').data('variation-id') || $('#addToCartBtn').data('variationId') || null;
+        }
+
+        // Call toggle with variationId (or null)
+        toggleWishlist(productId, $btn, variationId);
+    });
+    
+  });
 }
-
-// Bind click event once
-$(document).on("click", ".api-wishlist-button", function (e) {
-    e.preventDefault();
-    if (!isLoggedIn) {
-
-          // 🔒 Not logged in → open modal
-          const modal = new bootstrap.Modal(document.getElementById('staticBackdropWhishlist'));
-          modal.show();
-          return;
-        }
-    const $btn = $(this);
-    const productId = $btn.data("product-id");
-
-    // Try to get variation id from nearest product-options selected size
-    let variationId = null;
-    const $root = $btn.closest('.product-options');
-    if ($root && $root.length) {
-        const $sel = $root.find('.size-option.selected');
-        if ($sel && $sel.length) {
-            variationId = $sel.data('variation-id') || $sel.data('variationId') || $sel.data('variationid') || null;
-        }
-    }
-
-    // Fallback: read from global addToCart button (you already update this on size select)
-    if (!variationId) {
-        variationId = $('#addToCartBtn').data('variation-id') || $('#addToCartBtn').data('variationId') || null;
-    }
-
-    // Call toggle with variationId (or null)
-    toggleWishlist(productId, $btn, variationId);
-});
 
 // Load wishlist count and update nav badge
 function updateWishlistBadge(count) {

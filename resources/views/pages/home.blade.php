@@ -2,14 +2,176 @@
     <x-slot name="insertstyle">
         <style>
           .pre-order-badge {
-        background: #935b08ff;
-    color: #fefefeff;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-    white-space: nowrap;
-}
+            background: #935b08ff;
+            color: #fefefeff;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+          }
+
+          /* Featured Categories - Sharp corners, no gaps */
+          .featured-categories-wrapper {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+          }
+          
+          .featured-categories-container {
+            display: flex;
+            gap: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            padding: 0;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          
+          .featured-categories-container::-webkit-scrollbar {
+            display: none;
+          }
+          
+          .featured-category-card {
+            flex: 0 0 calc(33.333%);
+            min-width: 300px;
+            height: 400px;
+            position: relative;
+            border-radius: 0;
+            overflow: hidden;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            border: none;
+          }
+          
+          .featured-category-card:hover {
+            transform: translateY(-5px);
+            z-index: 2;
+          }
+          
+          .featured-category-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.4s ease;
+          }
+          
+          .featured-category-card:hover .featured-category-image {
+            transform: scale(1.05);
+          }
+          
+          .featured-category-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+          }
+          
+          .featured-category-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 30px;
+            z-index: 2;
+          }
+          
+          .featured-category-content h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: white;
+          }
+          
+          .featured-category-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            color: white;
+            transition: gap 0.3s ease;
+          }
+          
+          .featured-category-card:hover .featured-category-cta {
+            gap: 12px;
+          }
+          
+          .featured-category-cta img {
+            height: 12px;
+            filter: brightness(0) invert(1);
+          }
+          
+          /* Navigation Arrows */
+          .featured-nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+          }
+          
+          .featured-nav-arrow:hover {
+            background: #8d5943;
+            transform: translateY(-50%) scale(1.1);
+          }
+          
+          .featured-nav-arrow img {
+            width: 20px;
+            height: 20px;
+          }
+          
+          .featured-nav-prev {
+            left: 10px;
+          }
+          
+          .featured-nav-next {
+            right: 10px;
+          }
+          
+          /* Responsive */
+          @media (max-width: 1024px) {
+            .featured-category-card {
+              flex: 0 0 50%;
+              min-width: 280px;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            .featured-category-card {
+              flex: 0 0 100%;
+              min-width: 250px;
+              height: 350px;
+            }
+            
+            .featured-category-content h3 {
+              font-size: 1.5rem;
+            }
+            
+            .featured-nav-arrow {
+              width: 40px;
+              height: 40px;
+            }
+          }
         </style>
     </x-slot>
     <x-slot name="content">
@@ -80,27 +242,86 @@
 
         </div>
 
-        <div class="category-section" id="featured-categories-slider">
-    @if (count($featuredCategories) > 0)
-        @foreach ($featuredCategories as $category)
-            <div class="category-iner-section"
-                style="
-                    background-image: linear-gradient(to top, rgba(0,0,0,0.3), rgba(0,0,0,0)),
-                        url('{{ asset('assets/images/categories/'.$category->images[0]) }}');
-                ">
-                <div class="category-content">
-                    <h1>{{ $category->name }}</h1>
-                    <a href="#">
-                        Shop Now
-                        <img src="{{ asset('assets/images/right-arrow.png') }}" alt="missing-image" />
-                    </a>
-                </div>
+        <!-- Featured Categories Section - Redesigned -->
+        <div class="featured-categories-wrapper">
+            <div class="featured-categories-container" id="featured-categories-slider">
+                @if (count($featuredCategories) > 0)
+                    @foreach ($featuredCategories as $category)
+                        @php
+                            $categoryImage = 'default.jpg';
+                            if ($category->images && is_array($category->images) && count($category->images) > 0) {
+                                $categoryImage = $category->images[0];
+                            } elseif ($category->image) {
+                                $categoryImage = $category->image;
+                            }
+                            
+                            // Build the correct URL based on whether it's a parent or subcategory
+                            if ($category->parent_id) {
+                                $parent = \App\Models\Category::find($category->parent_id);
+                                $categoryUrl = $parent ? route('shop-all', ['slug' => $parent->slug, 'subcategory' => $category->slug]) : route('shop-all', ['slug' => $category->slug]);
+                            } else {
+                                $categoryUrl = route('shop-all', ['slug' => $category->slug]);
+                            }
+                        @endphp
+                        
+                        <a href="{{ $categoryUrl }}" class="featured-category-card">
+                            <div class="featured-category-image" style="background-image: url('{{ asset('assets/images/categories/'.$categoryImage) }}');">
+                                <div class="featured-category-overlay"></div>
+                            </div>
+                            <div class="featured-category-content">
+                                <h3>{{ $category->name }}</h3>
+                                <span class="featured-category-cta">
+                                    Shop Now
+                                    <img src="{{ asset('assets/images/right-arrow.png') }}" alt="arrow" />
+                                </span>
+                            </div>
+                        </a>
+                    @endforeach
+                    
+                    {{-- Duplicate items for infinite loop --}}
+                    @foreach ($featuredCategories as $category)
+                        @php
+                            $categoryImage = 'default.jpg';
+                            if ($category->images && is_array($category->images) && count($category->images) > 0) {
+                                $categoryImage = $category->images[0];
+                            } elseif ($category->image) {
+                                $categoryImage = $category->image;
+                            }
+                            
+                            if ($category->parent_id) {
+                                $parent = \App\Models\Category::find($category->parent_id);
+                                $categoryUrl = $parent ? route('shop-all', ['slug' => $parent->slug, 'subcategory' => $category->slug]) : route('shop-all', ['slug' => $category->slug]);
+                            } else {
+                                $categoryUrl = route('shop-all', ['slug' => $category->slug]);
+                            }
+                        @endphp
+                        
+                        <a href="{{ $categoryUrl }}" class="featured-category-card">
+                            <div class="featured-category-image" style="background-image: url('{{ asset('assets/images/categories/'.$categoryImage) }}');">
+                                <div class="featured-category-overlay"></div>
+                            </div>
+                            <div class="featured-category-content">
+                                <h3>{{ $category->name }}</h3>
+                                <span class="featured-category-cta">
+                                    Shop Now
+                                    <img src="{{ asset('assets/images/right-arrow.png') }}" alt="arrow" />
+                                </span>
+                            </div>
+                        </a>
+                    @endforeach
+                @else
+                    <p>No featured categories available.</p>
+                @endif
             </div>
-        @endforeach
-    @else
-        <p>No featured categories available.</p>
-    @endif
-</div>
+            
+            <!-- Navigation Arrows -->
+            <button class="featured-nav-arrow featured-nav-prev" id="featuredPrev">
+                <img src="{{ asset('assets/images/slide-left.png') }}" alt="Previous">
+            </button>
+            <button class="featured-nav-arrow featured-nav-next" id="featuredNext">
+                <img src="{{ asset('assets/images/slide-right.png') }}" alt="Next">
+            </button>
+        </div>
 
 
         <div class="all-products-main">
@@ -589,34 +810,131 @@
     </x-slot>
     <x-slot name="insertjavascript">
        <script>
-$(document).ready(function(){
-    $('#featured-categories-slider').slick({
-        slidesToShow: 3,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 2000,
-        infinite: true,
-        arrows: true,
-        dots: false,
-        prevArrow: '<button type="button" class="slick-prev"><img src="{{ asset('assets/images/slide-left.png') }}" alt="Prev"></button>',
-        nextArrow: '<button type="button" class="slick-next"><img src="{{ asset('assets/images/slide-right.png') }}" alt="Next"></button>',
-        responsive: [
-            {
-                breakpoint: 767,
-                settings: {
-                    slidesToShow: 2,
-                }
-            },
-            {
-                breakpoint: 557,
-                settings: {
-                    slidesToShow: 1,
-                }
-            }
-        ]
+// Infinite loop slider for featured categories (no glitch)
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('featured-categories-slider');
+    const prevBtn = document.getElementById('featuredPrev');
+    const nextBtn = document.getElementById('featuredNext');
+    
+    if (!container || !prevBtn || !nextBtn) return;
+    
+    const cards = container.querySelectorAll('.featured-category-card');
+    const totalCards = cards.length / 2; // We duplicated the items
+    let isAutoScrolling = true;
+    let autoScrollInterval;
+    let isScrolling = false;
+    
+    // Calculate scroll amount based on visible cards
+    function getScrollAmount() {
+        const containerWidth = container.clientWidth;
+        const cardWidth = cards[0].offsetWidth;
+        const visibleCards = Math.floor(containerWidth / cardWidth);
+        return visibleCards * cardWidth;
+    }
+    
+    // Check if we need to reset position (seamless loop)
+    function checkScrollPosition() {
+        const scrollLeft = container.scrollLeft;
+        const cardWidth = cards[0].offsetWidth;
+        const halfwayPoint = cardWidth * totalCards;
+        
+        // If we've scrolled past the original items, reset to beginning
+        if (scrollLeft >= halfwayPoint) {
+            container.scrollLeft = scrollLeft - halfwayPoint;
+        }
+        // If we've scrolled before the beginning, jump to end
+        else if (scrollLeft <= 0) {
+            container.scrollLeft = halfwayPoint;
+        }
+    }
+    
+    // Manual scroll with buttons
+    prevBtn.addEventListener('click', function() {
+        isAutoScrolling = false;
+        clearInterval(autoScrollInterval);
+        
+        container.scrollBy({
+            left: -getScrollAmount(),
+            behavior: 'smooth'
+        });
+        
+        setTimeout(() => { 
+            isAutoScrolling = true;
+            startAutoScroll();
+        }, 3000);
+    });
+    
+    nextBtn.addEventListener('click', function() {
+        isAutoScrolling = false;
+        clearInterval(autoScrollInterval);
+        
+        container.scrollBy({
+            left: getScrollAmount(),
+            behavior: 'smooth'
+        });
+        
+        setTimeout(() => { 
+            isAutoScrolling = true;
+            startAutoScroll();
+        }, 3000);
+    });
+    
+    // Auto-scroll function
+    function startAutoScroll() {
+        if (autoScrollInterval) clearInterval(autoScrollInterval);
+        
+        autoScrollInterval = setInterval(function() {
+            if (!isAutoScrolling || isScrolling) return;
+            
+            isScrolling = true;
+            
+            // Scroll to next set of cards
+            container.scrollBy({
+                left: getScrollAmount(),
+                behavior: 'smooth'
+            });
+            
+            // Wait for scroll to finish, then check position
+            setTimeout(() => {
+                checkScrollPosition();
+                isScrolling = false;
+            }, 600); // Match smooth scroll duration
+            
+        }, 3000); // Scroll every 3 seconds
+    }
+    
+    // Initialize: Start at the beginning of original items
+    const cardWidth = cards[0].offsetWidth;
+    container.scrollLeft = 0;
+    
+    // Start auto-scroll
+    startAutoScroll();
+    
+    // Pause on hover
+    container.addEventListener('mouseenter', function() {
+        isAutoScrolling = false;
+    });
+    
+    container.addEventListener('mouseleave', function() {
+        isAutoScrolling = true;
+    });
+    
+    prevBtn.addEventListener('mouseenter', function() {
+        isAutoScrolling = false;
+    });
+    
+    prevBtn.addEventListener('mouseleave', function() {
+        isAutoScrolling = true;
+    });
+    
+    nextBtn.addEventListener('mouseenter', function() {
+        isAutoScrolling = false;
+    });
+    
+    nextBtn.addEventListener('mouseleave', function() {
+        isAutoScrolling = true;
     });
 });
-
 </script>
 
 

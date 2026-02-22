@@ -194,7 +194,32 @@ public function store(Request $request)
         $page->images = $images;
         $page->image = $images[0]['src'] ?? null;
 
+        // Handle customize section
         $customize = $request->input('customize') ?? [];
+        $customizeCards = [];
+        
+        // Process 3 cards
+        for ($i = 0; $i < 3; $i++) {
+            $cardImage = null;
+            
+            // Handle image upload for each card
+            if ($request->hasFile("customize.images.$i")) {
+                $file = $request->file("customize.images.$i");
+                $imageName = time().'_customize_'.$i.'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+                $file->move(public_path('assets/images/pages'), $imageName);
+                $cardImage = $imageName;
+            } elseif (isset($customize['existing_images'][$i])) {
+                // Keep existing image
+                $cardImage = $customize['existing_images'][$i];
+            }
+            
+            $customizeCards[] = [
+                'title' => $customize['titles'][$i] ?? '',
+                'sub' => $customize['subs'][$i] ?? '',
+                'image' => $cardImage
+            ];
+        }
+        
         $sections = [];
         $sections['hero'] = [
             'heading' => $request->input('home.heading') ?? '',
@@ -204,6 +229,15 @@ public function store(Request $request)
             'style_label' => $request->input('home.style_label') ?? '',
             'images' => $images,
         ];
+        
+        $sections['customize'] = [
+            'heading1' => $customize['heading1'] ?? '',
+            'desc1' => $customize['desc1'] ?? '',
+            'heading2' => $customize['heading2'] ?? '',
+            'desc2' => $customize['desc2'] ?? '',
+            'cards' => $customizeCards
+        ];
+        
         $page->meta_data = [ 'sections' => $sections ];
     } else {
          // Other pages: single image with transform

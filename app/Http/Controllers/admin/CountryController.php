@@ -28,7 +28,6 @@ class CountryController extends Controller
             $validator = Validator::make($request->all(), [
                 'code' => 'required|string|size:2|unique:countries,code',
                 'name' => 'required|string|max:255',
-                'is_active' => 'boolean',
                 'sort_order' => 'nullable|integer|min:0',
             ]);
 
@@ -47,7 +46,7 @@ class CountryController extends Controller
             $country = Country::create([
                 'code' => strtoupper($request->code),
                 'name' => $request->name,
-                'is_active' => $request->has('is_active'),
+                'is_active' => $request->has('is_active') ? 1 : 0,
                 'sort_order' => $sortOrder,
             ]);
 
@@ -73,7 +72,6 @@ class CountryController extends Controller
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|size:2|unique:countries,code,' . $id,
             'name' => 'required|string|max:255',
-            'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
 
@@ -84,7 +82,7 @@ class CountryController extends Controller
         $country->update([
             'code' => strtoupper($request->code),
             'name' => $request->name,
-            'is_active' => $request->has('is_active'),
+            'is_active' => $request->has('is_active') ? 1 : 0,
             'sort_order' => $request->sort_order ?? 0,
         ]);
 

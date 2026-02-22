@@ -123,18 +123,25 @@
             </div>
 
             {{-- Home --}}
-            <div class="hero-section pt-0 pb" style="display:none;">
-                <div class="left-hero-section">
-                    <div class="left-inner-hero-sec">
-                        @php
-                            $homeMeta = optional($home)->meta_data ?? [];
-                            if (is_string($homeMeta)) { $homeMeta = json_decode($homeMeta, true); }
-                            $homeHeroMeta = $homeMeta['sections']['hero'] ?? [];
-                        @endphp
-                        <h1 id="hero_heading">{{ $homeHeroMeta['heading'] ?? (optional($home)->heading ?? 'Create Bangle box for all Styles') }}</h1>
-                        <p id="hero_description">{{ $homeHeroMeta['description'] ?? (optional($home)->description ?? 'Explore our diverse selection of bangles designed for every occasion.') }}</p>
+            <div class="hero-section-wrapper" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Hero Section</h4>
+                    <button type="button" class="btn editHeroBtn" data-section="home" style="background-color: #8d5943; color: white;">
+                        Edit Section
+                    </button>
+                </div>
+                
+                <div class="hero-section pt-0 pb">
+                    <div class="left-hero-section">
+                        <div class="left-inner-hero-sec">
+                            @php
+                                $homeMeta = optional($home)->meta_data ?? [];
+                                if (is_string($homeMeta)) { $homeMeta = json_decode($homeMeta, true); }
+                                $homeHeroMeta = $homeMeta['sections']['hero'] ?? [];
+                            @endphp
+                            <h1 id="hero_heading">{{ $homeHeroMeta['heading'] ?? (optional($home)->heading ?? 'Create Bangle box for all Styles') }}</h1>
+                            <p id="hero_description">{{ $homeHeroMeta['description'] ?? (optional($home)->description ?? 'Explore our diverse selection of bangles designed for every occasion.') }}</p>
                         <a id="hero_button" href="{{ url('banglz-box') }}">{{ ($homeMeta['button_label'] ?? 'Start building your bangle box') }}</a>
-                        <button type="button" class="btn btn-sm btn-warning mt-3 editHeroBtn" data-section="home">Edit Hero Section</button>
                         <div class="selection-sec mt-3">
                             <div class="circle-section">1</div>
                             <p id="size_label_el">{{ $homeHeroMeta['size_label'] ?? 'Select Your Size' }}</p>
@@ -170,6 +177,52 @@
                         <input type="hidden" name="home[image2_transform]" id="home_img2_transform" value="{{ $heroImages[1]['transform'] ?? $homeImage2Transform }}">
                         <button type="button" class="btn btn-sm btn-secondary crop-img-btn" data-index="2" style="position:absolute; top:8px; right:8px;">Crop</button>
                     </div>
+                </div>
+                </div>
+            </div>
+
+            {{-- Customize Section Preview (Create Bangle Box) --}}
+            <div id="customizePreview" class="mt-4" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Create Bangle Box Section</h4>
+                    <button type="button" class="btn editCustomizeBtn" style="background-color: #8d5943; color: white;">
+                        Edit Section
+                    </button>
+                </div>
+                
+                @php
+                    $customizeMeta = $homeMeta['sections']['customize'] ?? [];
+                    $customizeCards = $customizeMeta['cards'] ?? [];
+                @endphp
+                
+                <div class="mb-4">
+                    <h5 class="customize-title">{{ $customizeMeta['heading1'] ?? 'Create bangle box for all styles' }}</h5>
+                    <p class="customize-desc">{{ $customizeMeta['desc1'] ?? 'Select pieces marked with the Complete Your Look tag to build your perfect set.' }}</p>
+                </div>
+                
+                <div class="row mb-4">
+                    @for($i = 0; $i < 3; $i++)
+                        @php
+                            $card = $customizeCards[$i] ?? [];
+                            $cardImg = $card['image'] ?? 'about-head.jpg';
+                        @endphp
+                        <div class="col-md-4 mb-3">
+                            <div class="custom-card border rounded overflow-hidden" style="height: 250px; position: relative;">
+                                <img src="{{ asset('assets/images/pages/'.$cardImg) }}" 
+                                     class="custom-card-img" 
+                                     style="width: 100%; height: 100%; object-fit: cover;">
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent); padding: 20px; color: white;">
+                                    <h6 class="card-title mb-1">{{ $card['title'] ?? 'Choose your Stack' }}</h6>
+                                    <small class="card-sub">{{ $card['sub'] ?? 'Pick 6 or 9 bangles from over 250 colors.' }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    @endfor
+                </div>
+                
+                <div class="bundle-section">
+                    <h5>{{ $customizeMeta['heading2'] ?? 'Bundle your Look. Unlock Rewards' }}</h5>
+                    <p>{{ $customizeMeta['desc2'] ?? 'Select pieces marked with the Complete Your Look tag to build your perfect set.' }}</p>
                 </div>
             </div>
 
@@ -312,6 +365,83 @@
                 </div>
             </div>
 
+            {{-- Customize Edit Modal --}}
+            <div class="modal fade" id="customizeEditModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Create Bangle Box Section</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Section Heading 1</label>
+                                    <input type="text" id="customize_heading1" class="form-control" 
+                                           value="{{ $customizeMeta['heading1'] ?? 'Create bangle box for all styles' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Section Description 1</label>
+                                    <textarea id="customize_desc1" class="form-control" rows="2">{{ $customizeMeta['desc1'] ?? 'Select pieces marked with the Complete Your Look tag to build your perfect set.' }}</textarea>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mt-4 mb-3">Preview Cards (3 Cards)</h6>
+                            <div class="row">
+                                @for($i = 0; $i < 3; $i++)
+                                    @php
+                                        $card = $customizeCards[$i] ?? [];
+                                    @endphp
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6>Card {{ $i + 1 }}</h6>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Title</label>
+                                                    <input type="text" id="card_title_{{ $i }}" class="form-control" 
+                                                           value="{{ $card['title'] ?? 'Choose your Stack' }}">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Subtitle</label>
+                                                    <input type="text" id="card_sub_{{ $i }}" class="form-control" 
+                                                           value="{{ $card['sub'] ?? 'Pick 6 or 9 bangles from over 250 colors.' }}">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label class="form-label">Image</label>
+                                                    <input type="file" id="card_image_{{ $i }}" class="form-control" accept="image/*">
+                                                    <input type="hidden" name="customize[existing_images][{{ $i }}]" value="{{ $card['image'] ?? '' }}">
+                                                </div>
+                                                <div class="mt-2">
+                                                    <img id="card_preview_{{ $i }}" 
+                                                         src="{{ asset('assets/images/pages/'.($card['image'] ?? 'about-head.jpg')) }}" 
+                                                         style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endfor
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Section Heading 2</label>
+                                    <input type="text" id="customize_heading2" class="form-control" 
+                                           value="{{ $customizeMeta['heading2'] ?? 'Bundle your Look. Unlock Rewards' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Section Description 2</label>
+                                    <textarea id="customize_desc2" class="form-control" rows="2">{{ $customizeMeta['desc2'] ?? 'Select pieces marked with the Complete Your Look tag to build your perfect set.' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button id="saveCustomizeBtn" type="button" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Hidden inputs for headings/description --}}
             <input type="hidden" name="home[heading]" id="home_heading_input_hidden">
             <input type="hidden" name="home[description]" id="home_description_input_hidden">
@@ -336,7 +466,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const pageSelect = document.getElementById('page_name');
-    const homeHero = document.querySelector('.hero-section');
+    const homeHero = document.querySelector('.hero-section-wrapper');
     const aboutHero = document.querySelector('.about-hero-section');
     const contactHero = document.querySelector('.contact-us-section');
     const resourceHero = document.querySelector('.resource-section');
@@ -344,11 +474,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function toggleHeroSections() {
         const val = pageSelect.value;
-        if (homeHero) homeHero.style.display = val === 'home' ? 'flex' : 'none';
+        
+        if (homeHero) homeHero.style.display = val === 'home' ? 'block' : 'none';
         if (aboutHero) aboutHero.style.display = val === 'about_us' ? 'block' : 'none';
         if (contactHero) contactHero.style.display = val === 'contact_us' ? 'block' : 'none';
         if (resourceHero) resourceHero.style.display = val === 'resource' ? 'block' : 'none';
         if (appointmentsSection) appointmentsSection.style.display = val === 'appointments' ? 'block' : 'none';
+        
         const customizePreview = document.getElementById('customizePreview');
         if (customizePreview) customizePreview.style.display = val === 'home' ? 'block' : 'none';
         if (val === 'home') {
@@ -569,6 +701,8 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.addEventListener('click', function () {
             const section = this.dataset.section;
             editingSection.value = section;
+            console.log('Editing section:', section);
+            
             if (section === 'home') {
                 headingInput.value = heroHeadingEl.textContent.trim();
                 descInput.value = heroDescEl.textContent.trim();
@@ -580,6 +714,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('labelsRow').style.display = 'flex';
                 homeImagesRow.style.display = 'block';
                 singleImageRow.style.display = 'none';
+                console.log('Home images row should be visible now');
             } else if (section === 'about') {
                 headingInput.value = aboutHeadingEl.textContent.trim();
                 descInput.value = '';
@@ -664,6 +799,54 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('home_size_label_input_hidden').value = sizeLabelInput.value.trim();
         styleLabelEl.textContent = styleLabelInput.value.trim() || 'Select Your Style';
         document.getElementById('home_style_label_input_hidden').value = styleLabelInput.value.trim();
+        
+        // Handle Image 1
+        const f1 = imageInput1.files[0];
+        if (f1) {
+            openCropper(f1).then(cropped => {
+                let existing = document.getElementById('home_image1_input_hidden');
+                if (!existing) {
+                    existing = document.createElement('input');
+                    existing.type = 'file';
+                    existing.name = 'home[image1]';
+                    existing.id = 'home_image1_input_hidden';
+                    existing.style.display = 'none';
+                    document.getElementById('pageSettingForm').appendChild(existing);
+                }
+                const dt = new DataTransfer();
+                dt.items.add(cropped);
+                existing.files = dt.files;
+                
+                const img1 = document.getElementById('home_img_1');
+                if (img1) {
+                    img1.src = URL.createObjectURL(cropped);
+                }
+            });
+        }
+        
+        // Handle Image 2
+        const f2 = imageInput2.files[0];
+        if (f2) {
+            openCropper(f2).then(cropped => {
+                let existing = document.getElementById('home_image2_input_hidden');
+                if (!existing) {
+                    existing = document.createElement('input');
+                    existing.type = 'file';
+                    existing.name = 'home[image2]';
+                    existing.id = 'home_image2_input_hidden';
+                    existing.style.display = 'none';
+                    document.getElementById('pageSettingForm').appendChild(existing);
+                }
+                const dt = new DataTransfer();
+                dt.items.add(cropped);
+                existing.files = dt.files;
+                
+                const img2 = document.getElementById('home_img_2');
+                if (img2) {
+                    img2.src = URL.createObjectURL(cropped);
+                }
+            });
+        }
     }
 
     if (section === 'about') {
@@ -793,171 +976,141 @@ if (section === 'resource') {
     });
 });
 </script>
-<!-- Removed customize modal logic to prevent null element errors -->
+
 <script>
+// Customize Section Modal Handler
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Customize modal script loaded');
+  
   const openCustomizeBtns = document.querySelectorAll('.editCustomizeBtn');
   const customizeModalEl = document.getElementById('customizeEditModal');
-  if (!openCustomizeBtns.length || !customizeModalEl) return;
+  
+  console.log('Found buttons:', openCustomizeBtns.length);
+  console.log('Found modal:', customizeModalEl ? 'yes' : 'no');
+  
+  if (!openCustomizeBtns.length) {
+    console.error('No .editCustomizeBtn buttons found');
+    return;
+  }
+  
+  if (!customizeModalEl) {
+    console.error('Modal #customizeEditModal not found');
+    return;
+  }
+  
   const bsCustomizeModal = new bootstrap.Modal(customizeModalEl);
 
-  // Elements to update/read
-  const previewHeading1 = document.querySelector('.customize-title');
-  const previewDesc1 = document.querySelector('.customize-desc');
-  const previewHeading2 = document.querySelector('.bundle-section h3');
-  const previewDesc2 = document.querySelector('.bundle-section p');
-
-  // Card DOM nodes (preview)
-  const cardPreviews = [
-    document.querySelectorAll('.custom-card .custom-card-img')[0],
-    document.querySelectorAll('.custom-card .custom-card-img')[1],
-    document.querySelectorAll('.custom-card .custom-card-img')[2]
-  ];
-  const cardTitles = document.querySelectorAll('.custom-card .card-title');
-  const cardSubs = document.querySelectorAll('.custom-card .card-sub');
-
-  // Modal inputs
-  const in_heading1 = document.getElementById('custom_heading1');
-  const in_desc1 = document.getElementById('custom_desc1');
-  const in_heading2 = document.getElementById('custom_heading2');
-  const in_desc2 = document.getElementById('custom_desc2');
-
-  const cardImageInputs = document.querySelectorAll('.card-image-input');
-  const cardPreviewImgs = [
-    document.getElementById('card_preview_0'),
-    document.getElementById('card_preview_1'),
-    document.getElementById('card_preview_2')
-  ];
-  const in_card_titles = [
-    document.getElementById('card_title_0'),
-    document.getElementById('card_title_1'),
-    document.getElementById('card_title_2')
-  ];
-  const in_card_subs = [
-    document.getElementById('card_sub_0'),
-    document.getElementById('card_sub_1'),
-    document.getElementById('card_sub_2')
-  ];
-
-  // open modal and populate current values
+  // Open modal
   openCustomizeBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      // fill headings/descriptions
-      in_heading1.value = previewHeading1 ? previewHeading1.textContent.trim() : '';
-      in_desc1.value = previewDesc1 ? previewDesc1.textContent.trim() : '';
-      in_heading2.value = previewHeading2 ? previewHeading2.textContent.trim() : '';
-      in_desc2.value = previewDesc2 ? previewDesc2.textContent.trim() : '';
-
-      // populate cards: titles, subs, preview images (use src attr)
-      for (let i=0;i<3;i++){
-        in_card_titles[i].value = cardTitles[i] ? cardTitles[i].textContent.trim() : '';
-        in_card_subs[i].value = cardSubs[i] ? cardSubs[i].textContent.trim() : '';
-        // set preview img src from existing DOM preview if available
-        if (cardPreviews[i] && cardPreviews[i].src) {
-          cardPreviewImgs[i].src = cardPreviews[i].src;
-        }
-        // clear file inputs
-        cardImageInputs[i].value = '';
-      }
-
+    btn.addEventListener('click', function() {
+      console.log('Edit button clicked');
       bsCustomizeModal.show();
     });
   });
 
-  cardImageInputs.forEach(inp=>{
-    inp.addEventListener('change', function(e){
-      const idx = parseInt(this.dataset.index, 10);
-      const f = this.files[0];
-      if (f) {
-        openCropper(f).then(cropped => {
-          cardPreviewImgs[idx].src = URL.createObjectURL(cropped);
-          let existingFileInput = document.querySelector(`#pageSettingForm input[name="customize[images][${idx}]"]`);
-          if (!existingFileInput) {
-            existingFileInput = document.createElement('input');
-            existingFileInput.type = 'file';
-            existingFileInput.name = `customize[images][${idx}]`;
-            existingFileInput.style.display = 'none';
-            document.getElementById('pageSettingForm').appendChild(existingFileInput);
-          }
-          const dt = new DataTransfer();
-          dt.items.add(cropped);
-          existingFileInput.files = dt.files;
-        });
-      }
-    });
-  });
+  // Handle image preview and store files
+  const selectedFiles = [null, null, null];
+  
+  for (let i = 0; i < 3; i++) {
+    const fileInput = document.getElementById(`card_image_${i}`);
+    const preview = document.getElementById(`card_preview_${i}`);
+    
+    if (fileInput && preview) {
+      fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          selectedFiles[i] = file;
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            preview.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  }
 
   // Save handler
-  document.getElementById('saveCustomizeBtn').addEventListener('click', function(){
-    // 1) update visible preview on page
-    if (previewHeading1) previewHeading1.textContent = in_heading1.value || '';
-    if (previewDesc1) previewDesc1.textContent = in_desc1.value || '';
-    if (previewHeading2) previewHeading2.textContent = in_heading2.value || '';
-    if (previewDesc2) previewDesc2.textContent = in_desc2.value || '';
+  const saveBtn = document.getElementById('saveCustomizeBtn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', function() {
+      console.log('Save button clicked');
+      
+      // Update preview
+      const previewHeading1 = document.querySelector('.customize-title');
+      const previewDesc1 = document.querySelector('.customize-desc');
+      const previewHeading2 = document.querySelector('.bundle-section h5');
+      const previewDesc2 = document.querySelector('.bundle-section p');
+      
+      if (previewHeading1) previewHeading1.textContent = document.getElementById('customize_heading1').value;
+      if (previewDesc1) previewDesc1.textContent = document.getElementById('customize_desc1').value;
+      if (previewHeading2) previewHeading2.textContent = document.getElementById('customize_heading2').value;
+      if (previewDesc2) previewDesc2.textContent = document.getElementById('customize_desc2').value;
 
-    // cards: update heading, subs, and images (if selected)
-    for (let i=0;i<3;i++){
-      if (cardTitles[i]) cardTitles[i].textContent = in_card_titles[i].value || '';
-      if (cardSubs[i]) cardSubs[i].textContent = in_card_subs[i].value || '';
+      // Update card previews
+      for (let i = 0; i < 3; i++) {
+        const cardTitle = document.querySelectorAll('.custom-card .card-title')[i];
+        const cardSub = document.querySelectorAll('.custom-card .card-sub')[i];
+        const cardImg = document.querySelectorAll('.custom-card .custom-card-img')[i];
+        
+        if (cardTitle) cardTitle.textContent = document.getElementById(`card_title_${i}`).value;
+        if (cardSub) cardSub.textContent = document.getElementById(`card_sub_${i}`).value;
+        
+        const preview = document.getElementById(`card_preview_${i}`);
+        if (cardImg && preview) cardImg.src = preview.src;
+      }
 
-      const f = cardImageInputs[i].files[0];
-      if (f && cardPreviews[i]) {
-        // update visible card image with local preview
-        cardPreviews[i].src = URL.createObjectURL(f);
-
-        // append hidden file input to form so it submits with formData
-        let existingFileInput = document.querySelector(`#pageSettingForm input[name="customize[images][${i}]"]`);
-        if (!existingFileInput) {
-          existingFileInput = document.createElement('input');
-          existingFileInput.type = 'file';
-          existingFileInput.name = `customize[images][${i}]`;
-          existingFileInput.style.display = 'none';
-          document.getElementById('pageSettingForm').appendChild(existingFileInput);
+      // Add hidden inputs to form
+      function setHidden(name, val) {
+        let el = document.querySelector(`#pageSettingForm input[name="${name}"]`);
+        if (!el) {
+          el = document.createElement('input');
+          el.type = 'hidden';
+          el.name = name;
+          document.getElementById('pageSettingForm').appendChild(el);
         }
-        // attach file via DataTransfer
-        const dt = new DataTransfer();
-        dt.items.add(f);
-        existingFileInput.files = dt.files;
+        el.value = val || '';
       }
-      // always set hidden title/sub inputs
-      let hiddenTitle = document.querySelector(`#pageSettingForm input[name="customize[titles][${i}]"]`);
-      if (!hiddenTitle) {
-        hiddenTitle = document.createElement('input');
-        hiddenTitle.type = 'hidden';
-        hiddenTitle.name = `customize[titles][${i}]`;
-        document.getElementById('pageSettingForm').appendChild(hiddenTitle);
+
+      setHidden('customize[heading1]', document.getElementById('customize_heading1').value);
+      setHidden('customize[desc1]', document.getElementById('customize_desc1').value);
+      setHidden('customize[heading2]', document.getElementById('customize_heading2').value);
+      setHidden('customize[desc2]', document.getElementById('customize_desc2').value);
+
+      for (let i = 0; i < 3; i++) {
+        setHidden(`customize[titles][${i}]`, document.getElementById(`card_title_${i}`).value);
+        setHidden(`customize[subs][${i}]`, document.getElementById(`card_sub_${i}`).value);
+        
+        // Handle file inputs - create hidden file inputs with the selected files
+        if (selectedFiles[i]) {
+          let fileInputHidden = document.querySelector(`#pageSettingForm input[name="customize[images][${i}]"]`);
+          if (!fileInputHidden) {
+            fileInputHidden = document.createElement('input');
+            fileInputHidden.type = 'file';
+            fileInputHidden.name = `customize[images][${i}]`;
+            fileInputHidden.style.display = 'none';
+            document.getElementById('pageSettingForm').appendChild(fileInputHidden);
+          }
+          
+          // Transfer the file to the hidden input
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(selectedFiles[i]);
+          fileInputHidden.files = dataTransfer.files;
+          
+          console.log(`File attached for card ${i}:`, selectedFiles[i].name);
+        }
       }
-      hiddenTitle.value = in_card_titles[i].value || '';
 
-      let hiddenSub = document.querySelector(`#pageSettingForm input[name="customize[subs][${i}]"]`);
-      if (!hiddenSub) {
-        hiddenSub = document.createElement('input');
-        hiddenSub.type = 'hidden';
-        hiddenSub.name = `customize[subs][${i}]`;
-        document.getElementById('pageSettingForm').appendChild(hiddenSub);
-      }
-      hiddenSub.value = in_card_subs[i].value || '';
-    }
-
-    // create/replace hidden inputs for headings & descriptions
-    function setHidden(name, val) {
-      let el = document.querySelector(`#pageSettingForm input[name="${name}"]`);
-      if (!el) {
-        el = document.createElement('input');
-        el.type = 'hidden';
-        el.name = name;
-        document.getElementById('pageSettingForm').appendChild(el);
-      }
-      el.value = val || '';
-    }
-    setHidden('customize[heading1]', in_heading1.value);
-    setHidden('customize[desc1]', in_desc1.value);
-    setHidden('customize[heading2]', in_heading2.value);
-    setHidden('customize[desc2]', in_desc2.value);
-
-    bsCustomizeModal.hide();
-  });
-
+      bsCustomizeModal.hide();
+      
+      Swal.fire({
+        icon: 'info',
+        title: 'Changes Saved',
+        text: 'Click "Save Setting" button below to persist changes to database.',
+        timer: 2000
+      });
+    });
+  }
 });
 
 </script>

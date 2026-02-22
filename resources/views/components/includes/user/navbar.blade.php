@@ -191,9 +191,6 @@
                     <a>{{ strtoupper($category->name) }}</a>
                 </li>
                 @endforeach
-                <li data-target="catalogs">
-                    <a>CATALOGS</a>
-                </li>
                 <li data-target="static-trending">
                     <a>TRENDING</a>
                 </li>
@@ -295,34 +292,6 @@
 
         </div>
         @endforeach
-        
-      {{-- Catalogs/Collections Hover Section --}}
-      <div class="hover-content" id="catalogs">
-            <div class="row">
-                @forelse($collections as $collection)
-                <div class="col-4 mb-3">
-                    <a href="{{ route('catalog', $collection->slug) }}">
-                        <div class="nav-hover-list">
-                            <div class="nav-hover-img">
-                                @php
-                                $img = !empty($collection->images) && is_array($collection->images) ? $collection->images[0] : 'default.jpg';
-                                @endphp
-                                <img src="{{ asset('assets/images/collections/' . $img) }}" alt="{{ $collection->name }}">
-                            </div>
-                            <div class="nav-hover-detail">
-                                <h1>{{ strtoupper($collection->name) }}</h1>
-                                <p>{{ $collection->description ?? 'Explore this collection' }}</p>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                @empty
-                <div class="col-12">
-                    <p>No catalogs available at the moment.</p>
-                </div>
-                @endforelse
-            </div>
-        </div>
         
       <div class="hover-content" id="static-trending">
             <div class="row">
