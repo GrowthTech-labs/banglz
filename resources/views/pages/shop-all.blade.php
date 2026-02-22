@@ -127,13 +127,16 @@
             </div>
 
 
-            {{-- Tabs (subcategories). No "All" tab — first subcategory is active --}}
-            <div class="detai-tabs-about shop-all-detail">
+            {{-- Tabs (subcategories). Only show if there are subcategories AND we have a subcategory in the URL --}}
+            @if($subcategories->count() > 0)
+            <div class="detai-tabs-about shop-all-detail" @if(!request('subcategory')) style="display: none;" @endif>
                 <ul id="shopallTabs" class="custom-tabs shop-tabs ">
                     @foreach($subcategories as $index => $sub)
-                    <li data-subslug="{{ $sub->slug }}">{{ $sub->name }}</li>
+                    <li data-subslug="{{ $sub->slug }}" @if(request('subcategory') == $sub->slug) class="active" @endif>{{ $sub->name }}</li>
                     @endforeach
                 </ul>
+            </div>
+            @endif
 
                 <div class="tab-content">
                     {{-- Single pane now — filters are common and product list updates via AJAX --}}

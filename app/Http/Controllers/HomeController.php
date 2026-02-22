@@ -40,8 +40,12 @@ class HomeController extends Controller
         $topTags = Tag::where('top_listed', true)
             ->select('id', 'name', 'slug')
             ->get();
+        
+        // Get ONLY child categories (subcategories) with top_listed = 1
+        // Child categories have parent_id NOT NULL
         $topCategories = Category::where('top_listed', true)
-            ->select('id', 'name', 'slug')
+            ->whereNotNull('parent_id')
+            ->select('id', 'name', 'slug', 'parent_id')
             ->get();
 
 
@@ -49,7 +53,15 @@ class HomeController extends Controller
 
         $tabsWithProducts = $tabs->map(function ($tab) {
             if ($tab instanceof Category) {
-                $products = Product::where('category_id', $tab->id)
+                // Show products from BOTH the child category AND its parent category
+                $categoryIds = [$tab->id];
+                
+                // Add parent category ID if it exists
+                if ($tab->parent_id) {
+                    $categoryIds[] = $tab->parent_id;
+                }
+                
+                $products = Product::whereIn('category_id', $categoryIds)
                     ->where('status', 1)
                     ->take(10)
                     ->get();

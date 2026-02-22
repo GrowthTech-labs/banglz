@@ -240,7 +240,7 @@ class ProductController extends Controller
                 'category'      => 'required|exists:categories,id',
                 'category_box_id' => 'nullable|exists:category_boxes,id', // ✅ validate category_box_id
                 'images'        => 'nullable|array',  // nullable, conditionally required
-                'images.*'      => 'image',
+                'images.*'      => 'image|mimes:jpeg,jpg,png,gif,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000',
                 'existing_images' => 'nullable|array',
                 'removed_existing_images' => 'nullable|string',
                 'care' => 'required|string',
@@ -277,7 +277,12 @@ class ProductController extends Controller
                 $rules['weight_unit'] = 'required|in:g,kg,oz,lbs';
             }
 
-            $validator = Validator::make(array_merge($request->all(), ['category' => $finalCategoryId]), $rules);
+            $validator = Validator::make(array_merge($request->all(), ['category' => $finalCategoryId]), $rules, [
+                'images.*.image' => 'The file must be an image.',
+                'images.*.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif, webp.',
+                'images.*.max' => 'The image size must not exceed 5MB.',
+                'images.*.dimensions' => 'The image dimensions must be between 100x100 and 4000x4000 pixels.',
+            ]);
 
             $validator->after(function ($validator) use ($request) {
                 $isEdit = $request->has('id');

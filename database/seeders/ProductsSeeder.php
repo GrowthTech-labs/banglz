@@ -26,27 +26,47 @@ class ProductsSeeder extends Seeder
             ['name' => 'Wooden Beaded Bangles', 'description' => 'Natural wooden bangles with colorful beads.', 'price' => 29.99, 'compare_price' => 44.99, 'member_price' => 26.99, 'sku' => 'BNG-WOOD-010', 'quantity' => 90, 'images' => ['product-2.png'], 'status' => 1, 'is_featured' => 0, 'is_top_listed' => 0, 'weight' => '0.15', 'weight_unit' => 'lbs', 'country_of_origin' => 'IN', 'hs_code' => '7117907500'],
         ];
 
+        $created = 0;
+        $updated = 0;
+        
         foreach ($products as $data) {
             $data['category_id'] = $categories->random()->id;
-            $data['slug'] = Str::slug($data['name']);
-            Product::create($data);
+            $slug = Str::slug($data['name']);
+            
+            $product = Product::updateOrCreate(
+                ['slug' => $slug],
+                $data
+            );
+            
+            if ($product->wasRecentlyCreated) {
+                $created++;
+            } else {
+                $updated++;
+            }
         }
 
-        $this->command->info('✅ Created ' . count($products) . ' products!');
+        $this->command->info("✅ Products seeding completed! Created: {$created}, Updated: {$updated}");
     }
 
     private function ensureCategories()
     {
-        $categories = Category::all();
+        // Get any existing categories (including soft-deleted ones for seeding purposes)
+        $categories = Category::withTrashed()
+            ->whereNull('parent_id')
+            ->limit(5)
+            ->get();
+        
         if ($categories->isEmpty()) {
-            $cats = [
-                ['name' => 'Gold Bangles', 'slug' => 'gold-bangles', 'status' => 1],
-                ['name' => 'Silver Bangles', 'slug' => 'silver-bangles', 'status' => 1],
-                ['name' => 'Fashion Bangles', 'slug' => 'fashion-bangles', 'status' => 1],
-            ];
-            foreach ($cats as $cat) Category::create($cat);
-            $categories = Category::all();
+            // If still no categories, just get ANY categories
+            $categories = Category::withTrashed()->limit(5)->get();
         }
+        
+        if ($categories->isEmpty()) {
+            $this->command->error('❌ No categories found in database!');
+            throw new \Exception('At least one category must exist before seeding products.');
+        }
+        
+        $this->command->info('Using categories: ' . $categories->pluck('name')->implode(', '));
         return $categories;
     }
 }

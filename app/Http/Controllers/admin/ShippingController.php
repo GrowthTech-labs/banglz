@@ -353,6 +353,19 @@ class ShippingController extends Controller
         // Override validated items with actual product data
         $validated['items'] = $items;
 
+        // ✅ Ensure we have items
+        if (empty($validated['items'])) {
+            \Log::error('No items found in order', [
+                'order_id' => $validated['order_id'],
+                'products_meta_data' => $productsMetaData
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'errors' => ['No valid items found in order. Please ensure products have required shipping data.'],
+            ], 422);
+        }
+
         // ✅ Build payload for Stallion API
         $totalValue = array_sum(array_map(function($item) {
             return $item['value'] * $item['quantity'];
@@ -361,6 +374,13 @@ class ShippingController extends Controller
         $packageContents = implode(', ', array_map(function($item) {
             return $item['description'] . ' (x' . $item['quantity'] . ')';
         }, $validated['items']));
+        
+        \Log::info('Built items for shipment', [
+            'items_count' => count($validated['items']),
+            'items' => $validated['items'],
+            'total_value' => $totalValue,
+            'package_contents' => $packageContents
+        ]);
         
         $payload = [
             'to_address' => [
@@ -407,7 +427,11 @@ class ShippingController extends Controller
 
         \Log::info('Creating shipment', [
             'url' => $base . '/shipments',
-            'payload' => $payload
+            'payload' => $payload,
+            'items_count' => count($payload['items'] ?? []),
+            'has_package_contents' => isset($payload['package_contents']),
+            'has_value' => isset($payload['value']),
+            'has_currency' => isset($payload['currency'])
         ]);
 
         try {
