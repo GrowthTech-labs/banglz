@@ -274,12 +274,16 @@
                     </a>
                 </div>
                 @empty
-                <div class="col-12">
-                    <p>No subcategories found.</p>
+                {{-- If no subcategories, show message and Shop All button --}}
+                <div class="col-12 text-center py-4">
+                    <p class="mb-3">View all products in {{ $category->name }}</p>
+                    <a class="shop-all-main" href="{{ route('shop-all', ['slug' => $category->slug]) }}">
+                        <button class="get-started-btn">Shop All {{ $category->name }}</button>
+                    </a>
                 </div>
                 @endforelse
 
-                {{-- ✅ Extra col at the end for Shop All --}}
+                {{-- Shop All button at the end if there are subcategories --}}
                 @if ($category->subcategories && $category->subcategories->count() > 0)
                 <div class="col-4 mb-3">
                     <a class="shop-all-main" href="{{ route('shop-all', ['slug' => $category->slug]) }}">

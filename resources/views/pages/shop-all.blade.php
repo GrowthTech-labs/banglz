@@ -265,8 +265,13 @@
                                 </div>
 
                                 <div class="earing-main-grid" id="productList">
-
-                                    <div class="no-results">Loading....</div>
+                                    @if(isset($subcategories) && $subcategories->count() > 0)
+                                        {{-- Has subcategories: show loading placeholder, JavaScript will load products --}}
+                                        <div class="no-results">Loading....</div>
+                                    @else
+                                        {{-- No subcategories: render products server-side --}}
+                                        @include('pages.partials.product-list', ['products' => $products])
+                                    @endif
                                 </div>
 
                                 <div class="load-more-container" id="loadMoreContainer" style="text-align:center; margin-top:20px;">
@@ -533,6 +538,7 @@
 
     <x-slot name="insertjavascript">
         <script>
+        document.addEventListener('DOMContentLoaded', function() {
             // Utility: debounce (behavior unchanged)
             function debounce(fn, wait) {
                 let t;
@@ -596,7 +602,7 @@
             }
 
             // currentSubSlug defaults to requested subcategory if present, otherwise first subcategory slug (server-side)
-            let currentSubSlug = @json(request('subcategory') ?? ($subcategories -> first() -> slug ?? ''));
+            let currentSubSlug = @json(request('subcategory') ?? (isset($subcategories) && $subcategories->count() > 0 ? $subcategories->first()->slug : ''));
 
             // Attach tab click handlers
             shopTabs.forEach(tab => {
@@ -671,32 +677,56 @@
 
             // Base URL for AJAX calls
             const baseUrl = @json(url('shop-all/'.$category -> slug));
+            console.log('Shop All Debug - Base URL:', baseUrl);
+            console.log('Shop All Debug - Current SubSlug:', currentSubSlug);
 
             // Load products via AJAX
             // append: if true, append results for Load More, otherwise replace
             async function loadProducts(subslug = '', page = 1, append = false) {
+                console.log('=== loadProducts called ===');
+                console.log('SubSlug:', subslug);
+                console.log('Page:', page);
+                console.log('Append:', append);
+                
                 const qs = buildQueryParams(page, subslug);
+                console.log('Query String:', qs);
+                
                 const url = baseUrl + (qs ? ('?' + qs) : '');
+                console.log('Full URL:', url);
 
                 try {
+                    console.log('Fetching products...');
                     const res = await fetch(url, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
+                    console.log('Response status:', res.status);
+                    console.log('Response OK:', res.ok);
+                    
                     if (!res.ok) throw new Error('Network response was not ok');
 
                     const html = await res.text();
+                    console.log('HTML received, length:', html.length);
+                    console.log('HTML preview:', html.substring(0, 200));
 
                     const container = document.getElementById('productList');
-                    if (!container) return; // safety
+                    console.log('Product container found:', !!container);
+                    
+                    if (!container) {
+                        console.error('Product container not found!');
+                        return; // safety
+                    }
 
                     // If appending, append; otherwise replace
                     if (append) {
                         const temp = document.createElement('div');
                         temp.innerHTML = html;
-                        temp.querySelectorAll('.card').forEach(card => container.appendChild(card));
+                        const cards = temp.querySelectorAll('.card');
+                        console.log('Appending cards:', cards.length);
+                        cards.forEach(card => container.appendChild(card));
                     } else {
+                        console.log('Replacing container content');
                         container.innerHTML = html;
                         container.scrollIntoView({
                             behavior: 'smooth',
@@ -708,17 +738,28 @@
 
                     // Determine if there are more products to load:
                     const returnedCards = (new DOMParser()).parseFromString(html, 'text/html').querySelectorAll('.card').length;
+                    console.log('Returned cards count:', returnedCards);
+                    
                     const perPage = @json($products -> perPage() ?? 10);
+                    console.log('Per page:', perPage);
+                    
                     const loadMoreBtn = document.getElementById('loadMoreBtn');
                     if (loadMoreBtn) {
                         if (!returnedCards || returnedCards < perPage) {
+                            console.log('Hiding load more button');
                             loadMoreBtn.style.display = 'none';
                         } else {
+                            console.log('Showing load more button');
                             loadMoreBtn.style.display = 'inline-block';
                         }
                     }
+                    
+                    console.log('=== loadProducts completed successfully ===');
                 } catch (err) {
-                    console.error('Failed to load products', err);
+                    console.error('=== loadProducts FAILED ===');
+                    console.error('Error:', err);
+                    console.error('Error message:', err.message);
+                    console.error('Error stack:', err.stack);
                 }
             }
 
@@ -733,10 +774,14 @@
 
             // On first load - replace server-rendered list with first subcategory products (if there are subcategories)
             (function init() {
+                console.log('=== INIT FUNCTION CALLED ===');
                 const hasSubcategories = @json($subcategories -> count() > 0);
+                console.log('Has subcategories:', hasSubcategories);
+                console.log('Current SubSlug:', currentSubSlug);
 
                 // Ensure the tab matching currentSubSlug is selected (if present), otherwise first tab remains active
                 if (hasSubcategories && currentSubSlug) {
+                    console.log('Setting active tab for subslug:', currentSubSlug);
                     document.querySelectorAll('#shopallTabs li').forEach(t => {
                         t.classList.toggle('active', (t.dataset.subslug || '') === (currentSubSlug || ''));
                     });
@@ -744,20 +789,30 @@
 
                 // If there are subcategories, force load products for the first subcategory on page load.
                 if (hasSubcategories && currentSubSlug) {
+                    console.log('Loading products for subcategory:', currentSubSlug);
                     currentPage = 1;
                     loadProducts(currentSubSlug, 1, false);
                 } else {
+                    console.log('No subcategories or no subslug - keeping server rendered list');
                     // no subcategories: keep server rendered list, but still handle load more visibility
                     const initialCards = document.querySelectorAll('#productList .card').length;
+                    console.log('Initial cards count:', initialCards);
+                    
                     const perPage = @json($products -> perPage() ?? 10);
+                    console.log('Per page:', perPage);
+                    
                     const loadMoreBtn = document.getElementById('loadMoreBtn');
                     if (loadMoreBtn && initialCards < perPage) {
+                        console.log('Hiding load more button (not enough cards)');
                         loadMoreBtn.style.display = 'none';
                     }
                 }
+                console.log('=== INIT FUNCTION COMPLETED ===');
             })();
+        }); // End DOMContentLoaded
         </script>
         <script>
+        document.addEventListener('DOMContentLoaded', function() {
             /**
              * Fetch boxes (JSON) and render EXACTLY the same filter block.
              * Uses route template generated by Blade and replaces '__slug__' with slug.
@@ -875,9 +930,7 @@
                 // Optional: if you want to auto-load boxes for the first tab on page load,
                 // call fetchBoxes(initialSlug) here (if initialSlug available)
             })();
-        </script>
-
-
+        }); // End DOMContentLoaded
         </script>
 
     </x-slot>

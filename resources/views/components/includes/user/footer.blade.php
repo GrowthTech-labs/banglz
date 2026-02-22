@@ -698,120 +698,63 @@ const addToCartBtn = document.querySelector('#add-to-cart');
 </script>
 <script>
   $(document).ready(function() {
-    $('.category-slider').slick({
-      slidesToShow: 3,
-      slidesToScroll: 1,
-      autoplay: true,
-      autoplaySpeed: 1000,
-      infinite: true,
-      arrows: true,
-      dots: false,
-      prevArrow: '<button type="button" class="slick-prev"></button>',
-      nextArrow: '<button type="button" class="slick-next"></button>',
-      responsive: [{
-          breakpoint: 991,
-          settings: {
-            slidesToShow: 3
+    if ($('.category-slider').length) {
+      $('.category-slider').slick({
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 1000,
+        infinite: true,
+        arrows: true,
+        dots: false,
+        prevArrow: '<button type="button" class="slick-prev"></button>',
+        nextArrow: '<button type="button" class="slick-next"></button>',
+        responsive: [{
+            breakpoint: 991,
+            settings: {
+              slidesToShow: 3
+            }
+          },
+          {
+            breakpoint: 767,
+            settings: {
+              slidesToShow: 2
+            }
+          },
+          {
+            breakpoint: 557,
+            settings: {
+              slidesToShow: 1
+            }
           }
-        },
-        {
-          breakpoint: 767,
-          settings: {
-            slidesToShow: 2
-          }
-        },
-        {
-          breakpoint: 557,
-          settings: {
-            slidesToShow: 1
-          }
-        }
-      ]
-    });
-  });
-</script>
-<script>
-  // Refresh slider after tab fully visible
-  $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
-    $('.tab-pane.active .custom-slider').slick('setPosition');
-  });
-  $('.custom-slider').slick({
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    arrows: true,
-    dots: false,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    responsive: [{
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 3
-        }
-      },
-      {
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 2
-        }
-      },
-      {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 1
-        }
-      }
-    ]
+        ]
+      });
+    }
   });
 </script>
 <script>
   $(document).ready(function() {
-    $('.appointment-slider').slick({
-      slidesToShow: 4,
-      slidesToScroll: 1,
-      autoplay: true,
-      autoplaySpeed: 2000,
-      infinite: true,
-      arrows: true,
-      dots: false,
-      prevArrow: '<button type="button" class="slick-prev">‹</button>',
-      nextArrow: '<button type="button" class="slick-next">›</button>',
-      responsive: [{
-          breakpoint: 1024,
-          settings: {
-            slidesToShow: 3
-          }
-        },
-        {
-          breakpoint: 768,
-          settings: {
-            slidesToShow: 2
-          }
-        },
-        {
-          breakpoint: 480,
-          settings: {
-            slidesToShow: 1
-          }
-        }
-      ]
-    });
-  });
-</script>
-<script>
-  $('.product-slider').slick({
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: true, // built-in prev/next arrows
-    dots: false,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    responsive: [{
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 3
-        }
+    // Refresh slider after tab fully visible
+    if ($('a[data-bs-toggle="tab"]').length && $('.custom-slider').length) {
+      $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
+        $('.tab-pane.active .custom-slider').slick('setPosition');
+      });
+    }
+    
+    if ($('.custom-slider').length) {
+      $('.custom-slider').slick({
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: false,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        responsive: [{
+            breakpoint: 1200,
+            settings: {
+              slidesToShow: 3
+            }
       },
       {
         breakpoint: 992,
@@ -827,20 +770,94 @@ const addToCartBtn = document.querySelector('#add-to-cart');
       }
     ]
   });
+    }
+  });
 </script>
 <script>
-  $('.apointment-carousel').slick({
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    arrows: true, // built-in prev/next arrows
-    dots: false,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 2000,
-    responsive: [{
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 2
+  $(document).ready(function() {
+    if ($('.appointment-slider').length) {
+      $('.appointment-slider').slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        infinite: true,
+        arrows: true,
+        dots: false,
+        prevArrow: '<button type="button" class="slick-prev">‹</button>',
+        nextArrow: '<button type="button" class="slick-next">›</button>',
+        responsive: [{
+            breakpoint: 1024,
+            settings: {
+              slidesToShow: 3
+            }
+          },
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 2
+            }
+          },
+          {
+            breakpoint: 480,
+            settings: {
+              slidesToShow: 1
+            }
+          }
+        ]
+      });
+    }
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    if ($('.product-slider').length) {
+      $('.product-slider').slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true, // built-in prev/next arrows
+        dots: false,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        responsive: [{
+            breakpoint: 1200,
+            settings: {
+              slidesToShow: 3
+            }
+          },
+          {
+            breakpoint: 992,
+            settings: {
+              slidesToShow: 2
+            }
+          },
+          {
+            breakpoint: 576,
+            settings: {
+              slidesToShow: 1
+            }
+          }
+        ]
+      });
+    }
+  });
+</script>
+<script>
+  $(document).ready(function() {
+    if ($('.apointment-carousel').length) {
+      $('.apointment-carousel').slick({
+        slidesToShow: 3,
+        slidesToScroll: 1,
+        arrows: true, // built-in prev/next arrows
+        dots: false,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        responsive: [{
+            breakpoint: 992,
+            settings: {
+              slidesToShow: 2
         }
       },
       {
@@ -850,6 +867,8 @@ const addToCartBtn = document.querySelector('#add-to-cart');
         }
       }
     ]
+  });
+    }
   });
 </script>
 <script>
@@ -857,9 +876,10 @@ const addToCartBtn = document.querySelector('#add-to-cart');
   const hoverSection = document.getElementById('hoverSection');
   const contents = document.querySelectorAll('.nav-hover-box');
 
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      const target = item.getAttribute('data-target');
+  if (navItems.length && hoverSection && contents.length) {
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        const target = item.getAttribute('data-target');
 
       // show main section
       hoverSection.style.display = 'block';
@@ -882,6 +902,7 @@ const addToCartBtn = document.querySelector('#add-to-cart');
       contents.forEach(c => c.classList.remove('active'));
     }
   });
+  }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('assets/js/chatbot.js') }}"></script>
@@ -1207,8 +1228,10 @@ const productDetailBaseUrl = @json(route('product.detail', ':slug'));
 function loadWishlistBadge() {
   if (!isLoggedIn) {
     updateWishlistBadge(0);
-    document.getElementById('wishlist-items').innerHTML = "";
-    document.querySelector('.no-wishlist-message').style.display = "block";
+    const wishlistItems = document.getElementById('wishlist-items');
+    const noWishlistMessage = document.querySelector('.no-wishlist-message');
+    if (wishlistItems) wishlistItems.innerHTML = "";
+    if (noWishlistMessage) noWishlistMessage.style.display = "block";
     return;
   }
 
@@ -1221,13 +1244,13 @@ function loadWishlistBadge() {
       const container = document.getElementById('wishlist-items');
       const noWishlistMessage = document.querySelector('.no-wishlist-message');
 
-      container.innerHTML = "";
+      if (container) container.innerHTML = "";
 
       if (!data.wishlist || data.wishlist.length === 0) {
-        noWishlistMessage.style.display = "block";
+        if (noWishlistMessage) noWishlistMessage.style.display = "block";
         return;
       } else {
-        noWishlistMessage.style.display = "none";
+        if (noWishlistMessage) noWishlistMessage.style.display = "none";
       }
 
       data.wishlist.forEach(item => {
@@ -1327,7 +1350,7 @@ function loadWishlistBadge() {
             ${buttonHtml}
           </div>
         `;
-        container.appendChild(card);
+        if (container) container.appendChild(card);
       });
     })
     .catch(err => {
