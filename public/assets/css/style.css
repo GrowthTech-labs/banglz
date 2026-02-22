@@ -3134,6 +3134,26 @@ progress::-moz-progress-bar {
     font-weight: 600;
 }
 
+.tabs-head-content {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+}
+
+.tabs-head-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #856f5e;
+    margin-bottom: 15px;
+}
+
+.tabs-head-content p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
 .custom-slider {
     margin-top: 20px;
 }

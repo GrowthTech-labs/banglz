@@ -63,6 +63,50 @@
 
                     <hr>
 
+                    <h5>Configured Categories</h5>
+                    @php
+                        $configuredCategories = $collection->collectionCategories()->with('category')->orderBy('display_order')->get();
+                    @endphp
+                    
+                    @if($configuredCategories->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Title</th>
+                                        <th>Order</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($configuredCategories as $config)
+                                        <tr>
+                                            <td>{{ $config->category->name ?? '-' }}</td>
+                                            <td>{{ $config->title ?: '-' }}</td>
+                                            <td>{{ $config->display_order }}</td>
+                                            <td>
+                                                @if($config->status)
+                                                    <span class="badge bg-success">Active</span>
+                                                @else
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="{{ route('admin.catelog.manage-categories', $collection->id) }}" class="btn btn-sm btn-success mt-2">
+                            Manage Categories
+                        </a>
+                    @else
+                        <p class="text-muted">No categories configured yet.</p>
+                        <a href="{{ route('admin.catelog.manage-categories', $collection->id) }}" class="btn btn-sm btn-primary">
+                            Add Categories
+                        </a>
+                    @endif
+
                    
                 </div>
             </div>

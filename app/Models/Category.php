@@ -39,4 +39,11 @@ class Category extends Model
     return $this->hasMany(CategoryBox::class);
 }
 
+public function collections()
+{
+    return $this->belongsToMany(Collection::class, 'collection_categories', 'category_id', 'collection_id')
+                ->withPivot('title', 'description', 'images', 'display_order', 'status')
+                ->withTimestamps();
+}
+
 }

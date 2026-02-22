@@ -209,6 +209,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/catelog-create', [CatelogsController::class, 'create'])->name('admin.catelog.create');
         Route::post('/catelog-store', [CatelogsController::class, 'store'])->name('admin.catelog.store');
         Route::get('/catelog-edit/{id}', [CatelogsController::class, 'edit'])->name('admin.catelog.edit');
+        Route::get('/catelog-manage-categories/{id}', [CatelogsController::class, 'manageCategories'])->name('admin.catelog.manage-categories');
+        Route::get('/catelog-get-category-config/{collectionId}/{categoryId}', [CatelogsController::class, 'getCategoryConfig'])->name('admin.catelog.get-category-config');
+        Route::post('/catelog-save-category-config/{collectionId}', [CatelogsController::class, 'saveCategoryConfig'])->name('admin.catelog.save-category-config');
+        Route::delete('/catelog-delete-category-config/{collectionId}/{categoryId}', [CatelogsController::class, 'deleteCategoryConfig'])->name('admin.catelog.delete-category-config');
         Route::get('category', function () {
             return view('admin.category.category');
         })->name('admin.category');

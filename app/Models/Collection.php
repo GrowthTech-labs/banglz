@@ -24,4 +24,17 @@ public function products()
 {
     return $this->belongsToMany(Product::class, 'collection_products', 'collection_id', 'product_id');
 }
+
+public function categories()
+{
+    return $this->belongsToMany(Category::class, 'collection_categories', 'collection_id', 'category_id')
+                ->withPivot('title', 'description', 'images', 'display_order', 'status')
+                ->withTimestamps()
+                ->orderBy('display_order');
+}
+
+public function collectionCategories()
+{
+    return $this->hasMany(CollectionCategory::class);
+}
 }

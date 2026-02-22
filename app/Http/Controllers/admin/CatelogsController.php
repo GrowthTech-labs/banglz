@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
+use App\Models\CollectionCategory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,12 +44,15 @@ class CatelogsController extends Controller
         foreach ($catelogs as $catelog) {
    $actions = '
           <a href="' . route('admin.catelog.details', ['id' => $catelog->id]) . '">
-                <button type="button" class="btn btn-primary">View</button>
+                <button type="button" class="btn btn-primary btn-sm">View</button>
             </a>
-            <button type="button" class="btn btn-danger" onclick="confirmDelete(' . $catelog->id . ')">Delete</button>
-             <a href="' . route('admin.catelog.edit', ['id' => $catelog->id]) . '">
-        <button type="button" class="btn btn-info">Edit</button>
-    </a>
+            <a href="' . route('admin.catelog.edit', ['id' => $catelog->id]) . '">
+                <button type="button" class="btn btn-info btn-sm">Edit</button>
+            </a>
+            <a href="' . route('admin.catelog.manage-categories', ['id' => $catelog->id]) . '">
+                <button type="button" class="btn btn-success btn-sm">Manage Categories</button>
+            </a>
+            <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(' . $catelog->id . ')">Delete</button>
         ';
     //         $actions = '
     //       <a href="' . route('admin.catelog.details', ['id' => $catelog->id]) . '">
@@ -243,4 +247,164 @@ class CatelogsController extends Controller
                return view('admin.catalogs.create', compact('collection'));
 
     }
+
+    public function manageCategories($id)
+    {
+        $collection = Collection::with(['collectionCategories.category'])->findOrFail($id);
+        $allCategories = \App\Models\Category::whereNull('parent_id')->where('status', 1)->get();
+        
+        return view('admin.catalogs.manage-categories', compact('collection', 'allCategories'));
+    }
+
+    public function getCategoryConfig($collectionId, $categoryId)
+    {
+        $config = CollectionCategory::where('collection_id', $collectionId)
+                                    ->where('category_id', $categoryId)
+                                    ->first();
+        
+        return response()->json([
+            'status' => true,
+            'data' => $config
+        ]);
+    }
+
+    public function saveCategoryConfig(Request $request, $collectionId)
+    {
+        $uploadedImages = [];
+        
+        DB::beginTransaction();
+        try {
+            $validator = Validator::make($request->all(), [
+                'category_id' => 'required|exists:categories,id',
+                'title' => 'nullable|string|max:255',
+                'description' => 'nullable|string',
+                'status' => 'required|in:0,1',
+                'display_order' => 'nullable|integer',
+                'images' => 'nullable|array',
+                'images.*' => 'image',
+                'existing_images' => 'nullable|array',
+                'removed_existing_images' => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => implode(',', $validator->errors()->all()),
+                    'status' => false
+                ], 422);
+            }
+
+            // Handle uploaded files
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $file) {
+                    if ($file && $file->isValid()) {
+                        $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path('assets/images/collection_categories'), $name);
+                        $uploadedImages[] = $name;
+                    }
+                }
+            }
+
+            // Handle removed existing images
+            $removedExisting = json_decode($request->input('removed_existing_images', '[]'), true);
+            if (!is_array($removedExisting)) {
+                $removedExisting = [];
+            }
+            if (!empty($removedExisting)) {
+                foreach ($removedExisting as $filename) {
+                    $path = public_path('assets/images/collection_categories/' . $filename);
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                }
+            }
+
+            // Build final images array
+            $existingFromForm = $request->input('existing_images', []);
+            if (!is_array($existingFromForm)) {
+                $existingFromForm = [];
+            }
+            $allImages = array_values(array_merge($existingFromForm, $uploadedImages));
+
+            $data = [
+                'collection_id' => $collectionId,
+                'category_id' => $request->input('category_id'),
+                'title' => $request->input('title', ''),
+                'description' => $request->input('description', ''),
+                'status' => (int) $request->input('status', 1),
+                'display_order' => (int) $request->input('display_order', 0),
+                'images' => $allImages,
+            ];
+
+            CollectionCategory::updateOrCreate(
+                [
+                    'collection_id' => $collectionId,
+                    'category_id' => $request->input('category_id')
+                ],
+                $data
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Category configuration saved successfully.',
+                'status' => true
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // Cleanup newly uploaded images on error
+            if (!empty($uploadedImages)) {
+                foreach ($uploadedImages as $img) {
+                    $path = public_path('assets/images/collection_categories/' . $img);
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                }
+            }
+
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
+    }
+
+    public function deleteCategoryConfig($collectionId, $categoryId)
+    {
+        try {
+            $config = CollectionCategory::where('collection_id', $collectionId)
+                                       ->where('category_id', $categoryId)
+                                       ->first();
+            
+            if (!$config) {
+                return response()->json([
+                    'message' => 'Configuration not found',
+                    'status' => false
+                ], 404);
+            }
+
+            // Delete images
+            if (!empty($config->images) && is_array($config->images)) {
+                foreach ($config->images as $img) {
+                    $path = public_path('assets/images/collection_categories/' . $img);
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                }
+            }
+
+            $config->delete();
+
+            return response()->json([
+                'message' => 'Category configuration deleted successfully',
+                'status' => true
+            ], 200);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => false
+            ], 500);
+        }
+    }
+
 }
