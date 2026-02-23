@@ -204,25 +204,57 @@
 
 <script>
     $(document).ready(function() {
-        var isMobile = $(window).width() < 768;
-        console.log('Screen width:', $(window).width(), 'isMobile:', isMobile);
-        
         var table;
-        var mobileCurrentPage = 1;
-        var mobilePageSize = 10;
-        var mobileSearchTerm = '';
+        var isInitialized = false;
         
-        if (!isMobile) {
-            // Desktop DataTable
-            console.log('Initializing desktop table');
-            table = $('#detail-table').DataTable({
+        function initializeTable() {
+            var isMobile = $(window).width() < 768;
+            console.log('Initializing table, screen width:', $(window).width(), 'isMobile:', isMobile);
+            
+            // Destroy existing table if it exists
+            if (isInitialized && $.fn.DataTable.isDataTable('#detail-table')) {
+                console.log('Destroying existing table');
+                table.destroy();
+                // Rebuild table structure
+                $('#detail-table').html(`
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Available QTY</th>
+                            <th>Unavailable QTY</th>
+                            <th>Commited QTY</th>
+                            <th>On hand QTY</th>
+                            <th>Bangle</th>
+                            <th>Category</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `);
+            }
+            
+            // Show/hide appropriate views before initialization
+            if (isMobile) {
+                $('#mobile-products-view').show();
+                $('#mobile-loading').show();
+                $('#mobile-products-container').html('');
+                $('.client-table').hide();
+            } else {
+                $('#mobile-products-view').hide();
+                $('#mobile-loading').hide();
+                $('#mobile-products-container').html('');
+                $('.client-table').show();
+            }
+            
+            var tableConfig = {
                 processing: true,
                 serverSide: true,
                 ajax: {
                     url: "{{ route('admin .get-products-list') }}",
                     type: 'GET',
                     data: function(d) {
-                        d.search = $('#searchInput').val();
+                        d.search = isMobile ? $('#mobileSearchInput').val() : $('#searchInput').val();
                         if (d.order && d.order.length > 0) {
                             d.sort_by = d.columns[d.order[0].column].name;
                             d.sort_dir = d.order[0].dir;
@@ -247,7 +279,7 @@
                 pageLength: 10,
                 lengthChange: false,
                 searching: false,
-                ordering: true,
+                ordering: !isMobile,
                 order: [],
                 info: false,
                 autoWidth: false,
@@ -257,53 +289,15 @@
                     emptyTable: "No Product found",
                     zeroRecords: "No Product found"
                 }
-            });
-
-            var searchTimer;
-            $('#searchInput').on('keyup', function() {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(function() {
-                    table.ajax.reload();
-                }, 500);
-            });
-        } else {
-            // Mobile Card View
-            console.log('Initializing mobile view');
-            $('#mobile-products-view').show();
+            };
             
-            // Use DataTables API but render as cards
-            table = $('#detail-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('admin .get-products-list') }}",
-                    type: 'GET',
-                    data: function(d) {
-                        d.search = $('#mobileSearchInput').val();
-                        d.sort_by = 'id';
-                        d.sort_dir = 'desc';
-                    }
-                },
-                columns: [
-                    { data: 'name', name: 'name' },
-                    { data: 'price', name: 'price' },
-                    { data: 'available_quantity', name: 'available_quantity' },
-                    { data: 'unavailable_quantity', name: 'unavailable_quantity' },
-                    { data: 'commited_quantity', name: 'commited_quantity' },
-                    { data: 'on_hand_quantity', name: 'on_hand_quantity' },
-                    { data: 'is_bangle', name: 'is_bangle' },
-                    { data: 'category', name: 'category' },
-                    { data: 'action', name: 'action' }
-                ],
-                pageLength: 10,
-                lengthChange: false,
-                searching: false,
-                ordering: false,
-                info: false,
-                drawCallback: function(settings) {
+            // Add mobile-specific callback
+            if (isMobile) {
+                tableConfig.drawCallback = function(settings) {
                     var api = this.api();
                     var data = api.rows({page: 'current'}).data();
                     
+                    console.log('Mobile drawCallback triggered, data length:', data.length);
                     $('#mobile-loading').hide();
                     
                     if (data.length > 0) {
@@ -316,63 +310,50 @@
                         $('#mobile-products-container').html('<div class="text-center py-4"><p>No products found</p></div>');
                     }
                     
-                    // Update pagination
                     updateMobilePagination(api);
-                }
-            });
-            
-            var mobileSearchTimer;
-            $('#mobileSearchInput').on('keyup', function() {
-                clearTimeout(mobileSearchTimer);
-                mobileSearchTimer = setTimeout(function() {
-                    table.ajax.reload();
-                }, 500);
-            });
-        }
-        
-        function updateMobilePagination(api) {
-            var info = api.page.info();
-            var currentPage = info.page + 1;
-            var totalPages = info.pages;
-            
-            if (totalPages <= 1) {
-                $('#mobile-pagination').html('');
-                return;
+                };
+                
+                tableConfig.initComplete = function(settings, json) {
+                    console.log('Mobile table init complete, data:', json);
+                    $('#mobile-loading').hide();
+                    
+                    // Ensure drawCallback fires on init
+                    if (json && json.data && json.data.length > 0) {
+                        var html = '';
+                        json.data.forEach(function(product) {
+                            html += createProductCard(product);
+                        });
+                        $('#mobile-products-container').html(html);
+                        updateMobilePagination(this.api());
+                    } else {
+                        $('#mobile-products-container').html('<div class="text-center py-4"><p>No products found</p></div>');
+                    }
+                };
             }
             
-            var html = '<nav><ul class="pagination pagination-sm">';
-            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                        <a class="page-link mobile-page-link" href="#" data-page="${currentPage - 2}">Previous</a>
-                     </li>`;
+            table = $('#detail-table').DataTable(tableConfig);
+            isInitialized = true;
             
-            var startPage = Math.max(1, currentPage - 2);
-            var endPage = Math.min(totalPages, startPage + 4);
+            console.log('Table initialized, forcing initial draw');
             
-            if (endPage - startPage < 4) {
-                startPage = Math.max(1, endPage - 4);
+            // Setup search handlers
+            var searchTimer;
+            if (isMobile) {
+                $('#mobileSearchInput').off('keyup').on('keyup', function() {
+                    clearTimeout(searchTimer);
+                    searchTimer = setTimeout(function() {
+                        $('#mobile-loading').show();
+                        table.ajax.reload();
+                    }, 500);
+                });
+            } else {
+                $('#searchInput').off('keyup').on('keyup', function() {
+                    clearTimeout(searchTimer);
+                    searchTimer = setTimeout(function() {
+                        table.ajax.reload();
+                    }, 500);
+                });
             }
-            
-            for (var i = startPage; i <= endPage; i++) {
-                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                            <a class="page-link mobile-page-link" href="#" data-page="${i - 1}">${i}</a>
-                         </li>`;
-            }
-            
-            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                        <a class="page-link mobile-page-link" href="#" data-page="${currentPage}">Next</a>
-                     </li>`;
-            html += '</ul></nav>';
-            
-            $('#mobile-pagination').html(html);
-            
-            $('.mobile-page-link').on('click', function(e) {
-                e.preventDefault();
-                if (!$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
-                    var page = parseInt($(this).data('page'));
-                    table.page(page).draw('page');
-                    $('html, body').animate({ scrollTop: 0 }, 300);
-                }
-            });
         }
         
         function createProductCard(product) {
@@ -421,6 +402,86 @@
                 </div>
             `;
         }
+        
+        function updateMobilePagination(api) {
+            var info = api.page.info();
+            var currentPage = info.page + 1;
+            var totalPages = info.pages;
+            
+            if (totalPages <= 1) {
+                $('#mobile-pagination').html('');
+                return;
+            }
+            
+            var html = '<nav><ul class="pagination pagination-sm">';
+            html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link mobile-page-link" href="#" data-page="${currentPage - 2}">Previous</a>
+                     </li>`;
+            
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (var i = startPage; i <= endPage; i++) {
+                html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link mobile-page-link" href="#" data-page="${i - 1}">${i}</a>
+                         </li>`;
+            }
+            
+            html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link mobile-page-link" href="#" data-page="${currentPage}">Next</a>
+                     </li>`;
+            html += '</ul></nav>';
+            
+            $('#mobile-pagination').html(html);
+            
+            $('.mobile-page-link').off('click').on('click', function(e) {
+                e.preventDefault();
+                if (!$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                    var page = parseInt($(this).data('page'));
+                    table.page(page).draw('page');
+                    $('html, body').animate({ scrollTop: 0 }, 300);
+                }
+            });
+        }
+        
+        // Initialize on page load
+        initializeTable();
+        
+        // Handle window resize with debounce
+        var resizeTimer;
+        var lastWidth = $(window).width();
+        
+        $(window).on('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                var currentWidth = $(window).width();
+                var currentIsMobile = currentWidth < 768;
+                var lastIsMobile = lastWidth < 768;
+                
+                console.log('Resize check - Current width:', currentWidth, 'Last width:', lastWidth, 'Current mobile:', currentIsMobile, 'Last mobile:', lastIsMobile);
+                
+                // Only reinitialize if mobile state changed
+                if (currentIsMobile !== lastIsMobile) {
+                    console.log('Screen size crossed breakpoint, reinitializing...');
+                    
+                    // Show loader immediately for mobile
+                    if (currentIsMobile) {
+                        $('#mobile-products-view').show();
+                        $('#mobile-loading').show();
+                        $('#mobile-products-container').html('');
+                    }
+                    
+                    // Reinitialize table
+                    initializeTable();
+                }
+                
+                lastWidth = currentWidth;
+            }, 250);
+        });
     });
 
     function confirmDelete(id) {
