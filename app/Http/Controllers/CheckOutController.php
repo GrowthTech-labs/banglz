@@ -320,6 +320,86 @@ $isMixed = (
         $gift_cards_total = $request->input('giftCardsTotal', 0);
         // $amount = $amount + ($gift_cards_total * 100);
 
+        // ✅ BYPASS PAYMENT FOR TESTING
+        if (env('BYPASS_PAYMENT', false)) {
+            \Log::info('Payment bypassed for testing', [
+                'amount' => $amount,
+                'user_id' => $user ? $user->id : null,
+            ]);
+            
+            if ($request->type == 'gift_card') {
+                $giftcard = $this->giftCardOrder($gift_meta_data);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Gift card order placed successfully (payment bypassed)',
+                    'amount' => 0,
+                    'is_free' => true,
+                    'date' => now()->toDateString(),
+                ]);
+            } else if ($request->type == 'product') {
+                $order = $this->StoreOrder([
+                    'user_id' => $user ? $user->id : null,
+                    'session_id' => $sessionId,
+                    'products_meta_data' => json_encode($request->input('products_meta_data')),
+                    'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
+                    'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
+                    'bangle_box_meta_data' => json_encode($request->input('bangle_box_meta_data')),
+                    'total_amount' => $request->input('amount'),
+                    'tax' => $request->input('tax'),
+                    'shipping_fee' => $request->input('shipping_fee'),
+                    'us_import_duties' => $request->input('us_import_duties', 0),
+                    'status' => 'pending',
+                    'email' => $request->input('email'),
+                    'payment_status' => 'paid',
+                    'user_meta_data' => json_encode($request->input('users_meta_data')),
+                    'applied_points' => $request->input('applied_points', 0),
+                    'applied_shipping' => $request->input('applied_shipping', false),
+                    'rewards_discount' => $request->input('rewards_discount', 0),
+                    'sub_total' => $request->input('subtotal', 0),
+                ]);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Order placed successfully (payment bypassed)',
+                    'amount' => $request->input('amount'),
+                    'is_free' => false,
+                    'order_id' => $order->order_id,
+                    'date' => $order->created_at->toDateString(),
+                ]);
+            } else if ($request->type == 'both') {
+                $giftcard = $this->giftCardOrder($gift_meta_data);
+                $order = $this->StoreOrder([
+                    'user_id' => $user ? $user->id : null,
+                    'session_id' => $sessionId,
+                    'products_meta_data' => json_encode($request->input('products_meta_data')),
+                    'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
+                    'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
+                    'bangle_box_meta_data' => json_encode($request->input('bangle_box_meta_data')),
+                    'total_amount' => $request->input('amount'),
+                    'tax' => $request->input('tax'),
+                    'shipping_fee' => $request->input('shipping_fee'),
+                    'us_import_duties' => $request->input('us_import_duties', 0),
+                    'status' => 'pending',
+                    'email' => $request->input('email'),
+                    'payment_status' => 'paid',
+                    'user_meta_data' => json_encode($request->input('users_meta_data')),
+                    'applied_points' => $request->input('applied_points', 0),
+                    'applied_shipping' => $request->input('applied_shipping', false),
+                    'rewards_discount' => $request->input('rewards_discount', 0),
+                    'sub_total' => $request->input('subtotal', 0),
+                ]);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Order placed successfully (payment bypassed)',
+                    'amount' => $request->input('amount'),
+                    'is_free' => false,
+                    'order_id' => $order->order_id,
+                    'date' => $order->created_at->toDateString(),
+                ]);
+            }
+        }
+
         if ($amount <= 0) {
 
             if ($request->type == 'gift_card') {
