@@ -505,6 +505,15 @@ body, html {
   padding-left: 20px;
 }
 
+.nav-item ul.nav-second-level > .nav-item .nav-link {
+  padding-left: 50px !important;
+  font-size: 15px !important;
+}
+
+.nav-item ul.nav-second-level > .nav-item .nav-link .nav-link-text {
+  padding-left: 0 !important;
+}
+
 .has-search-input .form-control {
   padding-left: 2.375rem;
 }
@@ -666,6 +675,44 @@ body, html {
     display: -ms-flexbox;
     display: flex;
   }
+  
+  /* Submenu styles for desktop */
+  .sidenav .nav-second-level {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+    margin: 5px 0;
+    padding-left: 0 !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item {
+    margin: 0;
+    padding: 5px 10px 5px 30px;
+    background: transparent !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item .nav-link {
+    padding-left: 20px !important;
+    font-size: 15px !important;
+    color: #ffffff !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item .nav-link:hover {
+    color: #ffffff !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item.active {
+    background: rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item.active .nav-link {
+    color: #ffffff !important;
+    font-weight: 600;
+  }
+  
   .search-field-outer {
     width: 47%;
     margin: 0 auto;
@@ -867,6 +914,10 @@ body, html {
   .sidenav .collapse .nav-link {
     font-size: 15px !important;
     padding-left: 10px !important;
+  }
+  
+  .sidenav .nav-second-level > .nav-item .nav-link {
+    padding-left: 30px !important;
   }
   
   /* Dropdown toggle icon rotation */

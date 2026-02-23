@@ -113,52 +113,46 @@
                         height="30">
                     Orders</a>
             </li>
-               @php
-    // Detect if any of the submenu routes are active
-    $bangleActive = request()->routeIs('admin.banglez-size') ||
-                    request()->routeIs('admin.box-sizes') ||
-                    request()->routeIs('admin.bangle-box-colors');
-@endphp
+            @php
+                // Detect if any of the submenu routes are active
+                $bangleActive = request()->routeIs('admin.banglez-size') ||
+                                request()->routeIs('admin.box-sizes') ||
+                                request()->routeIs('admin.bangle-box-colors');
+            @endphp
 
-<li class="nav-item">
-    <a class="nav-link sidenav-item d-flex align-items-center justify-content-between toggle-menu" 
-       data-bs-toggle="collapse" 
-       href="#bangleBoxMenu" 
-       role="button" 
-       aria-expanded="{{ $bangleActive ? 'true' : 'false' }}" 
-       aria-controls="bangleBoxMenu"
-       onclick="return false;">
-        
-        <div class="d-flex align-items-center">
-            <img src="{{ asset('assets/images/admin/plots.svg') }}" class="icon-white pr-2" width="30" height="30">
-            <img src="{{ asset('assets/images/admin/blue-plots.png') }}" class="icon-blue pr-2" width="30" height="30">
-            Bangle Box
-        </div>
+            <li class="nav-item">
+                <a class="nav-link sidenav-item nav-link-collapse {{ $bangleActive ? 'nav-link-show' : '' }}" 
+                   data-toggle="collapse" 
+                   href="#bangleBoxMenu" 
+                   role="button" 
+                   aria-expanded="{{ $bangleActive ? 'true' : 'false' }}" 
+                   aria-controls="bangleBoxMenu">
+                    <img src="{{ asset('assets/images/admin/plots.svg') }}" class="icon-white pr-2" width="30" height="30">
+                    <img src="{{ asset('assets/images/admin/blue-plots.png') }}" class="icon-blue pr-2" width="30" height="30">
+                    <span class="nav-link-text">Bangle Box</span>
+                </a>
 
-        <i class="fa fa-chevron-down small rotate-icon {{ $bangleActive ? 'rotated' : '' }}"></i>
-    </a>
-
-    <ul class="collapse list-unstyled ms-4 {{ $bangleActive ? 'show' : '' }}" id="bangleBoxMenu">
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.banglez-size') ? 'active' : '' }}" 
-               href="{{ route('admin.banglez-size') }}">
-               Bangle Sizes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.box-sizes') ? 'active' : '' }}" 
-               href="{{ route('admin.box-sizes') }}">
-               Box Sizes
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request()->routeIs('admin.bangle-box-colors') ? 'active' : '' }}" 
-               href="{{ route('admin.bangle-box-colors') }}">
-               Bangle Box Colors
-            </a>
-        </li>
-    </ul>
-</li>
+                <ul class="nav-second-level collapse {{ $bangleActive ? 'show' : '' }}" id="bangleBoxMenu">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.banglez-size') ? 'active' : '' }}" 
+                           href="{{ route('admin.banglez-size') }}">
+                           <span class="nav-link-text">Bangle Sizes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.box-sizes') ? 'active' : '' }}" 
+                           href="{{ route('admin.box-sizes') }}">
+                           <span class="nav-link-text">Box Sizes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.bangle-box-colors') ? 'active' : '' }}" 
+                           href="{{ route('admin.bangle-box-colors') }}">
+                           <span class="nav-link-text">Bangle Box Colors</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
 
 

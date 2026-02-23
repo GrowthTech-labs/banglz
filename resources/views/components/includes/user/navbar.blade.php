@@ -447,6 +447,54 @@
         </div>
     </div>
 
+    {{-- New Mobile Menu --}}
+    <div class="mobile-menu-overlay-new"></div>
+    <div class="mobile-side-menu">
+        <div class="mobile-menu-header">
+            <h3>Menu</h3>
+            <button class="mobile-menu-close" aria-label="Close menu">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            <ul class="mobile-categories-list">
+                @foreach ($categories as $category)
+                <li class="mobile-category-item" data-category-id="{{ $category->id }}">
+                    @if (!empty($category->subcategories) && count($category->subcategories) > 0)
+                        <a href="javascript:void(0);" class="mobile-category-toggle">
+                            {{ strtoupper($category->name) }}
+                            <i class="fa fa-chevron-down"></i>
+                        </a>
+                        <ul class="mobile-subcategories">
+                            @foreach ($category->subcategories as $subcategory)
+                            <li>
+                                <a href="{{ route('shop-all', ['slug' => $category->slug, 'subcategory' => $subcategory->slug]) }}">
+                                    {{ strtoupper($subcategory->name) }}
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <a href="javascript:void(0);">{{ strtoupper($category->name) }}</a>
+                    @endif
+                </li>
+                @endforeach
+                <li class="mobile-category-item">
+                    <a href="{{ url('/appointment') }}">APPOINTMENT</a>
+                </li>
+                <li class="mobile-category-item">
+                    <a href="{{ url('about-us') }}?tab=About-Us">About Us</a>
+                </li>
+                <li class="mobile-category-item">
+                    <a href="{{ url('contact-us') }}">Contact Us</a>
+                </li>
+                <li class="mobile-category-item">
+                    <a href="{{ url('resource') }}">Resource</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
 
 
 
