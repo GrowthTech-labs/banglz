@@ -215,29 +215,29 @@
 <!-- Other Auto-Filled Fields -->
 <div class="name-fields" style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
     <div class="input-field">
-        <input type="text" id="country" name="country" placeholder="Country / Region" readonly>
+        <input type="text" id="country" name="country" placeholder="Country / Region" {{ env('BYPASS_PAYMENT') ? '' : 'readonly' }}>
         <span id="error-country" class="field-error text-danger"></span>
     </div>
     <div class="input-field">
-        <input type="text" id="city" name="city" placeholder="Town / City" readonly>
+        <input type="text" id="city" name="city" placeholder="Town / City" {{ env('BYPASS_PAYMENT') ? '' : 'readonly' }}>
         <span id="error-city" class="field-error text-danger"></span>
     </div>
 </div>
 
 <div class="name-fields" style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
     <div class="input-field">
-        <input type="text" id="state" name="state" placeholder="State / Province" readonly>
+        <input type="text" id="state" name="state" placeholder="State / Province" {{ env('BYPASS_PAYMENT') ? '' : 'readonly' }}>
         <span id="error-state" class="field-error text-danger"></span>
     </div>
     <div class="input-field">
-        <input type="text" id="postcode" name="postcode" placeholder="Postcode" readonly>
+        <input type="text" id="postcode" name="postcode" placeholder="Postcode" {{ env('BYPASS_PAYMENT') ? '' : 'readonly' }}>
         <span id="error-postcode" class="field-error text-danger"></span>
     </div>
 </div>
 
 <div class="name-fields" style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
     <div class="input-field">
-        <input type="text" id="street" name="street" placeholder="Street" readonly>
+        <input type="text" id="street" name="street" placeholder="Street" {{ env('BYPASS_PAYMENT') ? '' : 'readonly' }}>
         <span id="error-street" class="field-error text-danger"></span>
     </div>
 </div>
@@ -1584,5 +1584,62 @@ document.addEventListener("click", function(e) {
 });
 
 </script>
+
+@if(env('BYPASS_PAYMENT'))
+<script>
+// Manual address entry helper for testing
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🧪 Testing mode: Manual address entry enabled');
+    
+    // Auto-fill hidden fields when manual fields are changed
+    const updateHiddenFields = () => {
+        const country = document.getElementById('country').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const postcode = document.getElementById('postcode').value;
+        const street = document.getElementById('street').value;
+        
+        // Set hidden fields
+        document.getElementById('country_iso').value = country === 'Canada' ? 'CA' : 'US';
+        document.getElementById('province_code').value = state === 'Ontario' ? 'ON' : state.substring(0, 2).toUpperCase();
+        document.getElementById('latitude').value = '43.6532';  // Toronto default
+        document.getElementById('longitude').value = '-79.3832';
+        document.getElementById('formatted_address').value = `${street}, ${city}, ${state} ${postcode}, ${country}`;
+        document.getElementById('autocomplete').value = `${street}, ${city}`;
+    };
+    
+    // Add listeners to manual fields
+    ['country', 'city', 'state', 'postcode', 'street'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener('change', updateHiddenFields);
+            field.addEventListener('blur', updateHiddenFields);
+        }
+    });
+    
+    // Quick fill button
+    const quickFillBtn = document.createElement('button');
+    quickFillBtn.type = 'button';
+    quickFillBtn.textContent = '🧪 Quick Fill Test Address';
+    quickFillBtn.className = 'btn btn-secondary';
+    quickFillBtn.style.cssText = 'margin: 10px 0; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;';
+    quickFillBtn.onclick = function() {
+        document.getElementById('country').value = 'Canada';
+        document.getElementById('city').value = 'Toronto';
+        document.getElementById('state').value = 'Ontario';
+        document.getElementById('postcode').value = 'M5H 2N2';
+        document.getElementById('street').value = '123 Main Street';
+        updateHiddenFields();
+        console.log('✅ Test address filled');
+    };
+    
+    const autocompleteField = document.getElementById('autocomplete');
+    if (autocompleteField && autocompleteField.parentNode) {
+        autocompleteField.parentNode.appendChild(quickFillBtn);
+    }
+});
+</script>
+@endif
+
     </x-slot>
 </x-layouts.user-default>
