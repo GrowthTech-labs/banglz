@@ -83,7 +83,11 @@ class ProductsController extends Controller
             ->distinct();
 
         // Category / subcategory filtering
-        if ($subSlug = request('subcategory')) {
+        // Use route parameter $subcategory OR query parameter 'subcategory'
+        $subSlug = $subcategory ?: request('subcategory');
+        
+        if ($subSlug) {
+            // Show only specific subcategory products
             $sub = Category::where('slug', $subSlug)
                 ->where('parent_id', $category->id)
                 ->first();
@@ -93,6 +97,7 @@ class ProductsController extends Controller
                 $query->whereIn('products.category_id', $categoryIds);
             }
         } else {
+            // Show all products from parent and all children
             $query->whereIn('products.category_id', $categoryIds);
         }
 
@@ -234,18 +239,22 @@ class ProductsController extends Controller
             $query->latest('products.created_at');
         }
         $products = $query->paginate(10)->appends(request()->query());
- $boxCategory = $category; // default: parent
-    if ($subSlug = request('subcategory')) {
-        $sub = Category::where('slug', $subSlug)
-            ->where('parent_id', $category->id)
-            ->first();
-        if ($sub) {
-            $boxCategory = $sub;
+        
+        // Determine which category to use for boxes
+        $boxCategory = $category; // default: parent
+        $subSlug = $subcategory ?: request('subcategory');
+        
+        if ($subSlug) {
+            $sub = Category::where('slug', $subSlug)
+                ->where('parent_id', $category->id)
+                ->first();
+            if ($sub) {
+                $boxCategory = $sub;
+            }
         }
-    }
 
-    // Fetch boxes for the final category
-    $boxes = $boxCategory->boxes ?? collect();
+        // Fetch boxes for the final category
+        $boxes = $boxCategory->boxes ?? collect();
         if (request()->ajax()) {
         //          return response()->json([
         //     'html'  => view('pages.partials.product-list', compact('products'))->render(),

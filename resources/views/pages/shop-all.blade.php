@@ -268,11 +268,11 @@
                                 </div>
 
                                 <div class="earing-main-grid" id="productList">
-                                    @if(isset($subcategories) && $subcategories->count() > 0)
-                                        {{-- Has subcategories: show loading placeholder, JavaScript will load products --}}
+                                    @if(isset($subcategories) && $subcategories->count() > 0 && ($subcategory || request('subcategory')))
+                                        {{-- Has subcategories AND a specific subcategory is selected: show loading placeholder, JavaScript will load products --}}
                                         <div class="no-results">Loading....</div>
                                     @else
-                                        {{-- No subcategories: render products server-side --}}
+                                        {{-- No subcategories OR showing all products: render products server-side --}}
                                         @include('pages.partials.product-list', ['products' => $products])
                                     @endif
                                 </div>
@@ -604,8 +604,8 @@
                 });
             }
 
-            // currentSubSlug defaults to requested subcategory if present, otherwise first subcategory slug (server-side)
-            let currentSubSlug = @json(request('subcategory') ?? (isset($subcategories) && $subcategories->count() > 0 ? $subcategories->first()->slug : ''));
+            // currentSubSlug should be empty when showing all products
+            let currentSubSlug = @json(request('subcategory') ?? $subcategory ?? '');
 
             // Attach tab click handlers
             shopTabs.forEach(tab => {
