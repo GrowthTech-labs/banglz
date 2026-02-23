@@ -19,6 +19,8 @@
             <a href="{{ route('admin.page-settings.create') }}" class="btn text-white " style="background-color: #6cc2b6; border-color: #6cc2b6;">+ Add New Setting</a>
         </div>
     </div>
+    
+    <!-- Desktop Table View -->
     <div class="client-table pt-2">
         <div class="row g-2 align-items-center mb-3">
             <div class="col-1">
@@ -40,15 +42,28 @@
                 </tr>
             </thead>
             <tbody>
-
-                <tr>
-
-                    <!-- <td><a href="#"><button type="button" class="btn btn-primary">View</button></a></td> -->
-                </tr>
-
+                <tr></tr>
             </tbody>
         </table>
     </div>
+    
+    <!-- Mobile Card View -->
+    <div id="mobile-page-settings-view" class="mobile-view-container">
+        <div class="mb-3">
+            <input type="text" id="mobileSearchInput" class="form-control" placeholder="Search Page Settings...">
+        </div>
+        <div id="mobile-page-settings-container">
+            <!-- Page settings will be loaded here via JavaScript -->
+        </div>
+        <div id="mobile-loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading page settings...</p>
+        </div>
+        <div id="mobile-pagination" class="d-flex justify-content-center mt-3">
+            <!-- Pagination will be added here -->
+        </div>
     </div>
 
     <form id="delete-form" method="POST" style="display: none;">
@@ -71,57 +86,277 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    var table = $('#page-setting-table').DataTable({
-    processing: true,
-    serverSide: true,
-    ajax: {
-        url: "{{ route('admin.get-page-setting-list') }}",
-        type: 'GET',
-        data: function(d) {
-            d.search_custom = $('#searchInput').val(); // custom search
-            if (d.order && d.order.length > 0) {
-                let columnIndex = d.order[0].column;
-                d.sort_by = d.columns[columnIndex].data;
-                d.sort_dir = d.order[0].dir;
-            } else {
-                d.sort_by = 'id';
-                d.sort_dir = 'desc';
+    var table;
+    var isInitialized = false;
+    
+    function initializeTable() {
+        var isMobile = $(window).width() < 768;
+        console.log('Initializing table, screen width:', $(window).width(), 'isMobile:', isMobile);
+        
+        // Destroy existing table if it exists
+        if (isInitialized && $.fn.DataTable.isDataTable('#page-setting-table')) {
+            console.log('Destroying existing table');
+            table.destroy();
+            // Rebuild table structure
+            $('#page-setting-table').html(`
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Heading</th>
+                        <th>Description</th>
+                        <th>Page Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `);
+        }
+        
+        // Show/hide appropriate views before initialization
+        if (isMobile) {
+            $('#mobile-page-settings-view').show();
+            $('#mobile-loading').show();
+            $('#mobile-page-settings-container').html('');
+            $('.client-table').hide();
+        } else {
+            $('#mobile-page-settings-view').hide();
+            $('#mobile-loading').hide();
+            $('#mobile-page-settings-container').html('');
+            $('.client-table').show();
+        }
+        
+        var tableConfig = {
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('admin.get-page-setting-list') }}",
+                type: 'GET',
+                data: function(d) {
+                    d.search_custom = isMobile ? $('#mobileSearchInput').val() : $('#searchInput').val();
+                    if (d.order && d.order.length > 0) {
+                        let columnIndex = d.order[0].column;
+                        d.sort_by = d.columns[columnIndex].data;
+                        d.sort_dir = d.order[0].dir;
+                    } else {
+                        d.sort_by = 'id';
+                        d.sort_dir = 'desc';
+                    }
+                }
+            },
+            columns: [
+                { data: 'image', name: 'image', orderable: false },
+                { data: 'heading', name: 'heading', orderable: true },
+                { data: 'description', name: 'description', orderable: false },
+                { data: 'page_name', name: 'page_name', orderable: true },
+                { data: 'action', name: 'action', orderable: false }
+            ],
+            dom: 't<"row justify-content-end"<"col-sm-12 col-md-5"p>>',
+            pageLength: 10,
+            lengthChange: false,
+            searching: false,
+            ordering: !isMobile,
+            order: [],
+            info: false,
+            autoWidth: false,
+            responsive: true,
+            language: {
+                processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>',
+                emptyTable: "No Page found",
+                zeroRecords: "No Page found"
+            }
+        };
+        
+        // Add mobile-specific callback
+        if (isMobile) {
+            tableConfig.drawCallback = function(settings) {
+                var api = this.api();
+                var data = api.rows({page: 'current'}).data();
+                
+                console.log('Mobile drawCallback triggered, data length:', data.length);
+                $('#mobile-loading').hide();
+                
+                if (data.length > 0) {
+                    var html = '';
+                    data.each(function(pageSetting) {
+                        html += createPageSettingCard(pageSetting);
+                    });
+                    $('#mobile-page-settings-container').html(html);
+                } else {
+                    $('#mobile-page-settings-container').html('<div class="text-center py-4"><p>No page settings found</p></div>');
+                }
+                
+                updateMobilePagination(api);
+            };
+            
+            tableConfig.initComplete = function(settings, json) {
+                console.log('Mobile table init complete, data:', json);
+                $('#mobile-loading').hide();
+                
+                // Ensure drawCallback fires on init
+                if (json && json.data && json.data.length > 0) {
+                    var html = '';
+                    json.data.forEach(function(pageSetting) {
+                        html += createPageSettingCard(pageSetting);
+                    });
+                    $('#mobile-page-settings-container').html(html);
+                    updateMobilePagination(this.api());
+                } else {
+                    $('#mobile-page-settings-container').html('<div class="text-center py-4"><p>No page settings found</p></div>');
+                }
+            };
+        }
+        
+        table = $('#page-setting-table').DataTable(tableConfig);
+        isInitialized = true;
+        
+        console.log('Table initialized');
+        
+        // Setup search handlers
+        var searchTimer;
+        if (isMobile) {
+            $('#mobileSearchInput').off('keyup').on('keyup', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() {
+                    $('#mobile-loading').show();
+                    table.ajax.reload();
+                }, 500);
+            });
+        } else {
+            $('#searchInput').off('keyup').on('keyup', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() {
+                    table.ajax.reload();
+                }, 500);
+            });
+        }
+    }
+    
+    function createPageSettingCard(pageSetting) {
+        // Truncate description if too long
+        var description = pageSetting.description || 'N/A';
+        // Strip HTML tags for mobile display
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = description;
+        description = tempDiv.textContent || tempDiv.innerText || 'N/A';
+        if (description.length > 100) {
+            description = description.substring(0, 100) + '...';
+        }
+        
+        // Extract image from HTML
+        var imageHtml = '';
+        if (pageSetting.image) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pageSetting.image;
+            var imgTag = tempDiv.querySelector('img');
+            if (imgTag) {
+                imageHtml = `<div class="page-setting-card-image"><img src="${imgTag.src}" alt="Page Image"></div>`;
             }
         }
-    },
-    columns: [
-        { data: 'image', name: 'image', orderable: false },
-        { data: 'heading', name: 'heading', orderable: true },
-        // { data: 'sub_heading', name: 'sub_heading', orderable: true },
-        { data: 'description', name: 'description', orderable: false },
-        { data: 'page_name', name: 'page_name', orderable: true },
-        { data: 'action', name: 'action', orderable: false }
-    ],
-    dom: 't<"row justify-content-end"<"col-sm-12 col-md-5"p>>',
-    pageLength: 10,
-    lengthChange: false,
-    searching: false, // disable built-in search
-    ordering: true,
-    order: [],
-    info: false,
-    autoWidth: false,
-    responsive: true,
-    language: {
-        processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>',
-        emptyTable: "No Page found",
-        zeroRecords: "No Page found"
+        
+        return `
+            <div class="page-setting-card">
+                <div class="page-setting-card-header">
+                    <div class="page-setting-card-title">${pageSetting.heading || 'N/A'}</div>
+                </div>
+                ${imageHtml}
+                <div class="page-setting-card-body">
+                    <div class="page-setting-card-field">
+                        <span class="page-setting-card-label">Page Name</span>
+                        <span class="page-setting-card-value">${pageSetting.page_name || 'N/A'}</span>
+                    </div>
+                    <div class="page-setting-card-field">
+                        <span class="page-setting-card-label">Description</span>
+                        <span class="page-setting-card-value">${description}</span>
+                    </div>
+                </div>
+                <div class="page-setting-card-actions">
+                    ${pageSetting.action}
+                </div>
+            </div>
+        `;
     }
-});
-
-// 🔍 trigger reload when typing in custom search
-var searchTimer;
-$('#searchInput').on('keyup', function() {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(function() {
-        table.ajax.reload();
-    }, 500);
-});
-
+    
+    function updateMobilePagination(api) {
+        var info = api.page.info();
+        var currentPage = info.page + 1;
+        var totalPages = info.pages;
+        
+        if (totalPages <= 1) {
+            $('#mobile-pagination').html('');
+            return;
+        }
+        
+        var html = '<nav><ul class="pagination pagination-sm">';
+        html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link mobile-page-link" href="#" data-page="${currentPage - 2}">Previous</a>
+                 </li>`;
+        
+        var startPage = Math.max(1, currentPage - 2);
+        var endPage = Math.min(totalPages, startPage + 4);
+        
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+        
+        for (var i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link mobile-page-link" href="#" data-page="${i - 1}">${i}</a>
+                     </li>`;
+        }
+        
+        html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link mobile-page-link" href="#" data-page="${currentPage}">Next</a>
+                 </li>`;
+        html += '</ul></nav>';
+        
+        $('#mobile-pagination').html(html);
+        
+        $('.mobile-page-link').off('click').on('click', function(e) {
+            e.preventDefault();
+            if (!$(this).parent().hasClass('disabled') && !$(this).parent().hasClass('active')) {
+                var page = parseInt($(this).data('page'));
+                table.page(page).draw('page');
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            }
+        });
+    }
+    
+    // Initialize on page load
+    $(document).ready(function() {
+        initializeTable();
+    });
+    
+    // Handle window resize with debounce
+    var resizeTimer;
+    var lastWidth = $(window).width();
+    
+    $(window).on('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            var currentWidth = $(window).width();
+            var currentIsMobile = currentWidth < 768;
+            var lastIsMobile = lastWidth < 768;
+            
+            console.log('Resize check - Current width:', currentWidth, 'Last width:', lastWidth);
+            
+            // Only reinitialize if mobile state changed
+            if (currentIsMobile !== lastIsMobile) {
+                console.log('Screen size crossed breakpoint, reinitializing...');
+                
+                // Show loader immediately for mobile
+                if (currentIsMobile) {
+                    $('#mobile-page-settings-view').show();
+                    $('#mobile-loading').show();
+                    $('#mobile-page-settings-container').html('');
+                }
+                
+                // Reinitialize table
+                initializeTable();
+            }
+            
+            lastWidth = currentWidth;
+        }, 250);
+    });
 
     function confirmDelete(id) {
         Swal.fire({
@@ -174,9 +409,7 @@ $('#searchInput').on('keyup', function() {
             }
         });
     }
- </script>
-
-
+</script>
 
 <script>
     $('.sidenav  li:nth-of-type(9)').addClass('active');

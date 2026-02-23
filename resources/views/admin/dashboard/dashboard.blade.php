@@ -162,7 +162,9 @@
       <div class="heading-top top-product-heading">
         <h1>Top Products</h1>
       </div>
-      <div class="client-table product-table">
+      
+      <!-- Desktop Table View -->
+      <div class="client-table product-table" id="desktop-top-products">
         <table id="detail-table" class="detail-client-table table-responsive">
           <thead>
             <tr>
@@ -171,7 +173,6 @@
               <th class="table-heading">Product Quantity</th>
               <th class="table-heading">Product Category</th>
               <th class="table-heading">Action</th>
-
             </tr>
           </thead>
           <tbody>
@@ -186,19 +187,56 @@
                 <a href="{{ route('product.details', ['id' => $topProduct['id']]) }}">
                   <button type="button" class="btn btn-primary btn-sm">View</button>
                 </a>
-
                 <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $topProduct['id'] }})">Delete</button>
-
-<a href="{{ route('admin.product.edit', ['id' => $topProduct->id]) }}">
-    <button type="button" class="btn btn-info btn-sm">Edit</button>
-</a>
-
+                <a href="{{ route('admin.product.edit', ['id' => $topProduct->id]) }}">
+                  <button type="button" class="btn btn-info btn-sm">Edit</button>
+                </a>
               </td>
             </tr>
             @endforeach
             @endif
           </tbody>
         </table>
+      </div>
+      
+      <!-- Mobile Card View -->
+      <div id="mobile-top-products-view" class="mobile-view-container">
+        @if(sizeof($topProducts)>0)
+          @foreach($topProducts as $topProduct)
+          <div class="top-product-card">
+            <div class="top-product-card-header">
+              <div class="top-product-card-title">{{$topProduct['name'] ?? '-'}}</div>
+            </div>
+            <div class="top-product-card-body">
+              <div class="top-product-card-field">
+                <span class="top-product-card-label">Price</span>
+                <span class="top-product-card-value">{{$topProduct['price'] ?? '-'}}</span>
+              </div>
+              <div class="top-product-card-field">
+                <span class="top-product-card-label">Quantity</span>
+                <span class="top-product-card-value">{{$topProduct['quantity'] ?? '-'}}</span>
+              </div>
+              <div class="top-product-card-field full-width">
+                <span class="top-product-card-label">Category</span>
+                <span class="top-product-card-value">{{$topProduct['category']['name'] ?? '-'}}</span>
+              </div>
+            </div>
+            <div class="top-product-card-actions">
+              <a href="{{ route('product.details', ['id' => $topProduct['id']]) }}">
+                <button type="button" class="btn btn-primary btn-sm">View</button>
+              </a>
+              <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $topProduct['id'] }})">Delete</button>
+              <a href="{{ route('admin.product.edit', ['id' => $topProduct->id]) }}">
+                <button type="button" class="btn btn-info btn-sm">Edit</button>
+              </a>
+            </div>
+          </div>
+          @endforeach
+        @else
+          <div class="text-center py-4">
+            <p>No top products found</p>
+          </div>
+        @endif
       </div>
     </div>
 

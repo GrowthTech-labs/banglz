@@ -29,99 +29,319 @@ body, html {
 }
 
 .login-heading {
-  padding-bottom: 50px;
+  padding-bottom: 30px;
 }
 
 .login-heading img {
-  width:200px !important;
+  width: 150px !important;
+  max-width: 100%;
 }
 
 .login-heading h1 {
-  color: #6cc2b6  ;
-  font-size: 35px;
+  color: #6cc2b6;
+  font-size: 28px;
   font-weight: bold;
-  padding-top: 20px;
+  padding-top: 15px;
 }
 
 .login-email-field {
-  width: 80%;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0 auto 20px;
 }
 
 .login-email-field label {
-  color: #6cc2b6  ;
+  color: #6cc2b6;
   font-size: 16px;
   font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .login-email-field input {
   background-color: transparent;
-  height: 60px;
+  height: 50px;
   border-radius: 10px;
   border: 1px solid #797979;
+  width: 100%;
+  padding: 0 15px;
 }
 
-.login-email-field input:active, .login-email-field input:focus {
+.login-email-field input:active,
+.login-email-field input:focus {
   background-color: transparent;
-  height: 60px;
-  border-radius: 10px;
-  border: 1px solid #797979;
+  border: 1px solid #6cc2b6;
   outline: none !important;
-  -webkit-box-shadow: none !important;
-          box-shadow: none !important;
+  box-shadow: none !important;
 }
 
 .login-email-field input,
 .login-email-field input:hover,
 .login-email-field input:focus,
 .login-email-field input:active {
-  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
-          box-shadow: 0 0 0 30px #ffffff inset !important;
+  box-shadow: 0 0 0 30px #ffffff inset !important;
+}
+
+#login-page {
+  padding: 30px 20px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-content-outer {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  height: 100%;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .login-content {
-  width: 80%;
+  width: 100%;
+  padding: 20px;
 }
 
-#login-page{
-  padding: 30px 300px;
+.login-heading {
+  padding-bottom: 30px;
+}
+
+.login-heading img {
+  width: 150px !important;
+  max-width: 100%;
+}
+
+.login-heading h1 {
+  color: #6cc2b6;
+  font-size: 28px;
+  font-weight: bold;
+  padding-top: 15px;
+}
+
+.login-email-field {
+  width: 100%;
+  margin: 0 auto 20px;
+}
+
+.login-email-field label {
+  color: #6cc2b6;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.login-email-field input {
+  background-color: transparent;
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid #797979;
+  width: 100%;
+  padding: 0 15px;
+}
+
+.login-email-field input:active,
+.login-email-field input:focus {
+  background-color: transparent;
+  border: 1px solid #6cc2b6;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .login-button-outer {
-  padding-top: 50px;
-  padding-bottom: 50px;
+  padding-top: 30px;
+  padding-bottom: 20px;
 }
 
 .login-button-outer .login-btn {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #6cc2b7a1 , #24d8c0);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #6cc2b7a1, #24d8c0);
   color: #ffffff;
   border: none;
   height: 50px;
-  width: 250px;
+  width: 100%;
+  max-width: 250px;
   border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .login-button-outer .login-btn:hover {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #2e9c8ea1 , #03bba2);
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #2e9c8ea1, #03bba2);
+}
+
+.login-email-field {
+  position: relative;
+}
+
+.login-email-field label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.login-email-field i {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  color: #797979;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.login-email-field i:hover {
+  color: #6cc2b6;
+}
+
+/* Responsive Login Page */
+@media (max-width: 768px) {
+  #login-page {
+    padding: 20px 15px;
+  }
+  
+  .login-content {
+    padding: 15px;
+  }
+  
+  .login-heading {
+    padding-bottom: 25px;
+  }
+  
+  .login-heading img {
+    width: 120px !important;
+  }
+  
+  .login-heading h1 {
+    font-size: 24px;
+    padding-top: 12px;
+  }
+  
+  .login-email-field label {
+    font-size: 15px;
+  }
+  
+  .login-email-field input {
+    height: 48px;
+    font-size: 15px;
+  }
+  
+  .login-email-field i {
+    bottom: 14px;
+    font-size: 16px;
+  }
+  
+  .login-button-outer {
+    padding-top: 25px;
+  }
+  
+  .login-button-outer .login-btn {
+    height: 48px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  #login-page {
+    padding: 15px 10px;
+  }
+  
+  .login-content {
+    padding: 10px;
+  }
+  
+  .login-heading {
+    padding-bottom: 20px;
+  }
+  
+  .login-heading img {
+    width: 100px !important;
+  }
+  
+  .login-heading h1 {
+    font-size: 22px;
+    padding-top: 10px;
+  }
+  
+  .login-email-field {
+    margin-bottom: 15px;
+  }
+  
+  .login-email-field label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .login-email-field input {
+    height: 45px;
+    font-size: 14px;
+    padding: 0 12px;
+  }
+  
+  .login-email-field i {
+    right: 12px;
+    font-size: 15px;
+  }
+  
+  .login-button-outer {
+    padding-top: 20px;
+    padding-bottom: 15px;
+  }
+  
+  .login-button-outer .login-btn {
+    height: 45px;
+    font-size: 14px;
+    max-width: 100%;
+  }
+  
+  .alert {
+    font-size: 13px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-heading img {
+    width: 90px !important;
+  }
+  
+  .login-heading h1 {
+    font-size: 20px;
+  }
+  
+  .login-email-field input {
+    height: 42px;
+    font-size: 13px;
+  }
+  
+  .login-button-outer .login-btn {
+    height: 42px;
+    font-size: 13px;
+  }
+}
+
+.login-button-outer {
+  padding-top: 30px;
+  padding-bottom: 20px;
+}
+
+.login-button-outer .login-btn {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #6cc2b7a1, #24d8c0);
+  color: #ffffff;
+  border: none;
+  height: 50px;
+  width: 100%;
+  max-width: 250px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.login-button-outer .login-btn:hover {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), linear-gradient(92.84deg, #2e9c8ea1, #03bba2);
 }
 
 .login-button-outer .login-btn:active {
   color: #ffffff;
-  -webkit-box-shadow: none;
-          box-shadow: none;
+  box-shadow: none;
 }
 
 .login-logo h1 {
@@ -155,13 +375,26 @@ body, html {
   position: relative;
 }
 
+.login-email-field label {
+  display: block;
+  margin-bottom: 8px;
+}
+
 .login-email-field i {
   position: absolute;
-  right: 13px;
-  top: 70px;
+  right: 15px;
+  bottom: 15px;
   color: #797979;
   cursor: pointer;
+  font-size: 18px;
+  z-index: 10;
+  pointer-events: auto;
 }
+
+.login-email-field i:hover {
+  color: #6cc2b6;
+}
+
 .select_field select {
   width: 400;
   height: 50;
@@ -1491,26 +1724,41 @@ body, html {
 }
 .detail-client-table{
   width: 100%;
-  overflow-x: auto;
+  overflow-x: visible;
+  display: flex;
+  justify-content: center;
 }
+
 .product-table{
   padding-top: 0 !important;
   margin-top: 0 !important;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
+
 .product-table table {
   border-collapse: collapse;
   margin-top: 20px;
-  min-width: 600px;
+  width: auto;
+  max-width: 100%;
 }
 
 /* Responsive Table */
 @media (max-width: 991px) {
   .detail-client-table {
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+  }
+  
+  .product-table {
+    justify-content: flex-start;
   }
   
   .product-table table {
     font-size: 14px;
+    min-width: 600px;
   }
   
   .product-table table th,
@@ -1547,6 +1795,7 @@ body, html {
   
   .product-table table {
     font-size: 12px;
+    min-width: 450px;
   }
 }
 
@@ -2085,5 +2334,1337 @@ background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:
   .dataTables_paginate .pagination {
     flex-wrap: wrap;
     justify-content: center;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR CATEGORIES
+   ======================================== */
+
+/* Mobile Card Layout for Categories */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #category-table_wrapper {
+    display: none !important;
+  }
+  
+  .client-table .row.g-2 {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-categories-view {
+    display: block !important;
+  }
+  
+  .mobile-view-container {
+    display: block !important;
+  }
+  
+  .category-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .category-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .category-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .category-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .category-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .category-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .category-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .category-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .category-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  
+  .badge-category {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  
+  .badge-active {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-inactive {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  .badge-yes {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-no {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-categories-view {
+    display: none !important;
+  }
+}
+
+.mobile-view-container {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-view-container {
+    display: block !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR ATTRIBUTES
+   ======================================== */
+
+/* Mobile Card Layout for Attributes */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #detail-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-attributes-view {
+    display: block !important;
+  }
+  
+  .attribute-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .attribute-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .attribute-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .attribute-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .attribute-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .attribute-card-field.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .attribute-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .attribute-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .attribute-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .attribute-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-attributes-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR CATALOGS
+   ======================================== */
+
+/* Mobile Card Layout for Catalogs */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #catelog-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-catalogs-view {
+    display: block !important;
+  }
+  
+  .catalog-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .catalog-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .catalog-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .catalog-card-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .catalog-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .catalog-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .catalog-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .catalog-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .catalog-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-catalogs-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR COLORS
+   ======================================== */
+
+/* Mobile Card Layout for Colors */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #color-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-colors-view {
+    display: block !important;
+  }
+  
+  .color-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .color-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .color-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .color-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .color-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .color-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .color-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .color-card-swatch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .color-card-swatch-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .color-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .color-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-colors-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR COUNTRIES
+   ======================================== */
+
+/* Mobile Card Layout for Countries */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #countries-table {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-countries-view {
+    display: block !important;
+  }
+  
+  .country-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .country-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .country-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .country-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .country-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .country-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .country-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .country-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .country-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-countries-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR BLOGS
+   ======================================== */
+
+/* Mobile Card Layout for Blogs */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #blog-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-blogs-view {
+    display: block !important;
+  }
+  
+  .blog-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .blog-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .blog-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .blog-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .blog-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .blog-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .blog-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .blog-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .blog-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-blogs-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR BLOG CATEGORIES
+   ======================================== */
+
+/* Mobile Card Layout for Blog Categories */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #color-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-blog-categories-view {
+    display: block !important;
+  }
+  
+  .blog-category-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .blog-category-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .blog-category-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .blog-category-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .blog-category-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-blog-categories-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR PAGE SETTINGS
+   ======================================== */
+
+/* Mobile Card Layout for Page Settings */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #page-setting-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-page-settings-view {
+    display: block !important;
+  }
+  
+  .page-setting-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .page-setting-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .page-setting-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .page-setting-card-image {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .page-setting-card-image img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+  }
+  
+  .page-setting-card-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .page-setting-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-setting-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .page-setting-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .page-setting-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .page-setting-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-page-settings-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR CUSTOMERS
+   ======================================== */
+
+/* Mobile Card Layout for Customers */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #customer-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-customers-view {
+    display: block !important;
+  }
+  
+  .customer-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .customer-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .customer-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .customer-card-id {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .customer-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .customer-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .customer-card-field.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .customer-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .customer-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .customer-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .customer-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-customers-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR ORDERS
+   ======================================== */
+
+/* Mobile Card Layout for Orders */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .card-body #ordersTable_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-orders-view {
+    display: block !important;
+  }
+  
+  .order-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .order-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .order-card-status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  
+  .order-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .order-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .order-card-field.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .order-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .order-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .order-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .order-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-orders-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR BANGLE SIZES
+   ======================================== */
+
+/* Mobile Card Layout for Bangle Sizes */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #bangle-size-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-bangle-sizes-view {
+    display: block !important;
+  }
+  
+  .bangle-size-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .bangle-size-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .bangle-size-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .bangle-size-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .bangle-size-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-bangle-sizes-view {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR BOX SIZES
+   ======================================== */
+
+/* Mobile Card Layout for Box Sizes */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #box-size-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-box-sizes-view {
+    display: block !important;
+  }
+  
+  .box-size-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .box-size-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .box-size-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .box-size-card-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .box-size-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .box-size-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .box-size-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .box-size-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .box-size-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-box-sizes-view {
+    display: none !important;
+  }
+}
+
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR BANGLE COLORS
+   ======================================== */
+
+/* Mobile Card Layout for Bangle Colors */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  .client-table #bangle-color-table_wrapper {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-bangle-colors-view {
+    display: block !important;
+  }
+  
+  .bangle-color-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .bangle-color-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .bangle-color-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .bangle-color-card-image {
+    width: 100%;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  
+  .bangle-color-card-image img {
+    max-width: 150px;
+    height: auto;
+    border-radius: 6px;
+    border: 2px solid #ddd;
+  }
+  
+  .bangle-color-card-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .bangle-color-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .bangle-color-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .bangle-color-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .bangle-color-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .bangle-color-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-bangle-colors-view {
+    display: none !important;
+  }
+}
+
+
+/* ========================================
+   MOBILE CARD LAYOUT FOR TOP PRODUCTS (DASHBOARD)
+   ======================================== */
+
+/* Mobile Card Layout for Top Products */
+@media (max-width: 767px) {
+  /* Hide table on mobile */
+  #desktop-top-products {
+    display: none !important;
+  }
+  
+  /* Show mobile card view */
+  #mobile-top-products-view {
+    display: block !important;
+  }
+  
+  .top-product-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  .top-product-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6cc2b6;
+  }
+  
+  .top-product-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  .top-product-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  
+  .top-product-card-field {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .top-product-card-field.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .top-product-card-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .top-product-card-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .top-product-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+  }
+  
+  .top-product-card-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  
+  .top-product-card-actions a {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .top-product-card-actions a .btn {
+    width: 100%;
+  }
+}
+
+/* Desktop: hide mobile view */
+@media (min-width: 768px) {
+  #mobile-top-products-view {
+    display: none !important;
   }
 }
