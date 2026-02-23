@@ -5,10 +5,10 @@
 @include('components.includes.admin.navbar')
 <main class="content-wrapper">
   <div class="container-fluid py-3">
-    <div class="col-12 pl-0 d-flex justify-content-between">
-      <div class="heading-top">
+    <div class="col-12 pl-0 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+      <div class="heading-top mb-3 mb-md-0">
         <h1 class="mb-0 pl-0">Dashboard</h1>
-        <p class="pl-0">Welcome to Banglz Platform</p>
+        <p class="pl-0 mb-0">Welcome to Banglz Platform</p>
       </div>
       <div>
 
@@ -16,7 +16,7 @@
     </div>
     {{-- cards-section --}}
     <div class="dashbord-card-main row">
-      <div class="dashbord-cards col-md-3">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-6 col-lg-3">
         <div class="card-counter info">
           <i class="fa fa-shopping-cart"></i>
           <span class="count-name">Total Orders</span>
@@ -24,7 +24,7 @@
         </div>
       </div>
       
-      <div class="dashbord-cards col-md-3">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-6 col-lg-3">
         <div class="card-counter success">
           <i class="fa fa-dollar"></i>
           <span class="count-name">Total Revenue</span>
@@ -32,7 +32,7 @@
         </div>
       </div>
       
-      <div class="col-md-3">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-6 col-lg-3">
         <div class="card-counter warning">
           <i class="fa fa-calendar"></i>
           <span class="count-name">Today's Orders</span>
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-6 col-lg-3">
         <div class="card-counter primary">
           <i class="fa fa-calendar-check-o"></i>
           <span class="count-name">This Month</span>
@@ -51,14 +51,14 @@
     
     {{-- Secondary stats row --}}
     <div class="dashbord-card-main row mt-3">
-      <div class="dashbord-cards col-md-4">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-4">
         <div class="card-counter info">
           <i class="fa fa-ticket"></i>
           <span class="count-name">Products</span>
           <span class="count-numbers">{{$productsCount ?? '-'}}</span>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-4">
         <div class="card-counter info">
           <i class="fa fa-users"></i>
           <span class="count-name">Categories</span>
@@ -66,7 +66,7 @@
         </div>
       </div>
 
-      <div class="col-md-4">
+      <div class="dashbord-cards col-12 col-sm-6 col-md-4">
         <div class="card-counter info">
           <i class="fa fa-code-fork"></i>
           <span class="count-name">Collections</span>
@@ -78,7 +78,7 @@
 
     {{-- detail chart sections --}}
     <div class="detail-chart-section row">
-        <div class="col-md-12 col-lg-7 mt-3">
+        <div class="col-12 col-lg-7 mt-3">
             <div class="orders-card-unique">
                 <div class="orders-header-unique">
                 <div>
@@ -119,7 +119,7 @@
                 </div>
 
         </div>
-        <div class="col-md-12 col-lg-5 mt-3">
+        <div class="col-12 col-lg-5 mt-3">
             <div class="orders-card-unique">
   <div class="orders-header-unique">
     <div>
@@ -158,12 +158,12 @@
 
     {{-- top products --}}
 
-    <div class="top-product container-fluid  pt-3">
+    <div class="top-product container-fluid pt-3">
       <div class="heading-top top-product-heading">
         <h1>Top Products</h1>
       </div>
       <div class="client-table product-table">
-        <table id="detail-table" class="detail-client-table">
+        <table id="detail-table" class="detail-client-table table-responsive">
           <thead>
             <tr>
               <th class="table-heading">Product Name</th>
@@ -184,13 +184,13 @@
               <td>{{$topProduct['category']['name'] ?? '-'}}</td>
               <td>
                 <a href="{{ route('product.details', ['id' => $topProduct['id']]) }}">
-                  <button type="button" class="btn btn-primary">View</button>
+                  <button type="button" class="btn btn-primary btn-sm">View</button>
                 </a>
 
-                <button type="button" class="btn btn-danger" onclick="confirmDelete({{ $topProduct['id'] }})">Delete</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $topProduct['id'] }})">Delete</button>
 
 <a href="{{ route('admin.product.edit', ['id' => $topProduct->id]) }}">
-    <button type="button" class="btn btn-info">Edit</button>
+    <button type="button" class="btn btn-info btn-sm">Edit</button>
 </a>
 
               </td>
