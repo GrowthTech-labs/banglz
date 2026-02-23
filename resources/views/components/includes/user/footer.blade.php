@@ -142,10 +142,84 @@
 <script>
   const menuIcon = document.querySelector('.menu-icon');
   const sideMenu = document.querySelector('.side-menu');
+  const menuOverlay = document.querySelector('.mobile-menu-overlay');
+  const menuCloseBtn = document.querySelector('.side-menu-close');
 
-  menuIcon.addEventListener('click', () => {
-    sideMenu.classList.toggle('active');
+  // Function to open menu
+  function openMenu() {
+    sideMenu.classList.add('active');
+    if (menuOverlay) menuOverlay.classList.add('active');
+    if (menuIcon) menuIcon.classList.add('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  // Function to close menu
+  function closeMenu() {
+    sideMenu.classList.remove('active');
+    if (menuOverlay) menuOverlay.classList.remove('active');
+    if (menuIcon) menuIcon.classList.remove('hidden');
+    document.body.style.overflow = ''; // Restore scrolling
+  }
+
+  // Toggle menu on icon click/touch
+  if (menuIcon) {
+    menuIcon.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (sideMenu.classList.contains('active')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    // Add touch event for better mobile support
+    menuIcon.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (sideMenu.classList.contains('active')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }, { passive: false });
+  }
+
+  // Close menu when clicking overlay
+  if (menuOverlay) {
+    menuOverlay.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closeMenu();
+    }, { passive: false });
+  }
+
+  // Close menu when clicking close button
+  if (menuCloseBtn) {
+    menuCloseBtn.addEventListener('click', closeMenu);
+    menuCloseBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      closeMenu();
+    }, { passive: false });
+  }
+
+  // Close menu when clicking a link (except category toggles)
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.side-menu a[href]:not([href="javascript:void(0);"])');
+    if (link && sideMenu.classList.contains('active')) {
+      // Small delay to allow navigation to start
+      setTimeout(closeMenu, 100);
+    }
   });
+  
+  // Also handle touch events for links
+  document.addEventListener('touchend', (e) => {
+    const link = e.target.closest('.side-menu a[href]:not([href="javascript:void(0);"])');
+    if (link && sideMenu.classList.contains('active')) {
+      // Small delay to allow navigation to start
+      setTimeout(closeMenu, 100);
+    }
+  }, { passive: true });
 </script>
 
 
@@ -154,6 +228,8 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
+    const isMobile = window.innerWidth <= 768;
+    
     // ---------- Top First Nav (About, Contact, Resource) ----------
     const hoverSectionSmall = document.getElementById("hoverSection");
     const topNavItems = document.querySelectorAll(".top-first-nav .top-list ul li");
@@ -161,7 +237,9 @@
     let smallTimeout;
 
     topNavItems.forEach((li) => {
+      // Desktop: mouseenter
       li.addEventListener("mouseenter", () => {
+        if (isMobile) return; // Skip on mobile
         if (li.id === "redeemGiftCardBtn") return;
         clearTimeout(smallTimeout);
         hoverSectionSmall.style.display = "block";
@@ -173,20 +251,57 @@
         const targetSection = document.getElementById(targetId);
         if (targetSection) targetSection.classList.add("active");
       });
+      
+      // Mobile: click/touch
+      li.addEventListener("click", (e) => {
+        if (!isMobile) return; // Skip on desktop
+        if (li.id === "redeemGiftCardBtn") return;
+        
+        const targetId = li.getAttribute("data-target");
+        if (!targetId) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isActive = hoverSectionSmall.style.display === "block" && 
+                        document.getElementById(targetId)?.classList.contains("active");
+        
+        if (isActive) {
+          hoverSectionSmall.style.display = "none";
+          smallContents.forEach((sec) => sec.classList.remove("active"));
+        } else {
+          hoverSectionSmall.style.display = "block";
+          smallContents.forEach((sec) => sec.classList.remove("active"));
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) targetSection.classList.add("active");
+        }
+      });
     });
 
-    document.querySelector(".top-first-nav .top-list").addEventListener("mouseleave", () => {
-      smallTimeout = setTimeout(() => {
+    if (!isMobile) {
+      document.querySelector(".top-first-nav .top-list").addEventListener("mouseleave", () => {
+        smallTimeout = setTimeout(() => {
+          hoverSectionSmall.style.display = "none";
+        }, 150);
+      });
+
+      hoverSectionSmall.addEventListener("mouseenter", () => {
+        clearTimeout(smallTimeout);
+      });
+      hoverSectionSmall.addEventListener("mouseleave", () => {
         hoverSectionSmall.style.display = "none";
-      }, 150);
-    });
-
-    hoverSectionSmall.addEventListener("mouseenter", () => {
-      clearTimeout(smallTimeout);
-    });
-    hoverSectionSmall.addEventListener("mouseleave", () => {
-      hoverSectionSmall.style.display = "none";
-    });
+      });
+    }
+    
+    // Close dropdown when clicking outside on mobile
+    if (isMobile) {
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".top-first-nav") && !e.target.closest("#hoverSection")) {
+          hoverSectionSmall.style.display = "none";
+          smallContents.forEach((sec) => sec.classList.remove("active"));
+        }
+      });
+    }
 
     // ---------- Main Navbar (Categories + Appointment) ----------
     const navHover = document.querySelector(".nav-hover");
@@ -195,7 +310,9 @@
     let hideTimeout;
 
     mainNavItems.forEach((li) => {
+      // Desktop: mouseenter
       li.addEventListener("mouseenter", () => {
+        if (isMobile) return; // Skip on mobile
         clearTimeout(hideTimeout);
         navHover.style.display = "block";
 
@@ -206,20 +323,60 @@
         const targetSection = document.getElementById(targetId);
         if (targetSection) targetSection.classList.add("active");
       });
+      
+      // Mobile: click/touch
+      li.addEventListener("click", (e) => {
+        if (!isMobile) return; // Skip on desktop
+        
+        const targetId = li.getAttribute("data-target");
+        if (!targetId) return;
+        
+        // Check if link has href (like APPOINTMENT)
+        const link = li.querySelector('a[href]:not([href="javascript:void(0);"])');
+        if (link) return; // Allow navigation
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const isActive = navHover.style.display === "block" && 
+                        document.getElementById(targetId)?.classList.contains("active");
+        
+        if (isActive) {
+          navHover.style.display = "none";
+          hoverSections.forEach((sec) => sec.classList.remove("active"));
+        } else {
+          navHover.style.display = "block";
+          hoverSections.forEach((sec) => sec.classList.remove("active"));
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) targetSection.classList.add("active");
+        }
+      });
     });
 
-    document.querySelector(".top-navbar .nav-list").addEventListener("mouseleave", () => {
-      hideTimeout = setTimeout(() => {
+    if (!isMobile) {
+      document.querySelector(".top-navbar .nav-list").addEventListener("mouseleave", () => {
+        hideTimeout = setTimeout(() => {
+          navHover.style.display = "none";
+        }, 150);
+      });
+
+      navHover.addEventListener("mouseenter", () => {
+        clearTimeout(hideTimeout);
+      });
+      navHover.addEventListener("mouseleave", () => {
         navHover.style.display = "none";
-      }, 150);
-    });
-
-    navHover.addEventListener("mouseenter", () => {
-      clearTimeout(hideTimeout);
-    });
-    navHover.addEventListener("mouseleave", () => {
-      navHover.style.display = "none";
-    });
+      });
+    }
+    
+    // Close main nav dropdown when clicking outside on mobile
+    if (isMobile) {
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".top-navbar .nav-list") && !e.target.closest(".nav-hover")) {
+          navHover.style.display = "none";
+          hoverSections.forEach((sec) => sec.classList.remove("active"));
+        }
+      });
+    }
   });
 </script>
 

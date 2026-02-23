@@ -71,6 +71,13 @@ p {
 #hoverSection .nav-hover-box.active {
     pointer-events: auto; /* only active dropdown is clickable */
 }
+
+/* Mobile: Allow all interactions */
+@media (max-width: 768px) {
+    #hoverSection {
+        pointer-events: auto;
+    }
+}
 .nav-hover {
     display: none;
     position: absolute;
@@ -196,16 +203,15 @@ p {
     justify-content: space-between;
     gap: 25px;
     align-items: center;
-    margin-left: 10px;
-    margin-right: 20px;
+    margin: 0;
 }
 
 .nav-icons-section {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     gap: 1rem;
-    padding-right: 20px;
+    padding: 0;
 }
 
 /* .bundle-icone {
@@ -213,21 +219,22 @@ p {
     width: 25px;
     height: 25px;
 } */
-.nav-icon-div {
+
+/* Links inside nav-icon-div */
+.nav-icon-div a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     position: relative;
-    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-/* updated icon */
-/* icon sizing (same as cart/bundle) */
-.bundle-icone {
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    display: block;
-    object-fit: contain;
-    user-select: none;
-    -webkit-user-drag: none;
+.nav-icon-div a:hover .bundle-icone,
+.nav-icon-div a:active .bundle-icone {
+    opacity: 0.7;
 }
 
 /* badge shared style */
@@ -254,11 +261,6 @@ p {
 /* hide helper */
 .hidden {
     display: none !important;
-}
-
-/* ensure container positioned for badge */
-.nav-icon-div {
-    position: relative;
 }
 
 .hero-section {
@@ -439,6 +441,18 @@ p {
     .side-nav-list ul li a {
         width: 100%;
         height: 100%;
+        display: block;
+        padding: 12px 15px;
+        min-height: 44px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        -webkit-tap-highlight-color: rgba(164, 119, 100, 0.2);
+        touch-action: manipulation;
+    }
+    
+    .side-nav-list ul li a:active {
+        background-color: #f8d5c7;
     }
 
     .left-hero-section {
@@ -496,21 +510,49 @@ p {
         font-size: 12px;
         color: #c47451;
         font-weight: 600;
-        height: 25px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(196, 116, 81, 0.2);
+        list-style: none;
+    }
+    
+    .subcategories li a {
+        color: #c47451;
+        text-decoration: none;
+        width: 100%;
+        display: block;
+        padding: 12px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 
-    .subcategories li:hover {
-        border-bottom: 1px solid #c47451 !important;
+    .subcategories li:hover,
+    .subcategories li:active,
+    .subcategories li a:hover,
+    .subcategories li a:active {
+        background-color: rgba(196, 116, 81, 0.1);
     }
 
     .category-item a {
         color: #a47764;
         width: 100%;
         min-width: 100%;
+        display: block;
+        padding: 12px 0;
+        min-height: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(164, 119, 100, 0.2);
     }
 
-    .category-item a:hover {
+    .category-item a:hover,
+    .category-item a:active {
         color: #634437;
+        background-color: rgba(164, 119, 100, 0.1);
     }
 }
 
@@ -549,12 +591,29 @@ p {
     top: 130px;
     left: -250px;
     transition: left 0.3s ease;
-    z-index: 2147483647;
+    z-index: 9999;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .side-menu.active {
     left: 0;
+}
+
+/* Mobile menu improvements */
+@media (max-width: 768px) {
+    .side-menu {
+        width: 280px;
+        height: 100vh;
+        top: 0;
+        left: -280px;
+        padding-top: 60px;
+    }
+    
+    .side-menu.active {
+        left: 0;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+    }
 }
 
 .category-section {
@@ -2928,10 +2987,79 @@ progress::-moz-progress-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 0 20px;
+    gap: 20px;
+}
+
+.top-navbar {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow:
+        rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
+        rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+    padding: 0 20px;
+}
+
+/* Ensure all nav icons are same size and aligned */
+.nav-icon-div {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.nav-icon-div a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.bundle-icone {
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: block;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: opacity 0.2s;
+}
+
+/* User icon specific sizing */
+#userDropdown img {
+    width: 28px;
+    height: 28px;
+}
+
+.nav-icons {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    margin: 0;
+}
+
+.nav-icons-section {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    padding: 0;
+    height: 100%;
 }
 
 .top-list {
     height: 100%;
+    flex-shrink: 0;
 }
 
 .top-list ul {
@@ -2941,28 +3069,27 @@ progress::-moz-progress-bar {
     align-items: center;
     height: 100%;
     margin: 0px;
+    padding: 0;
 }
 
-.top-list ul li {
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.top-list ul li a {
-    color: black;
-    cursor: pointer;
-    display: flex;
-    z-index: 100;
-}
-
-.right-side-cart {
-    width: 50%;
+.discount-section {
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .discount-section a {
     font-size: 14px;
     font-weight: 600;
     color: #000;
+}
+
+/* Nav icons in top bar */
+.top-first-nav .nav-icons-section {
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .top-nav-list-hover {
@@ -4616,16 +4743,6 @@ td {
     }
 }
 
-.nav-icon-div {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-}
-.nav-icon-div img {
-    width: 20px;
-    height: 20px;
-}
-
 .user-dropdown-menu {
     display: none;
     position: absolute;
@@ -6068,4 +6185,554 @@ input[type="number"] {
 .category-iner-section.loaded .category-content-two {
     opacity: 1;
     transition: opacity 0.3s ease;
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Mobile menu close button */
+.side-menu-close {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    padding: 0;
+    touch-action: manipulation;
+}
+
+@media (max-width: 768px) {
+    .side-menu-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .side-menu-close::before,
+    .side-menu-close::after {
+        content: '';
+        position: absolute;
+        width: 24px;
+        height: 2px;
+        background-color: #a47764;
+    }
+    
+    .side-menu-close::before {
+        transform: rotate(45deg);
+    }
+    
+    .side-menu-close::after {
+        transform: rotate(-45deg);
+    }
+}
+
+/* Ensure menu icon is clickable on mobile */
+@media (max-width: 768px) {
+    .menu-icon {
+        position: relative;
+        z-index: 10000;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(164, 119, 100, 0.2);
+    }
+}
+
+/* General Mobile Touch Improvements */
+@media (max-width: 768px) {
+    /* Ensure all buttons are touchable */
+    button, 
+    .btn, 
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+    
+    /* Ensure all links are touchable */
+    a {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(164, 119, 100, 0.2);
+    }
+    
+    /* Fix for overlapping elements */
+    .nav-list ul li a,
+    .top-list ul li a {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Prevent double-tap zoom on buttons */
+    button,
+    .btn,
+    a[role="button"] {
+        touch-action: manipulation;
+    }
+    
+    /* Improve form field touch targets */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="search"],
+    select,
+    textarea {
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Fix for dropdown menus */
+    .dropdown-menu,
+    .user-dropdown-menu {
+        touch-action: manipulation;
+    }
+    
+    .user-dropdown-menu a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+    }
+}
+
+/* Fix for iOS Safari button rendering */
+button,
+input[type="submit"],
+input[type="button"] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Prevent text selection on buttons during touch */
+button,
+.btn,
+[role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Hide menu icon when sidebar is active */
+@media (max-width: 768px) {
+    .side-menu.active ~ .navbar-main .menu-icon,
+    body:has(.side-menu.active) .menu-icon {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Alternative approach - hide hamburger when menu is open */
+.menu-icon.hidden {
+    display: none !important;
+}
+
+/* Fix subcategories list styling */
+@media (max-width: 768px) {
+    .subcategories {
+        margin-left: 0;
+        padding-left: 20px;
+        list-style: none;
+    }
+    
+    .subcategories li {
+        margin: 0;
+    }
+    
+    /* Ensure links are fully clickable */
+    .subcategories li a {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Fix for category items with direct links (About, Contact, etc) */
+    .category-item > a[href]:not([href="javascript:void(0);"]) {
+        pointer-events: auto !important;
+    }
+}
+
+/* Mobile improvements for nav icons */
+@media (max-width: 768px) {
+    .nav-icon-div {
+        min-width: 44px;
+        min-height: 44px;
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 100;
+    }
+    
+    .nav-icon-div a {
+        min-width: 44px;
+        min-height: 44px;
+        width: 100%;
+        height: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(164, 119, 100, 0.2);
+        position: relative;
+        z-index: 101;
+    }
+    
+    /* Ensure icons are clickable */
+    .nav-icon-div,
+    .nav-icon-div a,
+    .bundle-icone {
+        pointer-events: auto !important;
+    }
+    
+    /* Increase touch target for icons */
+    .nav-icon-div a::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        z-index: -1;
+    }
+}
+
+/* Desktop - ensure icons are clickable */
+.nav-icons-section {
+    position: relative;
+    z-index: 50;
+}
+
+.nav-icons {
+    position: relative;
+    z-index: 50;
+}
+
+/* User dropdown should be above icons when open */
+.user-dropdown-menu {
+    z-index: 1000;
+}
+
+/* Visual feedback for clickable icons */
+.nav-icon-div.wishlist a:active,
+.nav-icon-div.cart a:active,
+.nav-icon-div#openSidebarBtn:active {
+    transform: scale(0.95);
+}
+
+.nav-icon-div.wishlist,
+.nav-icon-div.cart,
+.nav-icon-div#openSidebarBtn {
+    transition: transform 0.1s ease;
+}
+
+/* Top list styling */
+.top-list ul li {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.top-list ul li a {
+    color: black;
+    cursor: pointer;
+    display: flex;
+    z-index: 100;
+    padding: 8px 12px;
+    min-height: 44px;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .top-list ul li a {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.right-side-cart {
+    width: 50%;
+}
+
+/* Responsive navbar fixes */
+@media (max-width: 1200px) {
+    .top-first-nav {
+        padding: 0 10px;
+        gap: 10px;
+    }
+    
+    .top-list ul {
+        gap: 10px;
+    }
+    
+    .top-list ul li a {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .discount-section a {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 992px) {
+    .top-list ul {
+        gap: 8px;
+    }
+    
+    .top-list ul li a {
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+    
+    .discount-section {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-first-nav {
+        height: auto;
+        min-height: 50px;
+        flex-wrap: wrap;
+        padding: 5px 10px;
+    }
+    
+    .top-list {
+        order: 1;
+        width: 100%;
+        height: auto;
+    }
+    
+    .top-list ul {
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+    }
+    
+    .top-list ul li a {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+    
+    .discount-section {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        padding: 5px 0;
+    }
+    
+    .discount-section a {
+        font-size: 11px;
+    }
+    
+    .top-first-nav .nav-icons-section {
+        order: 2;
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+        padding: 5px 0;
+    }
+    
+    .nav-icons {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .top-first-nav {
+        padding: 5px;
+    }
+    
+    .top-list ul li a {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .discount-section a {
+        font-size: 10px;
+    }
+}
+
+/* Fix icon overlap issues */
+.nav-icon-div {
+    flex-shrink: 0;
+}
+
+.nav-icon-div img {
+    display: block;
+}
+
+/* Ensure proper spacing between icons */
+.nav-icons > .nav-icon-div {
+    margin: 0;
+}
+
+/* Fix user dropdown positioning */
+#userDropdown {
+    position: relative;
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+}
+
+/* Prevent icon overlap on small screens */
+@media (max-width: 1024px) {
+    .nav-icons {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-icons {
+        gap: 12px;
+    }
+    
+    .bundle-icone {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .nav-icon-div {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+.nav-logo-main {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-list {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ensure search and icons don't overlap */
+.top-navbar .nav-icons-section {
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .top-navbar {
+        padding: 0 10px;
+    }
+    
+    .nav-logo-main {
+        gap: 10px;
+        margin-left: 0;
+    }
+    
+    .nav-logo {
+        width: 150px;
+    }
+    
+    /* Hide main nav list on mobile (use hamburger menu instead) */
+    .top-navbar .nav-list {
+        display: none;
+    }
+}
+
+/* ========================================
+   NAVBAR ICON ALIGNMENT - FINAL FIX
+   ======================================== */
+
+/* Ensure all icons are exactly the same size and aligned */
+.nav-icon-div {
+    width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+.nav-icon-div a {
+    width: 100% !important;
+    height: 100% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.nav-icon-div img,
+.bundle-icone {
+    width: 28px !important;
+    height: 28px !important;
+    object-fit: contain !important;
+}
+
+/* User icon specific */
+#userDropdown {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+#userDropdown img {
+    width: 28px !important;
+    height: 28px !important;
+}
+
+/* Fix navbar heights */
+.top-first-nav {
+    height: 50px !important;
+    min-height: 50px !important;
+}
+
+.top-navbar {
+    height: 80px !important;
+    min-height: 80px !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .nav-icon-div {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    
+    .nav-icon-div img,
+    .bundle-icone {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    #userDropdown {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    
+    #userDropdown img {
+        width: 24px !important;
+        height: 24px !important;
+    }
 }

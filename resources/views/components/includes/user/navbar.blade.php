@@ -76,8 +76,10 @@
                     </div>
                 </div>
              <div class="nav-icon-div wishlist">
-        <img src="{{ asset('assets/images/heart.png') }}" alt="Wishlist" class="bundle-icone">
-        <span class="wishlist-count-badge hidden">0</span>
+        <a href="{{ url('personal-account') }}?tab=wishlist" title="Wishlist">
+            <img src="{{ asset('assets/images/heart.png') }}" alt="Wishlist" class="bundle-icone">
+            <span class="wishlist-count-badge hidden">0</span>
+        </a>
 </div>
 
                 <div class="nav-icon-div cart">
@@ -400,7 +402,9 @@
     </div>
 
     {{-- Side Menu --}}
+    <div class="mobile-menu-overlay"></div>
     <div class="side-menu">
+        <button class="side-menu-close" aria-label="Close menu"></button>
         <div class="nav-list side-nav-list">
 
 
@@ -412,19 +416,18 @@
                     @if (!empty($category->subcategories) && count($category->subcategories) > 0)
                     <ul class="subcategories" style="{{ $loop->first ? '' : 'display:none;' }}">
                         @foreach ($category->subcategories as $subcategory)
-                        <li>{{ strtoupper($subcategory->name) }}</li>
+                        <li>
+                            <a href="{{ route('shop-all', ['slug' => $category->slug, 'subcategory' => $subcategory->slug]) }}">
+                                {{ strtoupper($subcategory->name) }}
+                            </a>
+                        </li>
                         @endforeach
                     </ul>
                     @endif
                 </li>
                 @endforeach
                 <li class="category-item" data-category-id="static-appointment">
-                    <a href="javascript:void(0);">APPOINTMENT</a>
-                    <ul class="subcategories" style="display:none;">
-                        <li>NEW APPOINTMENT</li>
-                        <li>UPCOMING APPOINTMENTS</li>
-                        <li>PAST APPOINTMENTS</li>
-                    </ul>
+                    <a href="{{ url('/appointment') }}">APPOINTMENT</a>
                 </li>
                 <li class="category-item" data-category-id="about-appointment">
                     <a href="{{ url('about-us') }}?tab=About-Us">About Us</a>
@@ -624,64 +627,162 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('Mobile menu script loaded');
+        
         // Set <a> width to 100%
         document.querySelectorAll('#categories-list .category-item > a').forEach(link => {
             link.style.display = 'block';
             link.style.width = '100%';
         });
 
-        // Handle click to toggle active-list and subcategories
+        // Handle click/touch to toggle active-list and subcategories
         document.querySelectorAll('#categories-list .category-item > a').forEach(link => {
-            link.addEventListener('click', function() {
-                const li = this.parentElement;
-                const subList = li.querySelector('.subcategories');
-
-                // Remove active-list from all category items and hide all subcategories
-                document.querySelectorAll('#categories-list .category-item').forEach(item => {
-                    item.classList.remove('active-list');
-                    const sub = item.querySelector('.subcategories');
-                    if (sub) sub.style.display = 'none';
+            const href = link.getAttribute('href');
+            
+            // Only add toggle behavior if it's a javascript:void(0) link
+            if (href === 'javascript:void(0);') {
+                console.log('Adding toggle to:', link.textContent);
+                
+                // Click handler
+                link.addEventListener('click', function(e) {
+                    console.log('Category clicked:', this.textContent);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleCategory(this);
                 });
 
-                // Add active-list to clicked category and show subcategories
+                // Touch handler for better mobile support
+                link.addEventListener('touchend', function(e) {
+                    console.log('Category touched:', this.textContent);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleCategory(this);
+                }, { passive: false });
+            } else {
+                console.log('Direct link (no toggle):', link.textContent, href);
+            }
+        });
+
+        function toggleCategory(linkElement) {
+            const li = linkElement.parentElement;
+            const subList = li.querySelector('.subcategories');
+            const wasActive = li.classList.contains('active-list');
+
+            console.log('Toggle category, wasActive:', wasActive);
+
+            // Remove active-list from all category items and hide all subcategories
+            document.querySelectorAll('#categories-list .category-item').forEach(item => {
+                item.classList.remove('active-list');
+                const sub = item.querySelector('.subcategories');
+                if (sub) sub.style.display = 'none';
+            });
+
+            // If it wasn't active, make it active and show subcategories
+            if (!wasActive) {
                 li.classList.add('active-list');
                 if (subList) {
                     subList.style.display = 'block';
+                    console.log('Showing subcategories');
                 }
+            }
+        }
+
+        // Make subcategory links clickable - remove preventDefault
+        const subLinks = document.querySelectorAll('.subcategories li a');
+        console.log('Found subcategory links:', subLinks.length);
+        
+        subLinks.forEach(link => {
+            console.log('Subcategory link:', link.textContent, link.href);
+            
+            // Remove any existing click handlers that might prevent navigation
+            link.addEventListener('click', function(e) {
+                console.log('Subcategory link clicked:', this.textContent, this.href);
+                e.stopPropagation(); // Prevent parent handlers
+                // Allow default navigation
             });
+            
+            link.addEventListener('touchend', function(e) {
+                console.log('Subcategory link touched:', this.textContent, this.href);
+                e.stopPropagation(); // Prevent parent handlers
+                // Allow default navigation
+            }, { passive: true });
         });
     });
 </script>
 
 <script>
-    $(document).ready(function() {
-        $('.category-slider').slick({
-            slidesToShow: 4, // show 4 cards at once
-            slidesToScroll: 1, // scroll one card per click
-            infinite: true, // loop
-            arrows: true, // show next/prev arrows
-            dots: false, // no dots
-            responsive: [{
-                    breakpoint: 1024,
-                    settings: {
-                        slidesToShow: 3
-                    }
-                },
-                {
-                    breakpoint: 768,
-                    settings: {
-                        slidesToShow: 2
-                    }
-                },
-                {
-                    breakpoint: 480,
-                    settings: {
-                        slidesToShow: 1
-                    }
-                }
-            ]
+    // Wait for jQuery to be loaded
+    if (typeof jQuery !== 'undefined') {
+        $(document).ready(function() {
+            if ($('.category-slider').length) {
+                $('.category-slider').slick({
+                    slidesToShow: 4, // show 4 cards at once
+                    slidesToScroll: 1, // scroll one card per click
+                    infinite: true, // loop
+                    arrows: true, // show next/prev arrows
+                    dots: false, // no dots
+                    responsive: [{
+                            breakpoint: 1024,
+                            settings: {
+                                slidesToShow: 3
+                            }
+                        },
+                        {
+                            breakpoint: 768,
+                            settings: {
+                                slidesToShow: 2
+                            }
+                        },
+                        {
+                            breakpoint: 480,
+                            settings: {
+                                slidesToShow: 1
+                            }
+                        }
+                    ]
+                });
+            }
         });
-    });
+    } else {
+        // Fallback: wait for jQuery to load
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkJQuery = setInterval(function() {
+                if (typeof jQuery !== 'undefined') {
+                    clearInterval(checkJQuery);
+                    $(document).ready(function() {
+                        if ($('.category-slider').length) {
+                            $('.category-slider').slick({
+                                slidesToShow: 4,
+                                slidesToScroll: 1,
+                                infinite: true,
+                                arrows: true,
+                                dots: false,
+                                responsive: [{
+                                        breakpoint: 1024,
+                                        settings: {
+                                            slidesToShow: 3
+                                        }
+                                    },
+                                    {
+                                        breakpoint: 768,
+                                        settings: {
+                                            slidesToShow: 2
+                                        }
+                                    },
+                                    {
+                                        breakpoint: 480,
+                                        settings: {
+                                            slidesToShow: 1
+                                        }
+                                    }
+                                ]
+                            });
+                        }
+                    });
+                }
+            }, 100);
+        });
+    }
 </script>
 <!-- <script>
 document.addEventListener("DOMContentLoaded", () => {
