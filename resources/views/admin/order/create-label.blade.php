@@ -2629,17 +2629,24 @@ console.log('Selected Adress:', comp['postal_code'] || '');
            countryCode = countryCode.substring(0, 2).toUpperCase();
        }
        
+       // Get address and truncate to 50 characters max (Stallion API limit)
+       let address1 = document.querySelector('#address')?.value || '{{ $addr["address"] ?? $addr["address1"] ?? "" }}';
+       if (address1.length > 50) {
+           console.warn('Address1 truncated from', address1.length, 'to 50 characters');
+           address1 = address1.substring(0, 50);
+       }
+       
        return {
-            name: name.trim(),
+            name: name.trim().substring(0, 40), // Max 40 chars
             company: null,
-            address1: document.querySelector('#address')?.value || '{{ $addr["address"] ?? $addr["address1"] ?? "" }}',
-            address2: document.querySelector('#address2')?.value || '{{ $addr["address2"] ?? "" }}' || null,
-            city: document.querySelector('#city')?.value || '{{ $addr["city"] ?? "" }}',
+            address1: address1,
+            address2: document.querySelector('#address2')?.value?.substring(0, 50) || '{{ $addr["address2"] ?? "" }}' || null,
+            city: document.querySelector('#city')?.value?.substring(0, 35) || '{{ $addr["city"] ?? "" }}',
             province_code: provinceCode,
-            postal_code: document.querySelector('#zip')?.value || '{{ $addr["postcode"] ?? $addr["postal_code"] ?? "" }}',
+            postal_code: document.querySelector('#zip')?.value?.substring(0, 10) || '{{ $addr["postcode"] ?? $addr["postal_code"] ?? "" }}',
             country_code: countryCode,
-            phone: document.querySelector('#phone')?.value || '{{ $phone ?? "" }}',
-            email: '{{ $order->email ?? "" }}',
+            phone: document.querySelector('#phone')?.value?.substring(0, 20) || '{{ $phone ?? "" }}',
+            email: '{{ $order->email ?? "" }}'.substring(0, 50),
             is_residential: true
         };
     }

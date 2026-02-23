@@ -470,7 +470,9 @@
     </x-slot>
 
     <x-slot name="insertjavascript">
+        @if(config('services.paypal.sandbox_client_id'))
         <script src="https://www.paypal.com/sdk/js?client-id={{ config('services.paypal.sandbox_client_id') }}&currency=USD"></script>
+        @endif
 
         <script>
             // declare as globals so any later script can read them
@@ -557,6 +559,9 @@
 
                 // --- Stripe Elements (unchanged) ---
                 const stripeKey = "{{ config('services.stripe.key') ?? env('STRIPE_KEY') }}";
+                
+                @if(!env('BYPASS_PAYMENT'))
+                // Only initialize Stripe if not in bypass mode
                 if (!stripeKey) {
                     $cardErrors.text('Payment unavailable.');
                     return;
@@ -588,6 +593,15 @@
                 cardNumber.mount('#card-number-element');
                 cardExpiry.mount('#card-expiry-element');
                 cardCvc.mount('#card-cvc-element');
+                @else
+                // Bypass mode - create dummy Stripe objects to prevent errors
+                const stripe = null;
+                const elements = null;
+                const cardNumber = { on: function() {} };
+                const cardExpiry = { on: function() {} };
+                const cardCvc = { on: function() {} };
+                console.log('🧪 Stripe initialization skipped - bypass mode enabled');
+                @endif
 
                 const $errNumber = $('#error-card-number');
                 const $errExpiry = $('#error-card-expiry');
@@ -704,26 +718,32 @@
                 // --- Place order / checkout ---
                 $placeOrderBtn.on('click', function(e) {
                     e.preventDefault();
+                    console.log('🔘 Place Order button clicked');
                     clearErrors();
 
                     // Validate terms agreement first
                     if (!validateTerms()) {
+                        console.log('❌ Terms validation failed');
                         return;
                     }
+                    console.log('✅ Terms validated');
 
                     $placeOrderBtn.prop('disabled', true);
                     $checkoutMessage.text('Processing payment...').css('color', '#333');
                     showLoader();
 
                     const selectedPaymentMethod = $('input[name="payment_method"]:checked').val();
+                    console.log('💳 Payment method:', selectedPaymentMethod);
 
                     // Handle PayPal payment
                     if (selectedPaymentMethod === 'paypal') {
+                        console.log('📦 Processing PayPal payment');
                         processPayPalPayment();
                         return;
                     }
 
                     // Handle Stripe payment (existing code)
+                    console.log('📦 Processing Stripe payment');
                     processStripePayment();
                 });
 
@@ -779,6 +799,79 @@
 
                 // Stripe Payment Processing
                 function processStripePayment() {
+                    @if(env('BYPASS_PAYMENT'))
+                    // 🧪 BYPASS MODE: Skip Stripe validation and create order directly
+                    console.log('🧪 Payment bypass enabled - skipping Stripe validation');
+                    
+                    const formDataParts = gatherFormData();
+                    console.log('📋 Form data gathered:', formDataParts);
+                    
+                    const payload = {
+                        amount: FINAL_TOTAL,
+                        giftCardsTotal: window.GIFT_CARDS_TOTAL || 0,
+                        appliedGiftCardAmount: window.appliedGiftCardAmount || 0,
+                        appliedGiftCardCode: window.appliedGiftCardCode || '',
+                        applied_gift_card_meta_data: JSON.stringify(window.APPLIED_GIFT_CARD_META || []),
+                        type: window.TYPE || "",
+                        us_import_duties: US_DUTIES,
+                        rewards_discount: $('#discount-amount').text().replace('$', '').replace('-', '').replace(',', '') || 0,
+                        subtotal: $('#subtotal-amount').text().replace('$', '').replace(',', '') || 0,
+                        currency: 'usd',
+                        products_meta_data: JSON.stringify(PRODUCTS_META || { Products: [], Bundle: [] }),
+                        gift_card_meta_data: JSON.stringify(GIFT_CARD_META || []),
+                        bangle_box_meta_data: JSON.stringify(BangleBox_META || []),
+                        users_meta_data: JSON.stringify(formDataParts.users_meta_data),
+                        delivery_meta_data: JSON.stringify(formDataParts.delivery_meta_data),
+                        tax: TAX,
+                        shipping_fee: appliedShipping ? 0 : BASE_SHIPPING_FEE,
+                        email: formDataParts.users_meta_data.email,
+                        applied_points: USED_POINTS_FOR_CHECKOUT,
+                        applied_shipping: appliedShipping ? 1 : 0,
+                        _token: "{{ csrf_token() }}"
+                    };
+                    
+                    console.log('📤 Sending order to backend:', payload);
+                    
+                    $.post("{{ route('checkout.createPaymentIntent') }}", payload)
+                        .done(data => {
+                            console.log('✅ Order response:', data);
+                            hideLoader();
+                            if (data && data.status === 'success') {
+                                const orderId = data.order_id;
+                                const orderDate = data.date;
+                                const message = encodeURIComponent(data.message || 'Order placed successfully');
+                                
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Order Placed!',
+                                    text: data.message || 'Your order has been placed successfully (test mode)',
+                                    confirmButtonText: 'View Order'
+                                }).then(() => {
+                                    window.location.href = "{{ url('confirmation') }}/" + orderId + "/" + orderDate;
+                                });
+                            } else {
+                                $checkoutMessage.text(data?.message || 'Order failed').css('color', '#d9534f');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: data?.message || 'Failed to place order'
+                                });
+                                $placeOrderBtn.prop('disabled', false);
+                            }
+                        })
+                        .fail(xhr => {
+                            console.error('❌ Order failed:', xhr);
+                            hideLoader();
+                            $checkoutMessage.text(xhr.responseJSON?.message || 'Order failed').css('color', '#d9534f');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: xhr.responseJSON?.message || 'Failed to place order'
+                            });
+                            $placeOrderBtn.prop('disabled', false);
+                        });
+                    @else
+                    // NORMAL MODE: Use Stripe payment
                     const selectedSavedCardId = $savedCardsSelect.length ? $savedCardsSelect.val() : null;
                     const saveCard = $('#save_card').is(':checked') ? 1 : 0;
                     const currency = 'usd';
@@ -1015,6 +1108,8 @@
                         });
                     });
                 }
+                @endif
+                } // End of processStripePayment function
 
                 // Cancel
                 $('#cancelBtn').on('click', () => window.history.back());
