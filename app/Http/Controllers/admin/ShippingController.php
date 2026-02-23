@@ -283,37 +283,36 @@ class ShippingController extends Controller
         $productsList = $productsMetaData['Products'] ?? $productsMetaData ?? [];
 
         foreach ($productsList as $item) {
-            // New format: item has 'product' key
+            // New format: item has 'product' key with embedded data
             if (isset($item['product'])) {
-                $product = \App\Models\Product::find($item['product']['id'] ?? $item['product_id']);
-                if (!$product) continue;
-                
+                // Use product data from order meta (already captured at order time)
+                $productData = $item['product'];
                 $quantity = $item['qty'] ?? $item['quantity'] ?? 1;
                 $variation = $item['variation'] ?? null;
                 
                 if ($variation) {
                     $items[] = [
-                        'description' => $product->name . ' - ' . ($variation['size'] ?? ''),
-                        'sku' => $product->sku ?? '',
+                        'description' => $productData['name'] . ' - ' . ($variation['size'] ?? ''),
+                        'sku' => $productData['sku'] ?? '',
                         'quantity' => $quantity,
-                        'value' => $variation['price'] ?? $product->price,
+                        'value' => $variation['price'] ?? $productData['price'],
                         'currency' => 'CAD',
-                        'country_of_origin' => $product->country_of_origin,
-                        'hs_code' => $product->hs_code,
+                        'country_of_origin' => $productData['country_of_origin'] ?? 'CA',
+                        'hs_code' => $productData['hs_code'] ?? '7117907500',
                     ];
                 } else {
                     $items[] = [
-                        'description' => $product->name,
-                        'sku' => $product->sku ?? '',
+                        'description' => $productData['name'],
+                        'sku' => $productData['sku'] ?? '',
                         'quantity' => $quantity,
-                        'value' => $product->price,
+                        'value' => $productData['price'],
                         'currency' => 'CAD',
-                        'country_of_origin' => $product->country_of_origin,
-                        'hs_code' => $product->hs_code,
+                        'country_of_origin' => $productData['country_of_origin'] ?? 'CA',
+                        'hs_code' => $productData['hs_code'] ?? '7117907500',
                     ];
                 }
             }
-            // Old format: direct product_id
+            // Old format: direct product_id (need to query database)
             else {
                 $productId = $item['product_id'] ?? null;
                 $variationId = $item['variation_id'] ?? null;
@@ -334,7 +333,8 @@ class ShippingController extends Controller
                         'hs_code' => $variation->hs_code ?? $product->hs_code,
                     ];
                 } else if ($productId) {
-                    $product = \App\Models\Product::find($productId);
+                    // Use withTrashed() to include soft-deleted products
+                    $product = \App\Models\Product::withTrashed()->find($productId);
                     if (!$product) continue;
                     
                     $items[] = [
