@@ -480,7 +480,6 @@ $(document).ready(function () {
                         $("#passwordError").text(errors.password[0]);
                     }
                 } else if (xhr.status === 401) {
-                    console.log(xhr.responseJSON.message);
                     $("#signinError").text(xhr.responseJSON.message).show();
                 }
             }

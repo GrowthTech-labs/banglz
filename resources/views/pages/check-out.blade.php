@@ -600,7 +600,6 @@
                 const cardNumber = { on: function() {} };
                 const cardExpiry = { on: function() {} };
                 const cardCvc = { on: function() {} };
-                console.log('🧪 Stripe initialization skipped - bypass mode enabled');
                 @endif
 
                 const $errNumber = $('#error-card-number');
@@ -718,32 +717,26 @@
                 // --- Place order / checkout ---
                 $placeOrderBtn.on('click', function(e) {
                     e.preventDefault();
-                    console.log('🔘 Place Order button clicked');
                     clearErrors();
 
                     // Validate terms agreement first
                     if (!validateTerms()) {
-                        console.log('❌ Terms validation failed');
                         return;
                     }
-                    console.log('✅ Terms validated');
 
                     $placeOrderBtn.prop('disabled', true);
                     $checkoutMessage.text('Processing payment...').css('color', '#333');
                     showLoader();
 
                     const selectedPaymentMethod = $('input[name="payment_method"]:checked').val();
-                    console.log('💳 Payment method:', selectedPaymentMethod);
 
                     // Handle PayPal payment
                     if (selectedPaymentMethod === 'paypal') {
-                        console.log('📦 Processing PayPal payment');
                         processPayPalPayment();
                         return;
                     }
 
                     // Handle Stripe payment (existing code)
-                    console.log('📦 Processing Stripe payment');
                     processStripePayment();
                 });
 
@@ -801,10 +794,8 @@
                 function processStripePayment() {
                     @if(env('BYPASS_PAYMENT'))
                     // 🧪 BYPASS MODE: Skip Stripe validation and create order directly
-                    console.log('🧪 Payment bypass enabled - skipping Stripe validation');
                     
                     const formDataParts = gatherFormData();
-                    console.log('📋 Form data gathered:', formDataParts);
                     
                     const payload = {
                         amount: FINAL_TOTAL,
@@ -1365,7 +1356,7 @@
             );
         </script>
 
-      <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places"></script>
+      <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&loading=async" async defer></script>
 <script>
 //     function initAutocomplete() {
 //         const input = document.getElementById('autocomplete');
@@ -1489,7 +1480,12 @@ document.getElementById('province_code').value     = comp['administrative_area_l
     });
 }
 
-google.maps.event.addDomListener(window, 'load', initAutocomplete);
+// Use standard addEventListener instead of deprecated addDomListener
+if (window.google && window.google.maps) {
+    initAutocomplete();
+} else {
+    window.addEventListener('load', initAutocomplete);
+}
 
 
     function handleImportDuties(countryCode) {
@@ -1526,7 +1522,12 @@ google.maps.event.addDomListener(window, 'load', initAutocomplete);
         updateTotals();
     }
 
-    google.maps.event.addDomListener(window, 'load', initAutocomplete);
+    // Use standard addEventListener instead of deprecated addDomListener
+    if (window.google && window.google.maps) {
+        initAutocomplete();
+    } else {
+        window.addEventListener('load', initAutocomplete);
+    }
 </script>
 
 <script>

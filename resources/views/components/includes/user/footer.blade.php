@@ -622,36 +622,38 @@
 
 <script>
   $(document).ready(function() {
-    $('.center').slick({
-      centerMode: true,
-      centerPadding: '60px',
-      slidesToShow: 2,
-      slidesToScroll: 3,
-      dots: true,
-      arrows: false,
-      infinite: true,
-      autoplay: true,
-      autoplaySpeed: 2000,
-      speed: 600,
-      responsive: [{
-          breakpoint: 768,
-          settings: {
-            centerMode: false, // still center the slide
-            centerPadding: '0px', // remove side gaps
-            slidesToShow: 1 // only one big slide
+    if ($('.center').length) {
+      $('.center').slick({
+        centerMode: true,
+        centerPadding: '60px',
+        slidesToShow: 2,
+        slidesToScroll: 3,
+        dots: true,
+        arrows: false,
+        infinite: true,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        speed: 600,
+        responsive: [{
+            breakpoint: 768,
+            settings: {
+              centerMode: false, // still center the slide
+              centerPadding: '0px', // remove side gaps
+              slidesToShow: 1 // only one big slide
+            }
+          },
+          {
+            breakpoint: 480,
+            settings: {
+              arrows: false,
+              centerMode: false,
+              centerPadding: '0px',
+              slidesToShow: 1
+            }
           }
-        },
-        {
-          breakpoint: 480,
-          settings: {
-            arrows: false,
-            centerMode: false,
-            centerPadding: '0px',
-            slidesToShow: 1
-          }
-        }
-      ]
-    });
+        ]
+      });
+    }
   });
 </script>
 
@@ -779,7 +781,10 @@ const addToCartBtn = document.querySelector('#add-to-cart');
   function loadBundleSidebar() {
     const isLoggedIn = @json(Auth::check());
     fetch(pendingBundleUrl)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         const container = document.querySelector('.cart-item-slider');
         const progressText = document.querySelector('.progressbar-section h1 span');
@@ -1412,12 +1417,15 @@ function updateWishlistBadge(count) {
 
   function loadCartBadge() {
     fetch("{{ route('cart.count') }}")
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => {
         updateCartBadge(data.count || 0);
       })
       .catch(err => {
-        console.error('Error loading cart count:', err);
+        // Silently fail - cart badge will remain at 0
       });
   }
 
@@ -1660,7 +1668,7 @@ function loadWishlistBadge() {
       });
     })
     .catch(err => {
-      console.error("Error loading wishlist:", err);
+      // Silently fail - wishlist will remain empty
     });
 }
 

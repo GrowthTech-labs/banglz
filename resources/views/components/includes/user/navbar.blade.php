@@ -675,8 +675,6 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('Mobile menu script loaded');
-        
         // Set <a> width to 100%
         document.querySelectorAll('#categories-list .category-item > a').forEach(link => {
             link.style.display = 'block';
@@ -689,11 +687,8 @@
             
             // Only add toggle behavior if it's a javascript:void(0) link
             if (href === 'javascript:void(0);') {
-                console.log('Adding toggle to:', link.textContent);
-                
                 // Click handler
                 link.addEventListener('click', function(e) {
-                    console.log('Category clicked:', this.textContent);
                     e.preventDefault();
                     e.stopPropagation();
                     toggleCategory(this);
@@ -701,13 +696,10 @@
 
                 // Touch handler for better mobile support
                 link.addEventListener('touchend', function(e) {
-                    console.log('Category touched:', this.textContent);
                     e.preventDefault();
                     e.stopPropagation();
                     toggleCategory(this);
                 }, { passive: false });
-            } else {
-                console.log('Direct link (no toggle):', link.textContent, href);
             }
         });
 
@@ -715,8 +707,6 @@
             const li = linkElement.parentElement;
             const subList = li.querySelector('.subcategories');
             const wasActive = li.classList.contains('active-list');
-
-            console.log('Toggle category, wasActive:', wasActive);
 
             // Remove active-list from all category items and hide all subcategories
             document.querySelectorAll('#categories-list .category-item').forEach(item => {
@@ -730,27 +720,21 @@
                 li.classList.add('active-list');
                 if (subList) {
                     subList.style.display = 'block';
-                    console.log('Showing subcategories');
                 }
             }
         }
 
         // Make subcategory links clickable - remove preventDefault
         const subLinks = document.querySelectorAll('.subcategories li a');
-        console.log('Found subcategory links:', subLinks.length);
         
         subLinks.forEach(link => {
-            console.log('Subcategory link:', link.textContent, link.href);
-            
             // Remove any existing click handlers that might prevent navigation
             link.addEventListener('click', function(e) {
-                console.log('Subcategory link clicked:', this.textContent, this.href);
                 e.stopPropagation(); // Prevent parent handlers
                 // Allow default navigation
             });
             
             link.addEventListener('touchend', function(e) {
-                console.log('Subcategory link touched:', this.textContent, this.href);
                 e.stopPropagation(); // Prevent parent handlers
                 // Allow default navigation
             }, { passive: true });

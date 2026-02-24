@@ -644,11 +644,6 @@
         const selectedBoxIdFinal = selectedBoxBtn ? selectedBoxBtn.getAttribute('data-id') : null;
         const selectedBoxSizeFinal = selectedBoxBtn ? selectedBoxBtn.getAttribute('data-box') : null;
 
-        console.log('✅ Selected Size ID:', selectedSizeId);
-        console.log('🎨 Selected Color IDs:', selectedColors);
-        console.log('📦 Selected Box ID:', selectedBoxIdFinal);
-        console.log('📏 Selected Box Size:', selectedBoxSizeFinal);
-
         // === 🔥 AJAX call to backend ===
         try {
           const response = await fetch(`{{ route('bangle-box.add-to-cart') }}`, {

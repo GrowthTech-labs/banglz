@@ -2043,7 +2043,6 @@
                                 return res.json();
                             })
                             .then(data => {
-                                console.log('Address data:', data); // Debug log
                                 
                                 // Set values with a small delay to ensure form is ready
                                 setTimeout(() => {
