@@ -1775,24 +1775,77 @@ body, html {
 }
 .detail-client-table{
   width: 100%;
-  overflow-x: visible;
-  display: flex;
-  justify-content: center;
+  overflow-x: auto;
 }
 
 .product-table{
   padding-top: 0 !important;
   margin-top: 0 !important;
   width: 100%;
-  display: flex;
-  justify-content: center;
 }
 
 .product-table table {
   border-collapse: collapse;
   margin-top: 20px;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.product-table table th,
+.product-table table td {
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.product-table table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.product-table table td {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.product-table table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Column widths */
+.product-table table th:nth-child(1),
+.product-table table td:nth-child(1) {
+  width: 25%;
+}
+
+.product-table table th:nth-child(2),
+.product-table table td:nth-child(2) {
+  width: 15%;
+}
+
+.product-table table th:nth-child(3),
+.product-table table td:nth-child(3) {
+  width: 15%;
+}
+
+.product-table table th:nth-child(4),
+.product-table table td:nth-child(4) {
+  width: 20%;
+}
+
+.product-table table th:nth-child(5),
+.product-table table td:nth-child(5) {
+  width: 25%;
+}
+
+/* Action buttons */
+.product-table table td:last-child {
+  white-space: nowrap;
+}
+
+.product-table table td .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 /* Responsive Table */
@@ -1800,11 +1853,10 @@ body, html {
   .detail-client-table {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    justify-content: flex-start;
   }
   
-  .product-table {
-    justify-content: flex-start;
+  .product-table table {
+    min-width: 800px;
   }
   
   .product-table table {
