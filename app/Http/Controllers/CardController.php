@@ -23,7 +23,7 @@ class CardController extends Controller
     {
         $user = Auth::user();
         if (! $user) {
-            return response()->json(['status' => 'ok', 'cards' => []]);
+            return response()->json(['success' => true, 'cards' => []]);
         }
 
         $cards = Card::where('user_id', $user->id)
@@ -32,6 +32,7 @@ class CardController extends Controller
             ->map(function ($c) {
                 return [
                     'id' => $c->id,
+                    'payment_method_id' => $c->stripe_pm_id, // For frontend compatibility
                     'card_number' => $c->card_number, // masked via accessor
                     'last4' => $c->card_last4,
                     'brand' => $c->card_brand,
@@ -49,7 +50,7 @@ class CardController extends Controller
                 ];
             });
 
-        return response()->json(['status' => 'ok', 'cards' => $cards]);
+        return response()->json(['success' => true, 'cards' => $cards]);
     }
 
     // POST /cards/store (route name cards.store)

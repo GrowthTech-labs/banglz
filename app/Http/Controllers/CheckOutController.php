@@ -260,7 +260,7 @@ $isMixed = (
                     'use_saved_card_id'  => 'nullable|integer',
                     'save_card'          => 'nullable|boolean',
                     'billing'            => 'nullable|array',
-                    'products_meta_data' => 'required|array|min:1',
+                    'products_meta_data' => 'required|array',
                     'tax'                => 'nullable|numeric',
                     'shipping_fee'       => 'nullable|numeric',
                     'email'              => 'required|email',
@@ -275,7 +275,7 @@ $isMixed = (
 
                     'delivery_meta_data.address'      => 'required|string',
                     'delivery_meta_data.country'      => 'required|string',
-                    'delivery_meta_data.country_iso'  => 'required|string',
+                    'delivery_meta_data.country_iso'  => 'required|string|size:2',
                     'delivery_meta_data.state_province' => 'required|string',
                     'delivery_meta_data.city'         => 'required|string',
                     'delivery_meta_data.street'       => 'required|string',

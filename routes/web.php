@@ -173,7 +173,13 @@ Route::post('logout', [ControllersAuthController::class, 'logout'])->name('user.
 Route::get('category-details/{id}', [ProductController::class, 'details'])->name('category.show.details');
 
 
+Route::get('/api/user/saved-cards', [CardController::class, 'list']);
 
+Route::post('/gift-card/validate', function (Request $request) {
+    return response()->json(['success' => false, 'message' => 'Coming soon'], 400);
+});
+
+// Removed stub - using CheckOutController::createPaymentIntent instead
 Route::prefix('admin')->group(function () {
     Route::any('/login', [AuthController::class, 'login'])->name('login');
 
