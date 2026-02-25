@@ -57,6 +57,12 @@ class CardController extends Controller
     // Expecting: payment_method_id (from Stripe Elements via JS), optional billing fields
     public function store(Request $request)
     {
+        \Log::info('Card store request received', [
+            'user_id' => Auth::id(),
+            'payment_method_id' => $request->input('payment_method_id'),
+            'save_card' => $request->input('save_card'),
+        ]);
+
         $request->validate([
             'payment_method_id' => 'required|string',
             'full_name' => 'nullable|string|max:255',
@@ -71,6 +77,7 @@ class CardController extends Controller
 
         $user = $request->user();
         if (! $user) {
+            \Log::error('Card store failed: User not authenticated');
             return response()->json(['status' => 'error', 'message' => 'Login required to save card.'], 401);
         }
 
@@ -83,6 +90,7 @@ class CardController extends Controller
             // get or create Stripe customer for this user (you must implement how you save stripe_customer_id on users table)
             $stripeCustomerId = $user->stripe_customer_id ?? null;
             if (! $stripeCustomerId) {
+                \Log::info('Creating new Stripe customer for user', ['user_id' => $user->id]);
                 $customer = Customer::create([
                     'email' => $user->email,
                     'name'  => $user->name,
@@ -93,6 +101,10 @@ class CardController extends Controller
             }
 
             // Attach PaymentMethod to customer
+            \Log::info('Attaching payment method to customer', [
+                'pm_id' => $pmId,
+                'customer_id' => $stripeCustomerId
+            ]);
             $pm = PaymentMethod::retrieve($pmId);
             $pm->attach(['customer' => $stripeCustomerId]);
 
@@ -136,9 +148,13 @@ class CardController extends Controller
                 'is_default' => $saveCard ? true : false
             ]);
 
+            \Log::info('Card saved successfully', ['card_id' => $cardRecord->id]);
+
             return response()->json(['status' => 'ok', 'message' => 'Card saved', 'card' => $cardRecord]);
         } catch (\Exception $e) {
-            Log::error('Stripe store card error: ' . $e->getMessage());
+            Log::error('Stripe store card error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['status' => 'error', 'message' => 'Failed to save card. ' . $e->getMessage()], 500);
         }
     }

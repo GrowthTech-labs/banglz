@@ -172,6 +172,20 @@
                 <div class="top-header">
                     <h1><span>Checkout</span></h1>
                 </div>
+                
+                {{-- Display error message if payment was cancelled or failed --}}
+                @if(session('error'))
+                <div class="alert alert-danger" style="margin: 20px 0; padding: 15px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 5px; color: #721c24;">
+                    <strong>Error:</strong> {{ session('error') }}
+                </div>
+                @endif
+                
+                @if(session('success'))
+                <div class="alert alert-success" style="margin: 20px 0; padding: 15px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px; color: #155724;">
+                    <strong>Success:</strong> {{ session('success') }}
+                </div>
+                @endif
+                
                 <div class="checkout-section-body">
                     <div class="left-checkout-form-wrapper">
                         <form id="checkoutForm" onsubmit="return false;">

@@ -392,6 +392,5 @@
 </script>
 
 <script>
-    $('.sidenav  li:nth-of-type(5)').addClass('active');
 </script>
 @endsection

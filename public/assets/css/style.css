@@ -5083,7 +5083,7 @@ td {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     min-width: 230px;
-    z-index: 1000;
+    z-index: 9999;
 }
 
 .user-dropdown-menu a {
@@ -5111,8 +5111,9 @@ td {
     background-color: #8b6252;
     color: white !important;
     text-align: center;
-    margin: 20px;
-    margin-top: 40px;
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 4px;
 }
 .signin-btn:hover {
     background-color: #6a4739 !important;

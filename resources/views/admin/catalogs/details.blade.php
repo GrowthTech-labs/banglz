@@ -142,7 +142,6 @@
     $('body').addClass('bg-clr');
     // highlight correct menu item if needed
     $('.sidenav li').removeClass('active');
-    // example: $('.sidenav li:nth-of-type(4)').addClass('active');
 
     function changeMainImage(el) {
         document.getElementById('mainCollectionImage').src = el.src;

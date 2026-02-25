@@ -115,13 +115,18 @@ Route::get('/bundle/pending', [BundleController::class, 'getPendingBundle'])
 Route::post('/cart/add', [BundleController::class, 'addToCart'])->name('cart.add');
 Route::get('/cart', [BundleController::class, 'getCart'])->name('cart');
 Route::post('/cart/remove', [BundleController::class, 'removeFromCart'])->name('cart.remove');
-Route::get('check-out', [CheckOutController::class, 'checkoutPage'])->name('check-out');
+
+// Checkout routes - require authentication
+Route::middleware(['auth'])->group(function () {
+    Route::get('check-out', [CheckOutController::class, 'checkoutPage'])->name('check-out');
+    Route::post('/checkout/create-payment-intent', [CheckoutController::class, 'createPaymentIntent'])->name('checkout.createPaymentIntent');
+    Route::post('/checkout/complete', [CheckoutController::class, 'completeOrder'])->name('checkout.complete');
+});
+
 Route::get('/cards/list', [CardController::class, 'list'])->name('cards.list');
 Route::post('/cards/store', [CardController::class, 'store'])->name('cards.store');
 Route::post('/cards/{card}/default', [CardController::class, 'setDefault'])->name('cards.setDefault');
 Route::delete('/cards/{card}', [CardController::class, 'destroy'])->name('cards.delete');
-Route::post('/checkout/create-payment-intent', [CheckoutController::class, 'createPaymentIntent'])->name('checkout.createPaymentIntent');
-Route::post('/checkout/complete', [CheckoutController::class, 'completeOrder'])->name('checkout.complete');
 Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
 Route::get('/wishlists', [WishlistController::class, 'list'])->name('wishlists.index');
 Route::post('bangle-box/add-to-cart', [BanglzBox::class, 'addToCart'])->name('bangle-box.add-to-cart');

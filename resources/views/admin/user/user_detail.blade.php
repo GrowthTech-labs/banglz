@@ -94,6 +94,5 @@
 </script>
 
 <script>
-  $('.sidenav  li:nth-of-type(9)').addClass('active');
 </script>
 @endsection

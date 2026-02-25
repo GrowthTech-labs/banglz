@@ -234,7 +234,6 @@
 @section('admininsertjavascript')
 <script>
     $('body').addClass('bg-clr');
-    $('.sidenav li:nth-of-type(2)').addClass('active');
 
     function changeMainImage(el) {
         document.getElementById('mainProductImage').src = el.src;

@@ -178,14 +178,28 @@ public function getCartCount()
     return response()->json(['count' => $count]);
 }
 
-public function confirmation($trancationId, $date)
+public function confirmation($transactionId, $date)
 {
-    session()->put('transactionId', $trancationId);
+    // Find the order by order_id
+    $order = Order::where('order_id', $transactionId)->first();
+    
+    if (!$order) {
+        return redirect('/')->with('error', 'Order not found');
+    }
+    
+    // Check if payment is completed
+    if ($order->payment_status !== 'paid') {
+        return redirect('/checkout')->with('error', 'Payment not completed. Please complete your payment to confirm the order.');
+    }
+    
+    session()->put('transactionId', $transactionId);
     session()->put('date', $date);
-   return view('pages.conformation', [
+    
+    return view('pages.conformation', [
         'transactionId' => session('transactionId'),
         'date'          => session('date'),
         'message' => 'Order placed successfully',
+        'order' => $order,
     ]);
 }
 

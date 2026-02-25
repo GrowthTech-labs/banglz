@@ -66,6 +66,5 @@
 <script>
     $('body').addClass('bg-clr');
     $('.sidenav li').removeClass('active');
-    // Example: $('.sidenav li:nth-of-type(7)').addClass('active'); // adjust to highlight menu
 </script>
 @endsection

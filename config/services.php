@@ -34,6 +34,16 @@ return [
     'key' => env('STRIPE_KEY'),
     'secret' => env('STRIPE_SECRET'),
 ],
+
+'paypal' => [
+    'mode' => env('PAYPAL_MODE', 'sandbox'),
+    'sandbox_client_id' => env('PAYPAL_SANDBOX_CLIENT_ID'),
+    'sandbox_client_secret' => env('PAYPAL_SANDBOX_CLIENT_SECRET'),
+    'live_client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
+    'live_client_secret' => env('PAYPAL_LIVE_CLIENT_SECRET'),
+    'currency' => env('PAYPAL_CURRENCY', 'CAD'),
+],
+
  'google' => [
         'maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
     ],

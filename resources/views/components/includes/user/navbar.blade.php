@@ -56,12 +56,13 @@
                         <a class="signin-btn" href="{{ route('user.login') }}">Sign In or Join</a>
                         @endguest
 
+                        @auth
+                        <!-- 👤 If user IS signed in -->
                         <a href="{{ url('personal-account') }}">Account</a>
                         <a href="{{ url('personal-account') }}">Purchase History</a>
                         <a href="{{ url('personal-account') }}">Points & Rewards</a>
                         <a href="{{ url('personal-account') }}">Wishlist / Saved Items</a>
                         <a href="{{ url('personal-account') }}">Manage Account</a>
-                        @auth
 
                         <a href="{{ route('logout') }}"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -71,7 +72,6 @@
                         <form id="logout-form" action="{{ route('user.logout') }}" method="post" style="display: none;">
                             @csrf
                         </form>
-
                         @endauth
                     </div>
                 </div>

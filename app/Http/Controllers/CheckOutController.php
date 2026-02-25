@@ -27,24 +27,31 @@ class CheckOutController extends Controller
 {
 
     protected $stripe;
+    protected $paypalGateway;
 
     public function __construct()
     {
         $this->stripe = new StripeClient(config('services.stripe.secret') ?? env('STRIPE_SECRET'));
+        
+        // Initialize PayPal gateway
+        $this->paypalGateway = \Omnipay\Omnipay::create('PayPal_Rest');
+        $this->paypalGateway->setClientId(env('PAYPAL_SANDBOX_CLIENT_ID'));
+        $this->paypalGateway->setSecret(env('PAYPAL_SANDBOX_CLIENT_SECRET'));
+        $this->paypalGateway->setTestMode(env('PAYPAL_MODE', 'sandbox') === 'sandbox');
     }
     public function checkoutPage()
     {
-        $userId    = Auth::check() ? Auth::id() : null;
-        $sessionId = session()->get('cart_session_id');
-        $query = Cart::query();
-
-        $user = null;
-        if ($userId) {
-            $user = User::find($userId);
-            $query->where('user_id', $userId);
-        } else {
-            $query->where('session_id', $sessionId);
-        }
+        // User must be authenticated (enforced by middleware)
+        $user = Auth::user();
+        $userId = $user->id;
+        
+        // Clean up any pending/cancelled orders from previous incomplete checkouts
+        Order::where('user_id', $userId)
+            ->whereIn('payment_status', ['pending', 'cancelled'])
+            ->where('created_at', '<', now()->subHours(2)) // Older than 2 hours
+            ->delete();
+        
+        $query = Cart::where('user_id', $userId);
 
         // Fetch products
         $products = (clone $query)
@@ -313,10 +320,9 @@ $isMixed = (
         }
 
         $gift_meta_data = is_string($request->gift_card_meta_data) ? json_decode($request->gift_card_meta_data, true) : $request->gift_card_meta_data;
-        $user = Auth::user();
+        $user = Auth::user(); // User is always authenticated now
         $amount = round($request->input('amount') * 100); // cents
         $currency = $request->input('currency', 'usd');
-        $sessionId = $user ? null : session()->getId(); // for guest users
         $gift_cards_total = $request->input('giftCardsTotal', 0);
         // $amount = $amount + ($gift_cards_total * 100);
 
@@ -324,7 +330,7 @@ $isMixed = (
         if (env('BYPASS_PAYMENT', false)) {
             \Log::info('Payment bypassed for testing', [
                 'amount' => $amount,
-                'user_id' => $user ? $user->id : null,
+                'user_id' => $user->id,
             ]);
             
             if ($request->type == 'gift_card') {
@@ -338,8 +344,8 @@ $isMixed = (
                 ]);
             } else if ($request->type == 'product') {
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -369,8 +375,8 @@ $isMixed = (
             } else if ($request->type == 'both') {
                 $giftcard = $this->giftCardOrder($gift_meta_data);
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -406,8 +412,8 @@ $isMixed = (
                 $giftcard = $this->giftCardOrder($gift_meta_data);
             } else if ($request->type == 'product') {
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -428,8 +434,8 @@ $isMixed = (
             } else if ($request->type == 'both') {
                 $giftcard = $this->giftCardOrder($gift_meta_data);
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -462,6 +468,89 @@ $isMixed = (
                 'order_id' => $order->order_id,
                 'date' => $order->created_at->toDateString(),
             ]);
+        }
+
+        // Handle PayPal payment
+        if ($request->input('payment_type') === 'paypal') {
+            try {
+                // Create order first with pending payment status
+                if ($request->type == 'gift_card') {
+                    $giftcard = $this->giftCardOrder($gift_meta_data);
+                    $orderId = null;
+                } else if ($request->type == 'product') {
+                    $order = $this->StoreOrder([
+                        'user_id' => $user->id,
+                        'session_id' => null,
+                        'products_meta_data' => json_encode($request->input('products_meta_data')),
+                        'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
+                        'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
+                        'bangle_box_meta_data' => json_encode($request->input('bangle_box_meta_data')),
+                        'total_amount' => $request->input('amount'),
+                        'tax' => $request->input('tax'),
+                        'shipping_fee' => $request->input('shipping_fee'),
+                        'us_import_duties' => $request->input('us_import_duties', 0),
+                        'status' => 'pending',
+                        'email' => $request->input('email'),
+                        'payment_status' => 'pending',
+                        'user_meta_data' => json_encode($request->input('users_meta_data')),
+                        'applied_points' => $request->input('applied_points', 0),
+                        'applied_shipping' => $request->input('applied_shipping', false),
+                        'rewards_discount' => $request->input('rewards_discount', 0),
+                        'sub_total' => $request->input('subtotal', 0),
+                    ]);
+                    $orderId = $order->id;
+                } else if ($request->type == 'both') {
+                    $giftcard = $this->giftCardOrder($gift_meta_data);
+                    $order = $this->StoreOrder([
+                        'user_id' => $user->id,
+                        'session_id' => null,
+                        'products_meta_data' => json_encode($request->input('products_meta_data')),
+                        'delivery_meta_data' => json_encode($request->input('delivery_meta_data')),
+                        'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
+                        'bangle_box_meta_data' => json_encode($request->input('bangle_box_meta_data')),
+                        'total_amount' => $request->input('amount'),
+                        'tax' => $request->input('tax'),
+                        'shipping_fee' => $request->input('shipping_fee'),
+                        'us_import_duties' => $request->input('us_import_duties', 0),
+                        'status' => 'pending',
+                        'email' => $request->input('email'),
+                        'payment_status' => 'pending',
+                        'user_meta_data' => json_encode($request->input('users_meta_data')),
+                        'applied_points' => $request->input('applied_points', 0),
+                        'applied_shipping' => $request->input('applied_shipping', false),
+                        'rewards_discount' => $request->input('rewards_discount', 0),
+                        'sub_total' => $request->input('subtotal', 0),
+                    ]);
+                    $orderId = $order->id;
+                }
+
+                // Create PayPal payment
+                $response = $this->paypalGateway->purchase([
+                    'amount' => $request->input('amount'),
+                    'currency' => env('PAYPAL_CURRENCY', 'CAD'),
+                    'returnUrl' => route('payment.success', ['order_id' => $orderId]),
+                    'cancelUrl' => route('payment.error', ['order_id' => $orderId]),
+                    'description' => 'Order #' . ($orderId ?? 'Gift Card'),
+                ])->send();
+
+                if ($response->isRedirect()) {
+                    return response()->json([
+                        'status' => 'redirect',
+                        'approval_url' => $response->getRedirectUrl(),
+                        'order_id' => $orderId,
+                    ]);
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $response->getMessage() ?: 'PayPal payment failed'
+                    ], 500);
+                }
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'PayPal error: ' . $e->getMessage()
+                ], 500);
+            }
         }
 
         // If user selected a saved card (server will attempt off-session)
@@ -587,7 +676,7 @@ $isMixed = (
                 'amount' => $amount,
                 'currency' => $currency,
                 'metadata' => [
-                    'user_id' => $user ? $user->id : null,
+                    'user_id' => $user->id,
                 ],
             ]);
 
@@ -598,8 +687,8 @@ $isMixed = (
                 );
             } else if ($request->type == 'product') {
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')), // added
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -625,8 +714,8 @@ $isMixed = (
                     $gift_meta_data
                 );
                 $order = $this->StoreOrder([
-                    'user_id' => $user ? $user->id : null,
-                    'session_id' => $sessionId,
+                    'user_id' => $user->id,
+                    'session_id' => null,
                     'products_meta_data' => json_encode($request->input('products_meta_data')),
                     'delivery_meta_data' => json_encode($request->input('delivery_meta_data')), // added
                     'applied_gift_card_meta_data' => json_encode($request->input('applied_gift_card_meta_data')),
@@ -725,58 +814,22 @@ $isMixed = (
                 }
             }
         }
-        $user = Auth::user();
+        $user = Auth::user(); // User is always authenticated now
 
-        if ($user) {
-            // Applied points (raw integer points, not dollars)
-            if (!empty($orderData['applied_points']) && $orderData['applied_points'] > 0) {
-                $pointsToUse = (int) $orderData['applied_points'];
-                $user->decrement('total_points', $pointsToUse);
-            }
+        // Applied points (raw integer points, not dollars)
+        if (!empty($orderData['applied_points']) && $orderData['applied_points'] > 0) {
+            $pointsToUse = (int) $orderData['applied_points'];
+            $user->decrement('total_points', $pointsToUse);
+        }
 
-            // Applied free shipping
-            if (!empty($orderData['applied_shipping'])) {
-                if ($user->total_shippings > 0) {
-                    $user->decrement('total_shippings', 1);
-                }
-            }
-        } else {
-            $UserData = json_decode($orderData['user_meta_data'], true);
-            $email    = $orderData['email'];
-
-            $existingUser = User::where('email', $email)->first();
-
-            if ($existingUser) {
-                if ($existingUser->is_guest) {
-                    $existingUser->update([
-                        'name'      => $UserData['name'] ?? $existingUser->name,
-                        'last_name' => $UserData['last_name'] ?? $existingUser->last_name,
-                    ]);
-                }
-
-                $user = $existingUser;
-            } else {
-                // First create user (id is generated here)
-                $user = User::create([
-                    'name'     => $UserData['name'] ?? 'Guest',
-                    'last_name' => $UserData['last_name'] ?? null,
-                    'email'    => $email,
-                    'password' => Hash::make(Str::random(12)),
-                    'is_guest' => true,
-                ]);
-
-                // Then update customer_id to use the user id
-                $user->update([
-                    'customer_id' => 'CUST-' . str_pad($user->id, 3, '0', STR_PAD_LEFT),
-                ]);
+        // Applied free shipping
+        if (!empty($orderData['applied_shipping'])) {
+            if ($user->total_shippings > 0) {
+                $user->decrement('total_shippings', 1);
             }
         }
 
-        Order::where('id', $order->id)->update([
-            'user_id' => $user->id,
-            'email' => $user->email,
-
-        ]);
+        // No need to update order user_id since it's already set correctly
  if (!empty($bangle_box_meta_data)) {
     if (is_string($bangle_box_meta_data)) {
         $bangle_box_meta_data = json_decode($bangle_box_meta_data, true);

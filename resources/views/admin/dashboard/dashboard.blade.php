@@ -542,7 +542,6 @@ function confirmDelete(id) {
   $('body').addClass('bg-clr')
 </script>
 <script>
-  $('.sidenav  li:nth-of-type(1)').addClass('active');
 </script>
 
 @endsection

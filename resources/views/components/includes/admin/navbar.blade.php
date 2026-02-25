@@ -9,14 +9,14 @@
 
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto sidenav" id="navAccordion">
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item dasboard-link" href="{{route('admin.dashboard')}}">
                     <img src="{{asset('assets/images/admin/side-dashboard.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
                     <img src="{{asset('assets/images/admin/dash.png')}}" class="icon-blue pr-2" width="30" height="30">
                     Dashboard<span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.products*') || request()->routeIs('admin.product.*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.products') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -24,7 +24,7 @@
                         height="30">
                     Products</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.category*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.category') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -32,15 +32,7 @@
                         height="30">
                     Categories</a>
             </li>
-            <!-- <li class="nav-item ">
-                <a class="nav-link sidenav-item" href="{{ url('sub_category') }}"><img
-                        src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
-                        height="30">
-                    <img src="{{asset('assets/images/admin/blue-plots.png')}}" class="icon-blue pr-2" width="30"
-                        height="30">
-                    Sub Categories</a>
-            </li> -->
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.attributes*') || request()->routeIs('admin.attribute.*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.attributes') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -48,7 +40,7 @@
                         height="30">
                     Attributes</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.catelogs*') || request()->routeIs('admin.catalogs.*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.catelogs') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -56,7 +48,7 @@
                         height="30">
                     Catalogs</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.colors*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.colors') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -64,7 +56,7 @@
                         height="30">
                     Colors</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.countries.*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.countries.index') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -72,7 +64,7 @@
                         height="30">
                     Countries</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.blog.index') || request()->routeIs('admin.blog.create') || request()->routeIs('admin.blog.edit') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.blog.index') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -80,7 +72,7 @@
                         height="30">
                     Blogs</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.blog.category*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.blog.category') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -89,7 +81,7 @@
                     Blog Categories</a>
             </li>
 
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.page-setting*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.page-setting') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -97,7 +89,7 @@
                         height="30">
                     Page Settings</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.customers.*') || request()->routeIs('admin.customer.*') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.customers.list') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">
@@ -105,7 +97,7 @@
                         height="30">
                     Customers</a>
             </li>
-            <li class="nav-item ">
+            <li class="nav-item {{ request()->routeIs('admin.orders*') || request()->routeIs('admin.create-label') || request()->routeIs('admin.get-orders-list') ? 'active' : '' }}">
                 <a class="nav-link sidenav-item" href="{{ route('admin.orders') }}"><img
                         src="{{asset('assets/images/admin/plots.svg')}}" class="icon-white pr-2" width="30"
                         height="30">

@@ -439,8 +439,26 @@ function processPayPalPayment() {
     
     submitOrder(null, 'paypal')
         .then(response => {
-            if (response.approval_url) {
+            if (response.status === 'redirect' && response.approval_url) {
+                // Redirect to PayPal for payment
                 window.location.href = response.approval_url;
+            } else if (response.status === 'ok' || response.status === 'success') {
+                // Payment completed without redirect (shouldn't happen with PayPal)
+                window.Toast.fire({
+                    icon: 'success',
+                    title: response.message || 'Order placed successfully!'
+                });
+                
+                let redirectUrl = '/';
+                if (response.order_id && response.date) {
+                    redirectUrl = `/confirmation/${response.order_id}/${response.date}`;
+                }
+                
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1500);
+            } else {
+                throw new Error(response.message || 'PayPal payment failed');
             }
         })
         .catch(error => {
@@ -499,6 +517,7 @@ async function submitOrder(paymentMethodId, paymentType) {
     const formData = {
         // Payment info
         payment_method_id: paymentMethodId,
+        payment_type: paymentType, // Add payment type (stripe or paypal)
         save_card: $('#save_card').is(':checked') ? 1 : 0,
 
         // Amount info
@@ -592,12 +611,19 @@ async function submitOrder(paymentMethodId, paymentType) {
         
         // Save card if user checked the box and is logged in
         const shouldSaveCard = $('#save_card').is(':checked');
+        console.log('💳 Should save card?', shouldSaveCard, 'Payment Method ID:', paymentMethodId);
+        
         if (shouldSaveCard && paymentMethodId) {
             try {
+                console.log('💳 Attempting to save card...');
                 await saveCard(paymentMethodId, formData.delivery_meta_data);
+                console.log('✅ Card save completed');
             } catch (saveError) {
+                console.error('❌ Card save failed:', saveError);
                 // Don't fail the order if card save fails
             }
+        } else {
+            console.log('ℹ️ Skipping card save - checkbox not checked or no payment method');
         }
         
         window.Toast.fire({
@@ -625,6 +651,10 @@ async function submitOrder(paymentMethodId, paymentType) {
 
 // Save card for future use
 async function saveCard(paymentMethodId, deliveryData) {
+    console.log('💳 Saving card...', {
+        paymentMethodId: paymentMethodId,
+        deliveryData: deliveryData
+    });
     
     const cardData = {
         payment_method_id: paymentMethodId,
@@ -636,6 +666,8 @@ async function saveCard(paymentMethodId, deliveryData) {
         zip: deliveryData.postcode || '',
         phone: $('input[name="phone"]').val() || ''
     };
+    
+    console.log('💳 Card data to save:', cardData);
     
     try {
         const response = await fetch('/cards/store', {
@@ -649,13 +681,16 @@ async function saveCard(paymentMethodId, deliveryData) {
         });
         
         const data = await response.json();
+        console.log('💳 Save card response:', data);
         
         if (!response.ok || data.status !== 'ok') {
             throw new Error(data.message || 'Failed to save card');
         }
         
+        console.log('✅ Card saved successfully');
         return data;
     } catch (error) {
+        console.error('❌ Save card error:', error);
         throw error;
     }
 }

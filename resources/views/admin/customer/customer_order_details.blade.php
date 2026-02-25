@@ -838,29 +838,31 @@
             <li class="timeline-item">
                 <div class="timeline-dot bg-primary"></div>
                 <div class="timeline-content">
-                    <p class="mb-1"><strong>Order confirmation email</strong> was sent to <a href="#">angela@shop.com</a></p>
-                    <small class="text-muted">Yesterday · 11:00 AM</small>
+                    <p class="mb-1"><strong>Order confirmation email</strong> was sent to <a href="mailto:{{ $order->email }}">{{ $order->email }}</a></p>
+                    <small class="text-muted">{{ $order->created_at->format('M d, Y · h:i A') }}</small>
                 </div>
             </li>
             <li class="timeline-item">
                 <div class="timeline-dot bg-success"></div>
                 <div class="timeline-content">
-                    <p class="mb-1">$65.50 CAD will be added to your Oct 10, 2025 payout</p>
-                    <small class="text-muted">Yesterday · 11:01 AM</small>
+                    <p class="mb-1">${{ number_format($order->total_amount, 2) }} {{ strtoupper($order->currency ?? 'CAD') }} will be added to your payout</p>
+                    <small class="text-muted">{{ $order->created_at->addMinutes(1)->format('M d, Y · h:i A') }}</small>
                 </div>
             </li>
+            @if($order->payment_status === 'paid')
             <li class="timeline-item">
                 <div class="timeline-dot bg-warning"></div>
                 <div class="timeline-content">
-                    <p class="mb-1">Payment was processed using Visa ending in 8375</p>
-                    <small class="text-muted">Yesterday · 11:02 AM</small>
+                    <p class="mb-1">Payment was processed successfully</p>
+                    <small class="text-muted">{{ $order->created_at->addMinutes(2)->format('M d, Y · h:i A') }}</small>
                 </div>
             </li>
+            @endif
             <li class="timeline-item">
                 <div class="timeline-dot bg-secondary"></div>
                 <div class="timeline-content">
-                    <p class="mb-1">David placed this order on Online Store (checkout #37946)</p>
-                    <small class="text-muted">Yesterday · 11:03 AM</small>
+                    <p class="mb-1">{{ $order->user_meta_data['name'] ?? 'Customer' }} {{ $order->user_meta_data['last_name'] ?? '' }} placed this order (Order #{{ $order->order_id }})</p>
+                    <small class="text-muted">{{ $order->created_at->addMinutes(3)->format('M d, Y · h:i A') }}</small>
                 </div>
             </li>
         </ul>

@@ -150,7 +150,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $('body').addClass('bg-clr');
-    $('.sidenav li:nth-of-type(10)').addClass('active');
 </script>
 <script>
     $(document).on('click', '#editPoints', function() {
