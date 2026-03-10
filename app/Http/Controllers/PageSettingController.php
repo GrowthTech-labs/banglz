@@ -139,7 +139,8 @@ public function store(Request $request)
             // Handle image upload
             if ($request->hasFile("appointments.$i.image")) {
                 $file = $request->file("appointments.$i.image");
-                $imageName = time().'_'.$i.'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+                $extension = strtolower($file->getClientOriginalExtension());
+                $imageName = time().'_'.$i.'_'.Str::random(5).'.'.$extension;
                 $file->move(public_path('assets/images'), $imageName);
             } else {
                 // Keep existing image
@@ -171,7 +172,8 @@ public function store(Request $request)
 
         if ($request->hasFile("$key.image1")) {
             $file1 = $request->file("$key.image1");
-            $filename1 = time().'_'.Str::random(5).'.'.$file1->getClientOriginalExtension();
+            $extension1 = strtolower($file1->getClientOriginalExtension());
+            $filename1 = time().'_'.Str::random(5).'.'.$extension1;
             $file1->move(public_path('assets/images/pages'), $filename1);
             $images[0]['src'] = $filename1;
         } elseif (!isset($images[0]['src'])) {
@@ -182,7 +184,8 @@ public function store(Request $request)
 
         if ($request->hasFile("$key.image2")) {
             $file2 = $request->file("$key.image2");
-            $filename2 = time().'_'.Str::random(5).'.'.$file2->getClientOriginalExtension();
+            $extension2 = strtolower($file2->getClientOriginalExtension());
+            $filename2 = time().'_'.Str::random(5).'.'.$extension2;
             $file2->move(public_path('assets/images/pages'), $filename2);
             $images[1]['src'] = $filename2;
         } elseif (!isset($images[1]['src'])) {
@@ -205,7 +208,8 @@ public function store(Request $request)
             // Handle image upload for each card
             if ($request->hasFile("customize.images.$i")) {
                 $file = $request->file("customize.images.$i");
-                $imageName = time().'_customize_'.$i.'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+                $extension = strtolower($file->getClientOriginalExtension());
+                $imageName = time().'_customize_'.$i.'_'.Str::random(5).'.'.$extension;
                 $file->move(public_path('assets/images/pages'), $imageName);
                 $cardImage = $imageName;
             } elseif (isset($customize['existing_images'][$i])) {
@@ -245,7 +249,8 @@ public function store(Request $request)
 
     if ($request->hasFile("$key.image")) {
         $file = $request->file("$key.image");
-        $filename = time().'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filename = time().'_'.Str::random(5).'.'.$extension;
         $file->move(public_path('assets/images/pages'), $filename);
         $images[0]['src'] = $filename;
     } elseif (!isset($images[0]['src'])) {

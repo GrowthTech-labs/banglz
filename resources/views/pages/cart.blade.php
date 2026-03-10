@@ -125,6 +125,8 @@
         min-height: 195px;
         height: fit-content;
         position: relative;
+        display: flex;
+        flex-wrap: wrap;
 
         -webkit-transition: margin .2s linear, opacity .2s linear;
         -moz-transition: margin .2s linear, opacity .2s linear;
@@ -170,7 +172,7 @@
         background-color: #fff;
         border: 1px solid #ccc;
         border-style: none none solid none;
-        float: left;
+        display: block;
       }
 
       .product header {
@@ -184,6 +186,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        float: left;
       }
       
       .product header .product-link {
@@ -280,6 +283,8 @@
         width: 65%;
         padding-bottom: 10px;
         border: none;
+        flex: 1;
+        min-width: 250px;
       }
 
       .product h1 {
@@ -296,6 +301,8 @@
         flex-direction: column;
         border: none;
         padding-left: 20px;
+        width: 100%;
+        order: 3;
       }
       
       .product footer .quantity-controls {
@@ -678,6 +685,13 @@
 
       .shopping-cart {
         width: 70%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .cart-main-body {
+        display: flex;
+        gap: 20px;
       }
 
       .dots-container {
@@ -893,6 +907,278 @@
   .product.bangle-box .bangle-footer { width: 100%; align-items: space-between; flex-direction: row; justify-content: space-between; }
 }
 
+/* ========== MOBILE RESPONSIVE STYLES ========== */
+@media (max-width: 768px) {
+  /* Cart main wrapper */
+  .cart-main-wrapper {
+    padding: 10px !important;
+  }
+
+  .cart-main-body {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+
+  /* Shopping cart section */
+  .shopping-cart {
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Product cards - stack vertically */
+  .product {
+    flex-direction: column !important;
+    min-height: auto !important;
+    margin: 15px 0 !important;
+    padding: 0 !important;
+    border: 1px solid #eee !important;
+  }
+
+  .product header {
+    width: 100% !important;
+    height: 200px !important;
+    margin: 0 !important;
+    padding: 10px !important;
+    float: none !important;
+    order: 1;
+  }
+
+  .product .content {
+    width: 100% !important;
+    padding: 15px !important;
+    border: none !important;
+    float: none !important;
+    order: 2;
+    flex: none !important;
+    min-width: auto !important;
+  }
+
+  .product footer.content {
+    width: 100% !important;
+    padding: 15px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    float: none !important;
+    order: 3;
+    border-top: 1px solid #eee !important;
+  }
+
+  .product footer .quantity-controls {
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 15px !important;
+    gap: 10px;
+  }
+
+  .product-price {
+    width: 100%;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    padding: 0 !important;
+    gap: 10px;
+  }
+
+  .product footer .price,
+  .product footer .full-price {
+    float: none !important;
+    min-width: auto !important;
+    padding: 8px 15px !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+  }
+
+  /* Plus minus buttons */
+  .plus-minus-button {
+    width: auto !important;
+    display: inline-flex !important;
+  }
+
+  .qt {
+    width: 50px !important;
+    font-size: 16px !important;
+  }
+
+  .qt-plus,
+  .qt-minus {
+    padding: 0 8px !important;
+    font-size: 20px !important;
+  }
+
+  /* Remove button */
+  .remove-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Site footer (order summary) */
+  #site-footer {
+    width: 100% !important;
+    min-width: auto !important;
+    padding: 15px !important;
+    margin-top: 20px !important;
+  }
+
+  #site-footer h1 {
+    font-size: 20px !important;
+    padding: 8px 10px !important;
+  }
+
+  #site-footer h2 {
+    font-size: 18px !important;
+    flex-direction: column !important;
+    gap: 5px;
+  }
+
+  #site-footer h3 {
+    font-size: 16px !important;
+  }
+
+  .btn {
+    width: 100% !important;
+    font-size: 18px !important;
+    padding: 12px 0 !important;
+  }
+
+  .apply-btn {
+    width: 100% !important;
+    padding: 10px 15px !important;
+  }
+
+  /* Best seller carousel */
+  .best-seller-product {
+    margin-top: 30px;
+  }
+
+  .best-seller-product h1 {
+    font-size: 22px !important;
+    margin-bottom: 15px;
+  }
+
+  .carousel .card {
+    flex: 0 0 80% !important;
+    margin-right: 10px;
+  }
+
+  .nav-buttons .nav {
+    padding: 8px !important;
+  }
+
+  .nav-buttons .nav img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  /* Cart heading */
+  .cart-headig h1 {
+    font-size: 24px !important;
+  }
+
+  .cart-headig h3 {
+    font-size: 18px !important;
+    margin-top: 20px !important;
+  }
+
+  /* Empty cart state */
+  .empty-cart-state {
+    padding: 40px 15px !important;
+  }
+
+  .empty-cart-state h2 {
+    font-size: 22px !important;
+  }
+
+  .empty-cart-state p {
+    font-size: 14px !important;
+  }
+
+  /* Gift card specific */
+  .price-tag {
+    font-size: 24px !important;
+    padding: 6px !important;
+  }
+
+  /* Dropdown */
+  .dropdown {
+    font-size: 13px !important;
+    padding: 6px 10px !important;
+    width: 100% !important;
+  }
+
+  /* Promo section */
+  .promo-section {
+    padding: 10px !important;
+  }
+
+  .promo-field {
+    flex-direction: column !important;
+    gap: 10px;
+  }
+
+  .promo-field .form-group {
+    width: 100% !important;
+  }
+
+  .promo-field .form-group input {
+    width: 100% !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .product header {
+    height: 180px !important;
+  }
+
+  .product h1 {
+    font-size: 14px !important;
+  }
+
+  .product .content p {
+    font-size: 12px !important;
+  }
+
+  .product footer .price,
+  .product footer .full-price {
+    font-size: 13px !important;
+    padding: 6px 12px !important;
+  }
+
+  .product footer .price small,
+  .product footer .full-price small {
+    font-size: 10px !important;
+  }
+
+  .qt {
+    width: 40px !important;
+    font-size: 14px !important;
+  }
+
+  .carousel .card {
+    flex: 0 0 90% !important;
+  }
+
+  .cart-headig h1 {
+    font-size: 20px !important;
+  }
+
+  #site-footer h1 {
+    font-size: 18px !important;
+  }
+
+  #site-footer h2 {
+    font-size: 16px !important;
+  }
+
+  .product footer .quantity-controls {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .product-price {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}
 
 
     </style>
@@ -1531,6 +1817,48 @@
 
 
 
+            <footer id="site-footer">
+              <div class="clearfix order-summary" style="display:none;">
+                <h1>Order Summary</h1>
+                <div class="left">
+                  <h2 class="subtotal">Subtotal: <span> $ 163.96</span> </h2>
+                  <h3 class="tax">Taxes (5%): <span> $ 8.2 </span></h3>
+                  <h3 class="shipping">Shipping: <span> $ 5.00 </span> </h3>
+                </div>
+
+                <div class="right">
+                  <h1 class="total">Total: <span>$ 177.16 </span></h1>
+                  <a href="{{ url('/check-out') }}" class="btn ">Checkout</a>
+                </div>
+              </div>
+
+              <div class="promo-section" style="display:none;">
+                <h1>Gift Card</h1>
+                <div class="promo-field">
+                  <div class="form-group">
+                    <input type="text">
+                  </div>
+                  <div class="btn apply-btn">
+                    Apply
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="promo-section" style="display:none;">
+                <h1>Rewards & Points</h1>
+                <div class="promo-field">
+                  <div class="form-group">
+                    <p>Sign in to account to redeem Rewards, check out faster, and view your order history.</p>
+                  </div>
+                  <div class="btn apply-btn">
+                    Sign In Or Join
+                  </div>
+                </div>
+
+              </div>
+            </footer>
+
             <div class="best-seller-product">
               <h1>Top Seller</h1>
               <div class="carousel">
@@ -1583,47 +1911,6 @@
 
           </div>
 
-          <footer id="site-footer">
-            <div class="clearfix order-summary" style="display:none;">
-              <h1>Order Summary</h1>
-              <div class="left">
-                <h2 class="subtotal">Subtotal: <span> $ 163.96</span> </h2>
-                <h3 class="tax">Taxes (5%): <span> $ 8.2 </span></h3>
-                <h3 class="shipping">Shipping: <span> $ 5.00 </span> </h3>
-              </div>
-
-              <div class="right">
-                <h1 class="total">Total: <span>$ 177.16 </span></h1>
-                <a href="{{ url('/check-out') }}" class="btn ">Checkout</a>
-              </div>
-            </div>
-
-            <div class="promo-section" style="display:none;">
-              <h1>Gift Card</h1>
-              <div class="promo-field">
-                <div class="form-group">
-                  <input type="text">
-                </div>
-                <div class="btn apply-btn">
-                  Apply
-                </div>
-              </div>
-
-            </div>
-
-            <div class="promo-section" style="display:none;">
-              <h1>Rewards & Points</h1>
-              <div class="promo-field">
-                <div class="form-group">
-                  <p>Sign in to account to redeem Rewards, check out faster, and view your order history.</p>
-                </div>
-                <div class="btn apply-btn">
-                  Sign In Or Join
-                </div>
-              </div>
-
-            </div>
-          </footer>
         </div>
         @endif {{-- End of !$isCartEmpty --}}
       </div>

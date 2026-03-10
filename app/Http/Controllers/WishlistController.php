@@ -49,7 +49,7 @@ public function toggle(Request $request)
                 'message' => 'Removed from wishlist',
             ]);
         }
-        $wishlist = Wishlist::create([
+        $wishlist = WishList::create([
             'user_id'      => $userId ?: null,
             'session_id'   => $userId ? null : $sessionId,
             'product_id'   => $request->product_id,
@@ -68,7 +68,7 @@ public function toggle(Request $request)
 {
     $userId = Auth::id();
 
-    $query = Wishlist::query()
+    $query = WishList::query()
         ->with(['product.variations', 'variation']);
 
          $query->where('user_id', $userId);

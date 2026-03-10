@@ -123,7 +123,8 @@ class BangleColor extends Controller
                         }
                     }
 
-                    $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    $name = time() . '-' . uniqid() . '.' . $extension;
                     $file->move(public_path('assets/images/bangle-box'), $name);
                     $bangleColor->image = $name;
                 }

@@ -5076,7 +5076,7 @@ td {
 .user-dropdown-menu {
     display: none;
     position: absolute;
-    top: 40px; /* adjust based on icon size */
+    top: 40px;
     right: 0;
     background: white;
     border: 1px solid #ddd;
@@ -5084,6 +5084,7 @@ td {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     min-width: 230px;
     z-index: 9999;
+    max-width: 100vw;
 }
 
 .user-dropdown-menu a {
@@ -6947,6 +6948,35 @@ button,
     .nav-icons {
         gap: 12px;
     }
+
+    #userDropdown {
+        position: relative !important;
+    }
+
+    .user-dropdown-menu {
+        position: fixed !important;
+        top: 60px !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: 90vw !important;
+        min-width: 250px !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        overflow: visible !important;
+        z-index: 10000 !important;
+    }
+
+    .user-dropdown-menu a {
+        padding: 12px 15px !important;
+        font-size: 13px !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
     
     .bundle-icone {
         width: 24px;
@@ -6956,6 +6986,29 @@ button,
     .nav-icon-div {
         width: 28px;
         height: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .user-dropdown-menu {
+        position: fixed !important;
+        top: 60px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: 85vw !important;
+        min-width: 220px !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        overflow: visible !important;
+        z-index: 10000 !important;
+    }
+
+    .user-dropdown-menu a {
+        padding: 10px 15px !important;
+        font-size: 12px !important;
     }
 }
 
@@ -7073,3 +7126,52 @@ button,
 
 
 
+
+/* CRITICAL: Force user dropdown to center on mobile - HIGHEST PRIORITY */
+@media (max-width: 768px) {
+    #userdropdownMenu.user-dropdown-menu.show,
+    #userdropdownMenu.user-dropdown-menu,
+    #userDropdown .user-dropdown-menu.show,
+    #userDropdown .user-dropdown-menu,
+    div.user-dropdown-menu.show,
+    div.user-dropdown-menu {
+        position: fixed !important;
+        top: 60px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: 90vw !important;
+        min-width: 250px !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #userdropdownMenu.user-dropdown-menu.show,
+    #userdropdownMenu.user-dropdown-menu,
+    #userDropdown .user-dropdown-menu.show,
+    #userDropdown .user-dropdown-menu,
+    div.user-dropdown-menu.show,
+    div.user-dropdown-menu {
+        position: fixed !important;
+        top: 60px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        max-width: 85vw !important;
+        min-width: 220px !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+        background: white !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+}

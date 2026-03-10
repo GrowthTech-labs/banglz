@@ -170,7 +170,8 @@ class CatelogsController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
                     if ($file && $file->isValid()) {
-                        $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $extension = strtolower($file->getClientOriginalExtension());
+                        $name = time() . '-' . uniqid() . '.' . $extension;
                         $file->move(public_path('assets/images/collections'), $name);
                         $uploadedImages[] = $name;
                     }
@@ -307,7 +308,8 @@ class CatelogsController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
                     if ($file && $file->isValid()) {
-                        $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $extension = strtolower($file->getClientOriginalExtension());
+                        $name = time() . '-' . uniqid() . '.' . $extension;
                         $file->move(public_path('assets/images/collection_categories'), $name);
                         $uploadedImages[] = $name;
                     }

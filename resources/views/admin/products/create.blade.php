@@ -1557,13 +1557,39 @@ formData.append('images_details', JSON.stringify(imagesDetails));
                 Swal.close();
                 let title = 'System Error!';
                 let message = 'Something went wrong! Please try again.';
-                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.details) {
+                
+                if (xhr.status === 422 && xhr.responseJSON) {
                     title = 'Validation Error!';
-                    message = JSON.stringify(xhr.responseJSON.details, null, 2);
+                    
+                    // Check for errors object (field-specific errors)
+                    if (xhr.responseJSON.errors) {
+                        let errorList = [];
+                        Object.keys(xhr.responseJSON.errors).forEach(field => {
+                            xhr.responseJSON.errors[field].forEach(error => {
+                                errorList.push(error);
+                            });
+                        });
+                        message = errorList.join('\n');
+                    } 
+                    // Check for details (old format)
+                    else if (xhr.responseJSON.details) {
+                        message = JSON.stringify(xhr.responseJSON.details, null, 2);
+                    }
+                    // Check for message
+                    else if (xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     message = xhr.responseJSON.message;
                 }
-                Swal.fire({ icon: 'error', title: title, text: message, confirmButtonColor: '#d33' });
+                
+                console.error('Validation errors:', xhr.responseJSON);
+                Swal.fire({ 
+                    icon: 'error', 
+                    title: title, 
+                    html: message.replace(/\n/g, '<br>'), 
+                    confirmButtonColor: '#d33' 
+                });
                 submitButton.prop('disabled', false);
             }
         });

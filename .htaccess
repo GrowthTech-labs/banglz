@@ -1,0 +1,60 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    
+    # Remove /public/ from URLs (Laravel generates these but files are in root)
+    RewriteCond %{REQUEST_URI} ^/public/(.*)$
+    RewriteCond %{DOCUMENT_ROOT}/%1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/%1 -d
+    RewriteRule ^public/(.*)$ /$1 [L,R=301]
+    
+    # Serve static files directly if they exist
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # Send all other requests to index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# PHP Upload Settings
+<IfModule mod_php7.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 20M
+    php_value max_file_uploads 20
+    php_value memory_limit 256M
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 20M
+    php_value max_file_uploads 20
+    php_value memory_limit 256M
+</IfModule>
+
+# Set proper MIME types for images
+<IfModule mod_mime.c>
+    AddType image/jpeg .jpg .jpeg .JPG .JPEG
+    AddType image/png .png .PNG
+    AddType image/gif .gif .GIF
+    AddType image/webp .webp .WEBP
+    AddType image/svg+xml .svg .SVG
+</IfModule>
+
+# Enable compression for images
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Set cache headers for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+</IfModule>

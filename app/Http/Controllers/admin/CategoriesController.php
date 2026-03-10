@@ -15,7 +15,7 @@ class CategoriesController extends Controller
 {
     public function get_categories_list()
     {
-        $query = Category::query();
+        $query = Category::with('parent'); // Eager load parent relationship
 
         // Handle search
         if ($search = request('search')) {
@@ -42,10 +42,8 @@ class CategoriesController extends Controller
         $data = [];
 
         foreach ($categorie as $category) {
-            $parentName = Category::where('id', $category->parent_id)->value('name');
-            if (!$parentName) {
-                $parentName = '--';
-            }
+            // Use the eager loaded parent relationship
+            $parentName = $category->parent ? $category->parent->name : '--';
             $actions = '
           <a href="' . route('admin.category.details', ['id' => $category->id]) . '">
                 <button type="button" class="btn btn-primary">View</button>
@@ -194,7 +192,8 @@ class CategoriesController extends Controller
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
                     if ($file && $file->isValid()) {
-                        $name = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $extension = strtolower($file->getClientOriginalExtension());
+                        $name = time() . '-' . uniqid() . '.' . $extension;
                         $file->move(public_path('assets/images/categories'), $name);
                         $uploadedImages[] = $name;
                     }

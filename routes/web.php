@@ -68,6 +68,19 @@ Route::get('/reset-database', function (Request $request) {
     Artisan::call('migrate', ['--force' => true]);
     echo "✅ Migrations executed successfully.<br>";
     
+    // Seed countries if table is empty
+    try {
+        $countryCount = \App\Models\Country::count();
+        if ($countryCount === 0) {
+            Artisan::call('db:seed', ['--class' => 'CountriesSeeder', '--force' => true]);
+            echo "✅ Countries seeded successfully.<br>";
+        } else {
+            echo "ℹ️ Countries already exist ({$countryCount} countries).<br>";
+        }
+    } catch (\Exception $e) {
+        echo "⚠️ Could not seed countries: " . $e->getMessage() . "<br>";
+    }
+    
     //   Artisan::call('passport:install', ['--force' => true]);
     // echo "✅ Passport installed successfully.<br>";
     
@@ -103,6 +116,76 @@ Route::get('/reset-database', function (Request $request) {
     echo "✅ Cache cleared successfully.<br>";
     return 'All operations completed successfully.';
 });
+
+Route::get('/clear-cache', function (Request $request) {
+    $providedKey = $request->query('secret');
+    $expectedKey = env('DB_RESET_SECRET');
+
+    if ($providedKey !== $expectedKey) {
+        abort(403, 'Unauthorized');
+    }
+
+    echo "<h1>Laravel Cache Clear</h1><pre>";
+    echo "=== CLEARING CACHES ===\n\n";
+
+    try {
+        Artisan::call('config:clear');
+        echo "✓ Config cache cleared\n";
+    } catch (Exception $e) {
+        echo "✗ Config cache: " . $e->getMessage() . "\n";
+    }
+
+    try {
+        Artisan::call('route:clear');
+        echo "✓ Route cache cleared\n";
+    } catch (Exception $e) {
+        echo "✗ Route cache: " . $e->getMessage() . "\n";
+    }
+
+    try {
+        Artisan::call('view:clear');
+        echo "✓ View cache cleared\n";
+    } catch (Exception $e) {
+        echo "✗ View cache: " . $e->getMessage() . "\n";
+    }
+
+    try {
+        Artisan::call('cache:clear');
+        echo "✓ Application cache cleared\n";
+    } catch (Exception $e) {
+        echo "✗ Application cache: " . $e->getMessage() . "\n";
+    }
+
+    echo "\n=== CURRENT CONFIGURATION ===\n\n";
+    echo "APP_ENV: " . config('app.env') . "\n";
+    echo "APP_DEBUG: " . (config('app.debug') ? 'true' : 'false') . "\n";
+    echo "APP_URL: " . config('app.url') . "\n";
+    echo "ASSET_URL: " . (config('app.asset_url') ?: 'not set') . "\n";
+    echo "Public Path: " . public_path() . "\n";
+    echo "Base Path: " . base_path() . "\n\n";
+
+    echo "=== ASSET URL TEST ===\n\n";
+    echo "asset('assets/images/test.jpg'):\n";
+    echo asset('assets/images/test.jpg') . "\n\n";
+
+    echo "Expected: https://silver-opossum-253389.hostingersite.com/assets/images/test.jpg\n";
+    echo "Should NOT contain '/public/'\n\n";
+
+    echo "=== FILE SYSTEM CHECK ===\n\n";
+    $assetsPath = public_path('assets/images');
+    echo "Assets directory: $assetsPath\n";
+    echo "Exists: " . (is_dir($assetsPath) ? 'YES' : 'NO') . "\n";
+
+    if (is_dir($assetsPath . '/categories')) {
+        $files = glob($assetsPath . '/categories/*');
+        echo "Category images: " . count($files) . " files\n";
+    }
+
+    echo "\n=== DONE ===\n";
+    echo "Refresh your browser (Ctrl+Shift+R or Cmd+Shift+R) to clear browser cache.\n";
+    echo "</pre>";
+});
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/yotpo/reviews', [HomeController::class, 'reviews']);
 Route::get('/search', [ProductsController::class, 'search'])->name('search');
@@ -174,7 +257,7 @@ Route::post('subscription/unsubscribe', [\App\Http\Controllers\SubscriptionContr
 Route::post('subscription/subscribe', [\App\Http\Controllers\SubscriptionController::class, 'subscribe'])
     ->name('subscription.subscribe');
 
-Route::post('logout', [ControllersAuthController::class, 'logout'])->name('user.logout');
+Route::match(['get', 'post'], 'logout', [ControllersAuthController::class, 'logout'])->name('user.logout');
 Route::get('category-details/{id}', [ProductController::class, 'details'])->name('category.show.details');
 
 
@@ -369,7 +452,12 @@ Route::get('/bangle-color/{id}', [BanglzBox::class, 'getColors'])->name('bangle-
 // })->name('banglz-box');
 
 Route::get('/login', function () {
-    $countries = \App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+    try {
+        $countries = \App\Models\Country::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+    } catch (\Exception $e) {
+        // If countries table doesn't exist or query fails, use empty collection
+        $countries = collect([]);
+    }
     return view('pages.login', compact('countries'));
 })->name('user.login');
 Route::post('/signup', [ControllersAuthController::class, 'store'])->name('signup.store');

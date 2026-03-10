@@ -59,33 +59,96 @@ class PayPalController extends Controller
             if ($response->isSuccessful()) {
                 // Payment data
                 $data = $response->getData();
-                 $payment = Payment::create([
-                                'payment_id'     => $data['id'], // PayPal transaction ID
-                                'payer_id'       => $data['payer']['payer_info']['payer_id'] ?? '',
-                                'payer_email'    => $data['payer']['payer_info']['email'] ?? '',
-                                'amount'         => $data['transactions'][0]['amount']['total'] ?? '',
-                                'currency'       => $data['transactions'][0]['amount']['currency'] ?? '',
-                                'payment_status' => $data['state'] ?? '',
-                            ]);
+                $payment = Payment::create([
+                    'payment_id'     => $data['id'], // PayPal transaction ID
+                    'payer_id'       => $data['payer']['payer_info']['payer_id'] ?? '',
+                    'payer_email'    => $data['payer']['payer_info']['email'] ?? '',
+                    'amount'         => $data['transactions'][0]['amount']['total'] ?? '',
+                    'currency'       => $data['transactions'][0]['amount']['currency'] ?? '',
+                    'payment_status' => $data['state'] ?? '',
+                ]);
 
-                 $request->session()->invalidate();
-                return redirect()->route('payment-conform')->with([
-                        'transactionId' => $payment->payment_id,
-                        'date'          => $payment->created_at->format('Y-m-d H:i:s'),
-                    ]);
+                // Update order status if order_id is provided
+                if ($request->has('order_id')) {
+                    $order = \App\Models\Order::find($request->get('order_id'));
+                    if ($order) {
+                        $order->update([
+                            'payment_status' => 'paid',
+                            'status' => 'pending',
+                        ]);
+
+                        // Apply gift card if used
+                        $appliedGiftCardMeta = json_decode($order->applied_gift_card_meta_data, true);
+                        if (!empty($appliedGiftCardMeta)) {
+                            foreach ($appliedGiftCardMeta as $giftCardData) {
+                                if (!empty($giftCardData['code']) && !empty($giftCardData['amount'])) {
+                                    $this->applyGiftCardToOrder($giftCardData['code'], $giftCardData['amount']);
+                                }
+                            }
+                        }
+
+                        return redirect()->route('order.confirmation', [
+                            'transactionId' => $order->order_id,
+                            'date' => $order->created_at->toDateString()
+                        ]);
+                    }
+                }
+
+                // Fallback for old flow
+                $request->session()->invalidate();
+                return redirect()->route('order.confirmation', [
+                    'transactionId' => $payment->payment_id,
+                    'date' => $payment->created_at->format('Y-m-d')
+                ]);
             } else {
-                return $response->getMessage();
+                return redirect('/checkout')->with('error', $response->getMessage() ?: 'Payment failed');
             }
         } else {
-            return "Payment failed, missing data.";
+            return redirect('/checkout')->with('error', 'Payment failed, missing data.');
         }
     }
 
     /**
      * Payment was cancelled
      */
-    public function error()
+    public function error(Request $request)
     {
-        return "User cancelled the payment.";
+        // Update order status if order_id is provided
+        if ($request->has('order_id')) {
+            $order = \App\Models\Order::find($request->get('order_id'));
+            if ($order) {
+                $order->update([
+                    'payment_status' => 'cancelled',
+                    'status' => 'cancelled',
+                ]);
+            }
+        }
+
+        return redirect('/checkout')->with('error', 'Payment was cancelled.');
+    }
+
+    /**
+     * Apply gift card to order
+     */
+    private function applyGiftCardToOrder($code, $amount)
+    {
+        $giftCard = \App\Models\GiftCardCodes::where('code', $code)->first();
+
+        if (!$giftCard) {
+            return false;
+        }
+
+        \App\Models\GiftCardHistory::create([
+            'gift_card_id' => $giftCard->id,
+            'used_amount'  => $amount,
+        ]);
+
+        $totalUsed = $giftCard->histories()->sum('used_amount');
+
+        if ($totalUsed >= $giftCard->amount) {
+            $giftCard->update(['status' => 'used']);
+        }
+
+        return true;
     }
 }

@@ -163,6 +163,367 @@
             [type="checkbox"]:not(:checked) {
                 position: unset;
             }
+
+            /* ========== MOBILE RESPONSIVE STYLES ========== */
+            @media (max-width: 768px) {
+                .product-detail-main-wrapper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .checkout-main-section {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .check-out-wraper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .top-header {
+                    padding: 10px 15px !important;
+                    margin: 0 !important;
+                }
+
+                .checkout-section-body {
+                    flex-direction: column !important;
+                    gap: 0 !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .left-checkout-form-wrapper {
+                    width: 100% !important;
+                    padding: 15px !important;
+                    margin: 0 !important;
+                }
+
+                .right-cart-items-detail {
+                    width: 100% !important;
+                    padding: 15px !important;
+                    margin: 0 !important;
+                    border-top: 1px solid #eee;
+                }
+
+                .name-fields {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+
+                .name-fields .input-field {
+                    width: 100% !important;
+                    margin-bottom: 0 !important;
+                }
+
+                .input-field {
+                    margin-bottom: 8px !important;
+                }
+
+                .input-field input,
+                .input-field select {
+                    width: 100% !important;
+                    font-size: 16px !important;
+                    box-sizing: border-box !important;
+                }
+
+                .payment-types {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+
+                .payment-type-row {
+                    padding: 10px !important;
+                    flex-direction: row !important;
+                    justify-content: space-between !important;
+                    margin-bottom: 0 !important;
+                }
+
+                .card-button {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                    margin-bottom: 0 !important;
+                }
+
+                .card-button .btn {
+                    width: 100% !important;
+                    padding: 10px !important;
+                    margin: 0 !important;
+                }
+
+                .card-info-fields {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+
+                .card-info-fields .input-field {
+                    width: 100% !important;
+                    margin-bottom: 0 !important;
+                }
+
+                .promo-section {
+                    padding: 10px !important;
+                    margin: 8px 0 !important;
+                }
+
+                .promo-field {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                }
+
+                .promo-field .form-group {
+                    width: 100% !important;
+                    margin: 0 !important;
+                }
+
+                .promo-field .form-group input {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+
+                .promo-field .btn {
+                    width: 100% !important;
+                    margin: 0 !important;
+                }
+
+                .reward-container {
+                    flex-direction: column !important;
+                    gap: 10px !important;
+                    align-items: stretch !important;
+                }
+
+                .reward-box {
+                    width: 100% !important;
+                    padding: 12px !important;
+                    margin: 0 !important;
+                }
+
+                .cart-items-total {
+                    padding: 10px 0 !important;
+                    margin: 0 !important;
+                }
+
+                .cart-items-total p {
+                    font-size: 13px !important;
+                    padding: 5px 0 !important;
+                    margin: 0 !important;
+                }
+
+                .cart-total-payment {
+                    padding: 10px 0 !important;
+                    margin: 10px 0 0 0 !important;
+                }
+
+                .cart-total-payment h1 {
+                    font-size: 18px !important;
+                    margin: 0 0 10px 0 !important;
+                }
+
+                .cart-footer-buttons {
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                    margin: 0 !important;
+                }
+
+                .cart-footer-buttons .btn {
+                    width: 100% !important;
+                    padding: 10px !important;
+                    font-size: 14px !important;
+                    margin: 0 !important;
+                }
+
+                .common-button-light,
+                .common-button {
+                    width: 100% !important;
+                    margin: 0 !important;
+                }
+
+                .terms-checkbox {
+                    padding: 10px 0 !important;
+                    margin: 8px 0 !important;
+                }
+
+                .terms-checkbox label {
+                    font-size: 11px !important;
+                    flex-direction: row !important;
+                    align-items: flex-start !important;
+                    gap: 6px !important;
+                }
+
+                .terms-checkbox input[type="checkbox"] {
+                    margin-top: 2px !important;
+                    flex-shrink: 0;
+                }
+
+                .top-header h1 {
+                    font-size: 22px !important;
+                    margin: 0 !important;
+                }
+
+                .save-card select {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+
+                .saved-details {
+                    padding: 8px !important;
+                    font-size: 12px !important;
+                    margin: 8px 0 !important;
+                }
+
+                .paypal-icon img {
+                    height: 28px !important;
+                    width: 75px !important;
+                }
+
+                .right-icon img {
+                    max-width: 75px !important;
+                    height: auto !important;
+                }
+
+                h1 {
+                    font-size: 16px !important;
+                    margin: 12px 0 8px 0 !important;
+                }
+            }
+
+            /* Extra small devices */
+            @media (max-width: 480px) {
+                .product-detail-main-wrapper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .checkout-main-section {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .check-out-wraper {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .top-header {
+                    padding: 8px 12px !important;
+                    margin: 0 !important;
+                }
+
+                .checkout-section-body {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+
+                .left-checkout-form-wrapper {
+                    padding: 12px !important;
+                    margin: 0 !important;
+                }
+
+                .right-cart-items-detail {
+                    padding: 12px !important;
+                    margin: 0 !important;
+                }
+
+                .top-header h1 {
+                    font-size: 18px !important;
+                    margin: 0 !important;
+                }
+
+                .top-header h1 span {
+                    font-size: 18px !important;
+                }
+
+                .name-fields {
+                    gap: 6px !important;
+                }
+
+                .input-field input,
+                .input-field select {
+                    font-size: 14px !important;
+                    padding: 8px !important;
+                    box-sizing: border-box !important;
+                }
+
+                .payment-type-row {
+                    padding: 8px !important;
+                }
+
+                .card-button .btn {
+                    font-size: 13px !important;
+                    padding: 8px !important;
+                }
+
+                .promo-section {
+                    padding: 8px !important;
+                    margin: 6px 0 !important;
+                }
+
+                .promo-section h1 {
+                    font-size: 14px !important;
+                    margin: 0 0 6px 0 !important;
+                }
+
+                .reward-box {
+                    padding: 10px !important;
+                    width: 100% !important;
+                    margin: 0 !important;
+                }
+
+                .reward-box img {
+                    max-width: 60px !important;
+                    margin-bottom: 5px !important;
+                }
+
+                .reward-box h3 {
+                    font-size: 13px !important;
+                    margin: 0 !important;
+                }
+
+                .reward-box p {
+                    font-size: 11px !important;
+                    margin: 3px 0 0 0 !important;
+                }
+
+                .cart-items-total p {
+                    font-size: 12px !important;
+                    padding: 4px 0 !important;
+                    margin: 0 !important;
+                }
+
+                .cart-total-payment h1 {
+                    font-size: 16px !important;
+                    margin: 0 0 8px 0 !important;
+                }
+
+                .cart-footer-buttons .btn {
+                    font-size: 13px !important;
+                    padding: 8px !important;
+                }
+
+                .terms-checkbox label {
+                    font-size: 10px !important;
+                }
+
+                .alert {
+                    font-size: 12px !important;
+                    padding: 8px !important;
+                    margin: 0 !important;
+                }
+
+                .stripe-mount {
+                    font-size: 13px !important;
+                    padding: 10px !important;
+                }
+
+                .field-error {
+                    font-size: 11px !important;
+                }
+
+                h1 {
+                    font-size: 14px !important;
+                    margin: 10px 0 6px 0 !important;
+                }
+            }
         </style>
     </x-slot>
 
@@ -385,66 +746,64 @@
                                         @endguest
                                     </div>
                                 </div>
+                            <div class="terms-checkbox">
+                                <input type="checkbox" id="terms_agreement" name="terms_agreement">
+                                I agree to the <a href="{{ route('resource') }}" class="link-term" target="_blank">Terms & Conditions</a>
+                                and <a href="{{ route('resource') }}" class="link-term" target="_blank">Privacy Policy</a>
+                                <div id="terms-error" class="terms-error">Please accept the terms and conditions to proceed</div>
                             </div>
                         </form>
-                    </div>
 
-                    <div class="right-cart-items-detail">
-                        <h1>Order Summary</h1>
-                       <div class="cart-items-total">
-                            <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
-                                Sub-total <span id="subtotal-amount">${{ number_format($subTotal, 2) }}</span>
-                            </p>
-                            <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
-                                Tax (5%) <span id="tax-amount">${{ number_format($tax, 2) }}</span>
-                            </p>
-                            <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
-                                Delivery charges <span id="delivery-amount">${{ number_format($delivery, 2) }}</span>
-                            </p>
+                        <div class="right-cart-items-detail">
+                            <h1>Order Summary</h1>
+                           <div class="cart-items-total">
+                                <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
+                                    Sub-total <span id="subtotal-amount">${{ number_format($subTotal, 2) }}</span>
+                                </p>
+                                <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
+                                    Tax (5%) <span id="tax-amount">${{ number_format($tax, 2) }}</span>
+                                </p>
+                                <p style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
+                                    Delivery charges <span id="delivery-amount">${{ number_format($delivery, 2) }}</span>
+                                </p>
 
-                            <p id="us-import-duties-row" class="d-none" style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
-                                U.S Import Duties & Fees
-                                <span id="us-import-duties-amount">$0.00</span>
-                            </p>
-                            <p id="discount-row" class="d-none" >
-                                Rewards Discount <span id="discount-amount">-$0.00</span>
-                            </p>
+                                <p id="us-import-duties-row" class="d-none" style="{{ $type === 'gift_card' ? 'display:none;' : '' }}">
+                                    U.S Import Duties & Fees
+                                    <span id="us-import-duties-amount">$0.00</span>
+                                </p>
+                                <p id="discount-row" class="d-none" >
+                                    Rewards Discount <span id="discount-amount">-$0.00</span>
+                                </p>
 
-                            <p style="{{ $type === 'product' ? 'display:none;' : '' }}">
-                                Gift Card Total Price<span id="gift-card-amount">${{ number_format($giftCardsTotal, 2) }}</span>
-                            </p>
-                            <p id="applied-gift-card-row" class="d-none d-flex justify-content-between align-items-center">
-                                <span>Applied Gift Card</span>
-                                <span>
-                                    <span id="applied-gift-card-amount">-$0.00</span>
-                                    <a href="javascript:void(0)" id="remove-gift-card" class="text-danger ms-2">✕</a>
-                                </span>
-                            </p>
-                        </div>
-
-                        <div class="terms-checkbox">
-                            <input type="checkbox" id="terms_agreement" name="terms_agreement">
-                            I agree to the <a href="{{ route('resource') }}" class="link-term" target="_blank">Terms & Conditions</a>
-                            and <a href="{{ route('resource') }}" class="link-term" target="_blank">Privacy Policy</a>
-                            <div id="terms-error" class="terms-error">Please accept the terms and conditions to proceed</div>
-                        </div>
-
-                        <div class="cart-total-payment">
-                            <h1>Total: 
-                                <span id="grand-total">
-                                    ${{ number_format($total, 2) }}
-                                </span>
-                            </h1>
-
-                            <div class="cart-footer-buttons">
-                                <div class="common-button-light">
-                                    <button id="cancelBtn" class="btn cancel-btn">Cancel</button>
-                                </div>
-                                <div class="common-button place-order">
-                                    <button type="button" id="placeOrderBtn" class="btn" style="pointer-events: auto; cursor: pointer;">Place order</button>
-                                </div>
+                                <p style="{{ $type === 'product' ? 'display:none;' : '' }}">
+                                    Gift Card Total Price<span id="gift-card-amount">${{ number_format($giftCardsTotal, 2) }}</span>
+                                </p>
+                                <p id="applied-gift-card-row" class="d-none d-flex justify-content-between align-items-center">
+                                    <span>Applied Gift Card</span>
+                                    <span>
+                                        <span id="applied-gift-card-amount">-$0.00</span>
+                                        <a href="javascript:void(0)" id="remove-gift-card" class="text-danger ms-2">✕</a>
+                                    </span>
+                                </p>
                             </div>
-                            <div id="checkout-message" style="margin-top:.75rem;"></div>
+
+                            <div class="cart-total-payment">
+                                <h1>Total: 
+                                    <span id="grand-total">
+                                        ${{ number_format($total, 2) }}
+                                    </span>
+                                </h1>
+
+                                <div class="cart-footer-buttons">
+                                    <div class="common-button-light">
+                                        <button id="cancelBtn" class="btn cancel-btn">Cancel</button>
+                                    </div>
+                                    <div class="common-button place-order">
+                                        <button type="button" id="placeOrderBtn" class="btn" style="pointer-events: auto; cursor: pointer;">Place order</button>
+                                    </div>
+                                </div>
+                                <div id="checkout-message" style="margin-top:.75rem;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -223,7 +223,8 @@ class BlogController extends Controller
         }
 
         // Build a unique filename
-        $filename = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+        $extension = strtolower($file->getClientOriginalExtension());
+        $filename = time() . '_' . Str::random(8) . '.' . $extension;
 
         try {
             $file->move($destPath, $filename);
@@ -304,7 +305,8 @@ class BlogController extends Controller
                     throw new Exception('Image must be a file of type: jpeg, png, jpg, gif, webp');
                 }
                 
-                $filename = time() . '-' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $extension = strtolower($file->getClientOriginalExtension());
+                $filename = time() . '-' . uniqid() . '.' . $extension;
                 $destinationPath = public_path('assets/images/blogs');
                 
                 if (!File::exists($destinationPath)) {

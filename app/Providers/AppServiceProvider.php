@@ -20,8 +20,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-    //        if (app()->environment('local')) {
-    //     URL::forceScheme('https');
-    // }
+        // Force HTTPS in production
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+        
+        // Override the public path to prevent /public/ in asset URLs
+        // This is needed when public folder contents are moved to document root
+        $this->app->bind('path.public', function() {
+            return base_path(); // Point to root instead of public folder
+        });
     }
 }

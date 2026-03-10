@@ -240,7 +240,7 @@ class ProductController extends Controller
                 'category'      => 'required|exists:categories,id',
                 'category_box_id' => 'nullable|exists:category_boxes,id', // ✅ validate category_box_id
                 'images'        => 'nullable|array',  // nullable, conditionally required
-                'images.*'      => 'image|mimes:jpeg,jpg,png,gif,webp,JPEG,JPG,PNG,GIF,WEBP|max:5120|dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000',
+                'images.*'      => 'image|mimes:jpeg,jpg,png,gif,webp,JPEG,JPG,PNG,GIF,WEBP|max:10240|dimensions:min_width=100,min_height=100,max_width=4000,max_height=4000',
                 'existing_images' => 'nullable|array',
                 'removed_existing_images' => 'nullable|string',
                 'care' => 'required|string',
@@ -316,8 +316,14 @@ class ProductController extends Controller
 
 
             if ($validator->fails()) {
+                \Log::error('Product validation failed', [
+                    'errors' => $validator->errors()->all(),
+                    'request_data' => $request->except(['images', 'password'])
+                ]);
+                
                 return response()->json([
-                    'message' => implode(',', $validator->errors()->all()),
+                    'message' => implode(', ', $validator->errors()->all()),
+                    'errors' => $validator->errors(),
                     'status' => false
                 ], 422);
             }
@@ -351,7 +357,8 @@ class ProductController extends Controller
             // Handle new uploads
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $fileName = time() . '-' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $extension = strtolower($image->getClientOriginalExtension());
+                    $fileName = time() . '-' . uniqid() . '.' . $extension;
                     $image->move(public_path('assets/images/products'), $fileName);
 
                     // find its alt by original name

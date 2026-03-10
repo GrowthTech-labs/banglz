@@ -292,9 +292,15 @@ select{
             <div class="form-group">
                 <select id="country_select" name="country">
                     <option selected disabled>Select Country</option>
-                    @foreach($countries as $country)
-                        <option value="{{ $country->code }}">{{ $country->name }}</option>
-                    @endforeach
+                    @if($countries && $countries->count() > 0)
+                        @foreach($countries as $country)
+                            <option value="{{ $country->code }}">{{ $country->name }}</option>
+                        @endforeach
+                    @else
+                        <option value="CA">Canada</option>
+                        <option value="US">United States</option>
+                        <option value="GB">United Kingdom</option>
+                    @endif
                 </select>
             </div>
         </div>

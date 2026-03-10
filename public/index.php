@@ -46,6 +46,13 @@ require __DIR__.'/../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+// Fix public path detection for Hostinger deployment
+// When document root is not set to /public folder, Laravel adds /public/ to URLs
+// This forces Laravel to treat current directory as the public path
+$app->bind('path.public', function() {
+    return __DIR__;
+});
+
 $kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle(
