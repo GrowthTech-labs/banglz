@@ -57,9 +57,14 @@ class CardController extends Controller
     // Expecting: payment_method_id (from Stripe Elements via JS), optional billing fields
     public function store(Request $request)
     {
+        $pmId = $request->input('payment_method_id');
+
+        // Redact sensitive data in production logs
         \Log::info('Card store request received', [
             'user_id' => Auth::id(),
-            'payment_method_id' => $request->input('payment_method_id'),
+            'payment_method_id' => app()->environment('production')
+                ? 'pm_***' . substr($pmId, -4)
+                : $pmId,
             'save_card' => $request->input('save_card'),
         ]);
 
@@ -81,8 +86,6 @@ class CardController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Login required to save card.'], 401);
         }
 
-        $pmId = $request->input('payment_method_id');
-
         // init stripe library
         Stripe::setApiKey(config('services.stripe.secret') ?? env('STRIPE_SECRET'));
 
@@ -102,8 +105,12 @@ class CardController extends Controller
 
             // Attach PaymentMethod to customer
             \Log::info('Attaching payment method to customer', [
-                'pm_id' => $pmId,
-                'customer_id' => $stripeCustomerId
+                'pm_id' => app()->environment('production')
+                    ? 'pm_***' . substr($pmId, -4)
+                    : $pmId,
+                'customer_id' => app()->environment('production')
+                    ? 'cus_***' . substr($stripeCustomerId, -4)
+                    : $stripeCustomerId
             ]);
             $pm = PaymentMethod::retrieve($pmId);
             $pm->attach(['customer' => $stripeCustomerId]);
@@ -152,9 +159,13 @@ class CardController extends Controller
 
             return response()->json(['status' => 'ok', 'message' => 'Card saved', 'card' => $cardRecord]);
         } catch (\Exception $e) {
-            Log::error('Stripe store card error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Only include full stack trace in non-production environments
+            $logData = ['error' => $e->getMessage()];
+            if (!app()->environment('production')) {
+                $logData['trace'] = $e->getTraceAsString();
+            }
+
+            Log::error('Stripe store card error: ' . $e->getMessage(), $logData);
             return response()->json(['status' => 'error', 'message' => 'Failed to save card. ' . $e->getMessage()], 500);
         }
     }

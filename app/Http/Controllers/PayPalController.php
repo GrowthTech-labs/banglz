@@ -15,9 +15,19 @@ class PayPalController extends Controller
     public function __construct()
     {
         $this->gateway = Omnipay::create('PayPal_Rest');
-        $this->gateway->setClientId(env('PAYPAL_SANDBOX_CLIENT_ID'));
-        $this->gateway->setSecret(env('PAYPAL_SANDBOX_CLIENT_SECRET'));
-        $this->gateway->setTestMode(true); // Sandbox mode
+
+        // Use appropriate credentials based on mode
+        $mode = env('PAYPAL_MODE', 'sandbox');
+
+        if ($mode === 'live') {
+            $this->gateway->setClientId(env('PAYPAL_LIVE_CLIENT_ID'));
+            $this->gateway->setSecret(env('PAYPAL_LIVE_CLIENT_SECRET'));
+        } else {
+            $this->gateway->setClientId(env('PAYPAL_SANDBOX_CLIENT_ID'));
+            $this->gateway->setSecret(env('PAYPAL_SANDBOX_CLIENT_SECRET'));
+        }
+
+        $this->gateway->setTestMode($mode === 'sandbox');
     }
 
     /**

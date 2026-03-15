@@ -18,10 +18,18 @@ class AuthController extends Controller
     $validator = Validator::make($request->all(), [
         'first_name' => 'required|string|max:50',
         'last_name'  => 'required|string|max:50',
-        'email'      => 'required|email',
+        'email'      => 'required|email|unique:users,email',
         'address'    => 'required|string|max:255',
         'country'    => 'required|string',
-        'password'   => 'required|min:8|confirmed',
+        'password'   => [
+            'required',
+            'confirmed',
+            'min:12',
+            'regex:/[a-z]/',      // at least one lowercase letter
+            'regex:/[A-Z]/',      // at least one uppercase letter
+            'regex:/[0-9]/',      // at least one number
+            'regex:/[@$!%*#?&]/', // at least one special character
+        ],
     ]);
 
     if ($validator->fails()) {
@@ -104,6 +112,9 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($request->only('email', 'password'))) {
+            // Regenerate session to prevent session fixation attacks
+            $request->session()->regenerate();
+
             $user = Auth::user();
             $sessionId = session()->get('cart_session_id');
             $bundleSessionId = session()->get('bundle_session_id');
@@ -162,6 +173,9 @@ class AuthController extends Controller
 
     public function updateField(Request $request)
     {
+        // Define allowed fields that can be updated via this endpoint
+        $allowed = ['first_name', 'birthday'];
+
         $field = $request->input('field');
         $value = $request->input('value');
         if (! in_array($field, $allowed)) {

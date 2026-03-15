@@ -257,6 +257,61 @@ select{
     border: none;
 
 }
+
+/* Password Requirements Info Box */
+.password-requirements-info {
+    background-color: #f9f5f3;
+    border-left: 3px solid #8d5943;
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.password-requirements-info small {
+    color: #8d5943;
+    font-weight: 600;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.password-requirements-info ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 11px;
+    color: #666;
+    line-height: 18px;
+    list-style-type: disc;
+}
+
+.password-requirements-info li {
+    margin: 2px 0;
+}
+
+/* Custom SweetAlert Styling */
+.custom-swal-button {
+    border-radius: 10px !important;
+    padding: 12px 45px !important;
+    font-size: 12px !important;
+    font-weight: bold !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+}
+
+.custom-swal-button:hover {
+    background-color: black !important;
+    color: white !important;
+}
+
+/* Enhanced Error Messages */
+.error-message {
+    font-size: 11px;
+    color: #dc3545;
+    margin-top: 3px;
+    display: block;
+    line-height: 16px;
+}
         </style>
     </x-slot>
     <x-slot name="content">
@@ -302,6 +357,17 @@ select{
                         <option value="GB">United Kingdom</option>
                     @endif
                 </select>
+            </div>
+        </div>
+        <!-- Password Requirements Info -->
+        <div class="col-12">
+            <div class="password-requirements-info">
+                <small>Password must include:</small>
+                <ul>
+                    <li>At least 12 characters</li>
+                    <li>One uppercase & one lowercase letter</li>
+                    <li>One number & one special character (@$!%*#?&)</li>
+                </ul>
             </div>
         </div>
         <div class="col-6">
@@ -420,6 +486,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         input.parentNode.appendChild(errorEl); // place error under input
                     }
                 }
+            } else if (response.status === 429) {
+                // Rate limited
+                Swal.fire({
+                    title: 'Slow Down!',
+                    text: 'Too many signup attempts. Please wait a minute before trying again.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#8d5943',
+                    customClass: {
+                        confirmButton: 'custom-swal-button'
+                    }
+                });
             } else {
                 let data = await response.json();
              if (data.success) {
@@ -427,7 +505,11 @@ document.addEventListener("DOMContentLoaded", () => {
         title: 'Success!',
         text: data.message,
         icon: 'success',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#8d5943',
+        customClass: {
+            confirmButton: 'custom-swal-button'
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             window.location.reload();
@@ -467,7 +549,11 @@ $(document).ready(function () {
         text: response.message,
         icon: 'success',
         showConfirmButton: false,
-            timer: 1500
+            timer: 1500,
+            confirmButtonColor: '#8d5943',
+            customClass: {
+                confirmButton: 'custom-swal-button'
+            }
             });
              setTimeout(function () {
                 window.location.href = "{{ route('home') }}";
@@ -485,8 +571,23 @@ $(document).ready(function () {
                     if (errors.password) {
                         $("#passwordError").text(errors.password[0]);
                     }
+                } else if (xhr.status === 429) {
+                    // Rate limited
+                    Swal.fire({
+                        title: 'Too Many Attempts',
+                        text: 'Please wait a minute before trying again.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#8d5943',
+                        customClass: {
+                            confirmButton: 'custom-swal-button'
+                        }
+                    });
                 } else if (xhr.status === 401) {
                     $("#signinError").text(xhr.responseJSON.message).show();
+                } else {
+                    // Generic error
+                    $("#signinError").text("An error occurred. Please try again.").show();
                 }
             }
         });

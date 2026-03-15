@@ -55,75 +55,48 @@ use Illuminate\Http\Request;
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+/*
+ * SECURITY WARNING: These utility routes are disabled for security reasons.
+ * DO NOT enable these routes in production as they expose administrative functions.
+ *
+ * Instead, use SSH access and run these commands directly:
+ * - php artisan migrate --force
+ * - php artisan db:seed --class=CountriesSeeder --force
+ * - php artisan config:clear
+ * - php artisan cache:clear
+ * - php artisan route:clear
+ * - php artisan view:clear
+ *
+ * If you absolutely must use these routes in development:
+ * 1. Only enable in local environment (check app()->environment('local'))
+ * 2. Add IP whitelist middleware
+ * 3. Use signed URLs with expiration instead of query parameters
+ * 4. Add aggressive rate limiting
+ */
+
+// DISABLED FOR SECURITY - Use Artisan commands via SSH instead
+/*
 Route::get('/reset-database', function (Request $request) {
-    
-    $providedKey = $request->query('key');
-    $expectedKey = env('DB_RESET_SECRET');
-
-    if ($providedKey !== $expectedKey) {
-        abort(403, 'Unauthorized');
-    }
-
-    // Run migrations only
-    Artisan::call('migrate', ['--force' => true]);
-    echo "✅ Migrations executed successfully.<br>";
-    
-    // Seed countries if table is empty
-    try {
-        $countryCount = \App\Models\Country::count();
-        if ($countryCount === 0) {
-            Artisan::call('db:seed', ['--class' => 'CountriesSeeder', '--force' => true]);
-            echo "✅ Countries seeded successfully.<br>";
-        } else {
-            echo "ℹ️ Countries already exist ({$countryCount} countries).<br>";
-        }
-    } catch (\Exception $e) {
-        echo "⚠️ Could not seed countries: " . $e->getMessage() . "<br>";
-    }
-    
-    //   Artisan::call('passport:install', ['--force' => true]);
-    // echo "✅ Passport installed successfully.<br>";
-    
-    $imagesPath = public_path('assets/images');
-    if (is_dir($imagesPath)) {
-        // Set directory permissions
-        @chmod($imagesPath, 0755);
-
-        // Set file permissions
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($imagesPath, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        foreach ($files as $file) {
-            if ($file->isDir()) {
-                @chmod($file->getRealPath(), 0755);
-            } else {
-                @chmod($file->getRealPath(), 0644);
-            }
-        }
-
-        echo "✅ Permissions fixed for public/images.<br>";
-    } else {
-        echo "⚠️ public/images directory not found.<br>";
-    }
-    
- Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    Artisan::call('config:cache');
-    echo "✅ Cache cleared successfully.<br>";
-    return 'All operations completed successfully.';
-});
+    // This route is disabled. Use: php artisan migrate --force
+    abort(404);
+})->middleware('throttle:1,60');
 
 Route::get('/clear-cache', function (Request $request) {
-    $providedKey = $request->query('secret');
-    $expectedKey = env('DB_RESET_SECRET');
+    // This route is disabled. Use: php artisan cache:clear
+    abort(404);
+})->middleware('throttle:1,60');
+*/
 
-    if ($providedKey !== $expectedKey) {
-        abort(403, 'Unauthorized');
-    }
+// TEMPORARY DEVELOPMENT ONLY - Remove before production deployment
+if (app()->environment('local')) {
+    Route::get('/dev/clear-cache', function (Request $request) {
+        $providedKey = $request->query('secret');
+        $expectedKey = env('DB_RESET_SECRET');
+
+        if ($providedKey !== $expectedKey) {
+            abort(403, 'Unauthorized');
+        }
 
     echo "<h1>Laravel Cache Clear</h1><pre>";
     echo "=== CLEARING CACHES ===\n\n";
@@ -156,35 +129,36 @@ Route::get('/clear-cache', function (Request $request) {
         echo "✗ Application cache: " . $e->getMessage() . "\n";
     }
 
-    echo "\n=== CURRENT CONFIGURATION ===\n\n";
-    echo "APP_ENV: " . config('app.env') . "\n";
-    echo "APP_DEBUG: " . (config('app.debug') ? 'true' : 'false') . "\n";
-    echo "APP_URL: " . config('app.url') . "\n";
-    echo "ASSET_URL: " . (config('app.asset_url') ?: 'not set') . "\n";
-    echo "Public Path: " . public_path() . "\n";
-    echo "Base Path: " . base_path() . "\n\n";
+        echo "\n=== CURRENT CONFIGURATION ===\n\n";
+        echo "APP_ENV: " . config('app.env') . "\n";
+        echo "APP_DEBUG: " . (config('app.debug') ? 'true' : 'false') . "\n";
+        echo "APP_URL: " . config('app.url') . "\n";
+        echo "ASSET_URL: " . (config('app.asset_url') ?: 'not set') . "\n";
+        echo "Public Path: " . public_path() . "\n";
+        echo "Base Path: " . base_path() . "\n\n";
 
-    echo "=== ASSET URL TEST ===\n\n";
-    echo "asset('assets/images/test.jpg'):\n";
-    echo asset('assets/images/test.jpg') . "\n\n";
+        echo "=== ASSET URL TEST ===\n\n";
+        echo "asset('assets/images/test.jpg'):\n";
+        echo asset('assets/images/test.jpg') . "\n\n";
 
-    echo "Expected: https://silver-opossum-253389.hostingersite.com/assets/images/test.jpg\n";
-    echo "Should NOT contain '/public/'\n\n";
+        echo "Expected: https://silver-opossum-253389.hostingersite.com/assets/images/test.jpg\n";
+        echo "Should NOT contain '/public/'\n\n";
 
-    echo "=== FILE SYSTEM CHECK ===\n\n";
-    $assetsPath = public_path('assets/images');
-    echo "Assets directory: $assetsPath\n";
-    echo "Exists: " . (is_dir($assetsPath) ? 'YES' : 'NO') . "\n";
+        echo "=== FILE SYSTEM CHECK ===\n\n";
+        $assetsPath = public_path('assets/images');
+        echo "Assets directory: $assetsPath\n";
+        echo "Exists: " . (is_dir($assetsPath) ? 'YES' : 'NO') . "\n";
 
-    if (is_dir($assetsPath . '/categories')) {
-        $files = glob($assetsPath . '/categories/*');
-        echo "Category images: " . count($files) . " files\n";
-    }
+        if (is_dir($assetsPath . '/categories')) {
+            $files = glob($assetsPath . '/categories/*');
+            echo "Category images: " . count($files) . " files\n";
+        }
 
-    echo "\n=== DONE ===\n";
-    echo "Refresh your browser (Ctrl+Shift+R or Cmd+Shift+R) to clear browser cache.\n";
-    echo "</pre>";
-});
+        echo "\n=== DONE ===\n";
+        echo "Refresh your browser (Ctrl+Shift+R or Cmd+Shift+R) to clear browser cache.\n";
+        echo "</pre>";
+    })->middleware('throttle:2,60'); // Max 2 requests per hour
+}
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/yotpo/reviews', [HomeController::class, 'reviews']);
@@ -199,11 +173,15 @@ Route::post('/cart/add', [BundleController::class, 'addToCart'])->name('cart.add
 Route::get('/cart', [BundleController::class, 'getCart'])->name('cart');
 Route::post('/cart/remove', [BundleController::class, 'removeFromCart'])->name('cart.remove');
 
-// Checkout routes - require authentication
+// Checkout routes - require authentication with rate limiting
 Route::middleware(['auth'])->group(function () {
     Route::get('check-out', [CheckOutController::class, 'checkoutPage'])->name('check-out');
-    Route::post('/checkout/create-payment-intent', [CheckoutController::class, 'createPaymentIntent'])->name('checkout.createPaymentIntent');
-    Route::post('/checkout/complete', [CheckoutController::class, 'completeOrder'])->name('checkout.complete');
+    Route::post('/checkout/create-payment-intent', [CheckoutController::class, 'createPaymentIntent'])
+        ->name('checkout.createPaymentIntent')
+        ->middleware('throttle:10,1'); // Max 10 payment attempts per minute
+    Route::post('/checkout/complete', [CheckoutController::class, 'completeOrder'])
+        ->name('checkout.complete')
+        ->middleware('throttle:10,1');
 });
 
 Route::get('/cards/list', [CardController::class, 'list'])->name('cards.list');
@@ -460,8 +438,13 @@ Route::get('/login', function () {
     }
     return view('pages.login', compact('countries'));
 })->name('user.login');
-Route::post('/signup', [ControllersAuthController::class, 'store'])->name('signup.store');
-Route::post('/signin', [ControllersAuthController::class, 'login'])->name('signin');
+// Rate limiting: 5 signup attempts per minute, 10 login attempts per minute
+Route::post('/signup', [ControllersAuthController::class, 'store'])
+    ->name('signup.store')
+    ->middleware('throttle:5,1');
+Route::post('/signin', [ControllersAuthController::class, 'login'])
+    ->name('signin')
+    ->middleware('throttle:10,1');
 
 
 
